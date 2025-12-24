@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Locus Gold | Standoff 2</title>
+    <title>Locus Gold | Standoff 2 Elite</title>
     
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -12,198 +12,146 @@
     <style>
         :root {
             --accent: #ff9d00;
-            --accent-glow: rgba(255, 157, 0, 0.5);
-            --bg: #0d0d0d;
-            --surface: #1a1a1a;
-            --surface-bright: #262626;
+            --accent-dark: #cc7e00;
+            --bg: #0a0a0b;
+            --surface: #151517;
+            --surface-light: #1c1c1f;
             --text: #ffffff;
-            --text-dim: #737373;
-            --error: #ff4d4d;
-            --success: #00ff88;
+            --text-dim: #8e8e93;
+            --success: #34c759;
         }
 
-        * {
-            margin: 0; padding: 0; box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-            user-select: none; -webkit-user-select: none;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
         body {
             background-color: var(--bg);
             color: var(--text);
-            font-family: 'Inter', -apple-system, sans-serif;
-            height: 100vh; width: 100vw; overflow: hidden;
-            display: flex; flex-direction: column;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            height: 100vh; overflow: hidden; display: flex; flex-direction: column;
         }
 
-        /* ДИЗАЙН СЧЕТА: КИБЕРСПОРТИВНЫЙ СТИЛЬ */
+        /* ГОРЯЧИЙ ДИЗАЙН БАЛАНСА */
         .header {
-            padding: 40px 20px 20px;
-            background: linear-gradient(180deg, #1a1a1a 0%, #0d0d0d 100%);
-            border-bottom: 2px solid var(--surface-bright);
+            padding: 45px 20px 25px;
+            background: linear-gradient(180deg, #1a1a1c 0%, var(--bg) 100%);
+            text-align: center; border-bottom: 1px solid #222;
         }
 
-        .score-board {
-            display: flex; flex-direction: column; align-items: center;
-            position: relative;
-        }
+        .score-title { font-size: 11px; font-weight: 800; color: var(--accent); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px; }
+        .score-value { font-size: 54px; font-weight: 900; text-shadow: 0 0 25px rgba(255,157,0,0.3); }
 
-        .score-label {
-            font-size: 10px; font-weight: 900; color: var(--accent);
-            letter-spacing: 3px; text-transform: uppercase; margin-bottom: 5px;
-        }
+        /* ОСНОВНОЙ КОНТЕНТ */
+        .viewport { flex: 1; position: relative; }
+        .page { position: absolute; width: 100%; height: 100%; display: none; flex-direction: column; align-items: center; padding: 20px; }
+        .page.active { display: flex; }
 
-        .score-value-container {
-            display: flex; align-items: center; gap: 10px;
-        }
-
-        .gold-icon { width: 32px; height: 32px; }
-
-        .score-value {
-            font-size: 52px; font-weight: 900; letter-spacing: -2px;
-            text-shadow: 0 0 20px var(--accent-glow);
-        }
-
-        /* КОНТЕНТ */
-        .main-view { flex: 1; position: relative; width: 100%; }
-
-        .page {
-            position: absolute; width: 100%; height: 100%;
-            display: none; flex-direction: column; align-items: center;
-            padding: 20px; overflow-y: auto;
-        }
-
-        .page.active { display: flex; animation: fadeIn 0.2s ease-out; }
-
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-        /* КЛИКЕР: МОНЕТА ИЗ STANDOFF */
-        .clicker-area {
-            flex: 1; display: flex; align-items: center; justify-content: center;
-        }
-
-        .coin-glitch-container {
-            position: relative; width: 260px; height: 260px;
-        }
-
-        .main-coin {
-            width: 100%; height: 100%;
-            background: radial-gradient(circle, #f9a825 0%, #bf360c 100%);
-            border-radius: 50%; border: 6px solid var(--surface-bright);
+        /* КЛИКЕР */
+        .clicker-box { flex: 1; display: flex; align-items: center; justify-content: center; width: 100%; }
+        .coin {
+            width: 250px; height: 250px; border-radius: 50%;
+            background: radial-gradient(circle, #fbc02d 0%, #f57f17 100%);
+            border: 8px solid var(--surface-light);
             display: flex; align-items: center; justify-content: center;
-            font-size: 100px; font-weight: 900; color: rgba(0,0,0,0.6);
-            box-shadow: 0 0 40px rgba(191, 54, 12, 0.4), inset 0 0 30px rgba(255,255,255,0.3);
-            transition: transform 0.05s; z-index: 2;
+            font-size: 110px; font-weight: 900; color: rgba(0,0,0,0.5);
+            box-shadow: 0 0 50px rgba(245, 127, 23, 0.2);
+            transition: transform 0.05s; cursor: pointer;
         }
-
-        .main-coin:active { transform: scale(0.94); }
+        .coin:active { transform: scale(0.92); }
 
         /* КНОПКИ */
-        .btn-stack { width: 100%; max-width: 400px; display: flex; flex-direction: column; gap: 12px; }
-
+        .action-list { width: 100%; max-width: 400px; display: flex; flex-direction: column; gap: 12px; }
         .btn {
-            width: 100%; padding: 20px; border-radius: 12px; border: none;
-            font-size: 15px; font-weight: 800; color: #fff;
-            display: flex; align-items: center; justify-content: center; gap: 10px;
-            text-transform: uppercase; letter-spacing: 1px;
+            width: 100%; padding: 18px; border-radius: 14px; border: none;
+            font-size: 16px; font-weight: 700; color: white; transition: 0.2s;
         }
+        .btn-main { background: var(--accent); }
+        .btn-sec { background: var(--surface-light); }
+        .btn-withdraw { background: #222; color: #555; pointer-events: none; }
+        .btn-withdraw.active { background: var(--success); color: black; pointer-events: auto; }
 
-        .btn-primary { background: var(--accent); box-shadow: 0 4px 0 #c77a00; }
-        .btn-secondary { background: var(--surface-bright); }
-        .btn-withdraw { background: #444; color: #888; pointer-events: none; }
-        .btn-withdraw.ready { background: var(--success); color: #000; box-shadow: 0 4px 0 #00bd65; pointer-events: auto; }
-
-        /* ИСТОРИЯ И СПИСКИ */
-        .section-header { width: 100%; font-size: 12px; font-weight: 800; color: var(--text-dim); margin: 20px 0 10px; text-transform: uppercase; }
-        
-        .list-box { width: 100%; background: var(--surface); border-radius: 12px; border: 1px solid var(--surface-bright); }
-        
-        .list-item {
-            padding: 15px 20px; border-bottom: 1px solid var(--surface-bright);
-            display: flex; justify-content: space-between; align-items: center;
+        /* МОДАЛЬНОЕ ОКНО ВВОДА ID */
+        #withdraw-modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85); backdrop-filter: blur(8px);
+            z-index: 1000; display: none; align-items: center; justify-content: center;
+            padding: 20px;
         }
-
-        .status-badge {
-            padding: 4px 10px; border-radius: 6px; font-size: 10px; font-weight: 900;
-            background: rgba(255, 157, 0, 0.1); color: var(--accent);
+        .modal-content {
+            background: var(--surface); width: 100%; max-width: 350px;
+            padding: 30px; border-radius: 24px; border: 1px solid var(--accent);
+            text-align: center;
         }
-
-        /* ТАБ-БАР */
-        .nav {
-            height: 80px; background: var(--surface); border-top: 1px solid var(--surface-bright);
-            display: flex; padding-bottom: env(safe-area-inset-bottom);
+        .modal-title { margin-bottom: 20px; font-size: 18px; font-weight: 800; }
+        .id-input {
+            width: 100%; background: var(--bg); border: 2px solid #333;
+            padding: 15px; border-radius: 12px; color: white; font-size: 20px;
+            text-align: center; margin-bottom: 20px; outline: none;
         }
+        .id-input:focus { border-color: var(--accent); }
 
-        .nav-item {
-            flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
-            color: var(--text-dim); transition: 0.2s;
-        }
+        /* ИСТОРИЯ */
+        .history-box { width: 100%; margin-top: 20px; background: var(--surface); border-radius: 16px; overflow: hidden; }
+        .history-item { padding: 15px 20px; border-bottom: 1px solid #222; display: flex; justify-content: space-between; align-items: center; }
+        .status-wait { color: var(--accent); font-size: 12px; font-weight: 700; text-transform: uppercase; }
 
-        .nav-item.active { color: var(--accent); }
-        .nav-icon { font-size: 20px; margin-bottom: 4px; }
-        .nav-label { font-size: 10px; font-weight: 800; }
+        /* НАВИГАЦИЯ */
+        .nav { height: 85px; background: var(--surface); border-top: 1px solid #222; display: flex; }
+        .nav-tab { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-dim); }
+        .nav-tab.active { color: var(--accent); }
+        .nav-tab span { font-size: 10px; font-weight: 700; margin-top: 4px; }
 
-        /* АНИМАЦИЯ ТАПА */
-        .tap-vfx {
-            position: absolute; color: var(--accent); font-weight: 900; font-size: 32px;
-            pointer-events: none; animation: tapMove 0.6s ease-out forwards;
-        }
-        @keyframes tapMove { 0% { transform: translateY(0); opacity: 1; } 100% { transform: translateY(-100px); opacity: 0; } }
+        .tap-vfx { position: absolute; color: var(--accent); font-weight: 900; pointer-events: none; animation: tapUp 0.6s ease-out forwards; }
+        @keyframes tapUp { 0% { transform: translateY(0); opacity: 1; } 100% { transform: translateY(-100px); opacity: 0; } }
     </style>
 </head>
 <body>
 
     <header class="header">
-        <div class="score-board">
-            <div class="score-label">Твой баланс золота</div>
-            <div class="score-value-container">
-                <div id="gold-val" class="score-value">0</div>
-            </div>
-        </div>
+        <div class="score-title">Золото Locus</div>
+        <div id="balance" class="score-value">0</div>
     </header>
 
-    <main class="main-view">
+    <div class="viewport">
         <div id="page-main" class="page active">
-            <div class="clicker-area">
-                <div class="coin-glitch-container">
-                    <div id="click-btn" class="main-coin">G</div>
-                </div>
+            <div class="clicker-box">
+                <div id="coin-trigger" class="coin">G</div>
             </div>
-            <div style="color: var(--text-dim); font-size: 11px; margin-bottom: 10px;">STANDOFF 2 EDITION V1.0</div>
+            <div style="font-size: 12px; color: #444;">ID ПОЛЬЗОВАТЕЛЯ: <span id="user-id-display">...</span></div>
         </div>
 
-        <div id="page-bonuses" class="page">
-            <div class="btn-stack">
-                <button class="btn btn-primary" onclick="App.watchAd()">📺 СМОТРЕТЬ РЕКЛАМУ (+10 G)</button>
-                <button class="btn btn-secondary" onclick="App.invite()">🔗 ПРИГЛАСИТЬ ДРУГА</button>
-            </div>
-            <div class="section-header">Твои рефералы</div>
-            <div id="ref-box" class="list-box">
-                <div style="padding: 20px; text-align: center; color: var(--text-dim);">У тебя пока нет рефералов</div>
+        <div id="page-bonus" class="page">
+            <div class="action-list">
+                <button class="btn btn-main" onclick="App.watchAd()">📺 СМОТРЕТЬ РЕКЛАМУ (+10 G)</button>
+                <button class="btn btn-sec" onclick="App.copyLink()">🔗 ПРИГЛАСИТЬ ДРУГА</button>
             </div>
         </div>
 
         <div id="page-withdraw" class="page">
-            <div class="btn-stack">
-                <button id="withdraw-btn" class="btn btn-withdraw" onclick="App.startWithdraw()">💰 ВЫВЕСТИ В STANDOFF 2</button>
+            <div class="action-list">
+                <button id="withdraw-init-btn" class="btn btn-withdraw" onclick="App.openModal()">🏦 ВЫВЕСТИ В STANDOFF 2</button>
             </div>
-            <div class="section-header">История выводов</div>
-            <div id="history-box" class="list-box">
-                <div style="padding: 20px; text-align: center; color: var(--text-dim);">История пуста</div>
+            <div class="history-box" id="history-container">
+                <div style="padding: 20px; text-align: center; color: #555;">История выплат пуста</div>
             </div>
         </div>
-    </main>
+    </div>
+
+    <div id="withdraw-modal">
+        <div class="modal-content">
+            <div class="modal-title">ВЫВОД СРЕДСТВ</div>
+            <p style="font-size: 13px; color: #888; margin-bottom: 15px;">Введите ваш игровой ID Standoff 2 (8-9 цифр)</p>
+            <input type="number" id="id-input-field" class="id-input" placeholder="12345678">
+            <div style="display: flex; gap: 10px;">
+                <button class="btn btn-sec" style="padding: 12px;" onclick="App.closeModal()">ОТМЕНА</button>
+                <button class="btn btn-main" style="padding: 12px; flex: 1;" onclick="App.confirmWithdraw()">ПОДТВЕРДИТЬ</button>
+            </div>
+        </div>
+    </div>
 
     <nav class="nav">
-        <div class="nav-item active" onclick="App.setTab('main', this)">
-            <span class="nav-icon">🎮</span><span class="nav-label">ИГРАТЬ</span>
-        </div>
-        <div class="nav-item" onclick="App.setTab('bonuses', this)">
-            <span class="nav-icon">💎</span><span class="nav-label">БОНУСЫ</span>
-        </div>
-        <div class="nav-item" onclick="App.setTab('withdraw', this)">
-            <span class="nav-icon">🏦</span><span class="nav-label">ВЫВОД</span>
-        </div>
+        <div class="nav-tab active" onclick="App.switchPage('main', this)">🎮<span>ИГРАТЬ</span></div>
+        <div class="nav-tab" onclick="App.switchPage('bonus', this)">💎<span>БОНУСЫ</span></div>
+        <div class="nav-tab" onclick="App.switchPage('withdraw', this)">🏦<span>ВЫВОД</span></div>
     </nav>
 
     <script>
@@ -212,199 +160,170 @@
             tg: window.Telegram.WebApp,
             uid: null,
             
-            state: {
-                gold: 0,
-                journal: 0,
-                isSyncing: false
-            },
+            state: { gold: 0, journal: 0, isSyncing: false },
+            config: { min: 750, syncInterval: 2500 },
 
-            config: {
-                min: 750,
-                syncMs: 2000,
-                fb: {
+            async init() {
+                this.tg.expand();
+                this.uid = this.tg.initDataUnsafe?.user?.id?.toString() || "DEV_TEST_USER";
+                document.getElementById('user-id-display').innerText = this.uid;
+
+                // Firebase
+                const config = {
                     apiKey: "AIzaSyCoa29KS-sin6hoRz0ZbE4f3ki0tZLwkKI",
                     authDomain: "gold-clicker-5d882.firebaseapp.com",
                     projectId: "gold-clicker-5d882",
                     storageBucket: "gold-clicker-5d882.firebasestorage.app",
                     messagingSenderId: "83489312782",
                     appId: "1:83489312782:web:ee5b7bdc390e53e7dd6c5f"
-                }
-            },
+                };
 
-            async init() {
-                this.tg.expand();
-                this.uid = this.tg.initDataUnsafe?.user?.id?.toString() || "DEV_USER";
-
-                if (!firebase.apps.length) firebase.initializeApp(this.config.fb);
+                if (!firebase.apps.length) firebase.initializeApp(config);
                 this.db = firebase.firestore();
 
-                // Восстановление из журнала
-                const cache = localStorage.getItem('locus_cache');
-                if (cache) this.state.journal = Number(cache);
-
-                await this.load();
-                this.loops();
-                this.events();
+                await this.loadData();
+                this.startLoops();
+                this.bindEvents();
                 this.render();
             },
 
-            async load() {
+            async loadData() {
                 try {
                     const doc = await this.db.collection('players').doc(this.uid).get();
                     if (doc.exists) {
                         this.state.gold = doc.data().gold || 0;
                     } else {
-                        await this.db.collection('players').doc(this.uid).set({ gold: 0, name: this.tg.initDataUnsafe?.user?.first_name || "Игрок" });
+                        await this.db.collection('players').doc(this.uid).set({ 
+                            gold: 0, 
+                            username: this.tg.initDataUnsafe?.user?.username || "Unknown" 
+                        });
                     }
-                } catch (e) { console.error(e); }
+                } catch (e) { console.error("Load Error:", e); }
             },
 
             async sync() {
-                if (this.state.isSyncing || this.state.journal === 0) return;
+                if (this.state.journal === 0 || this.state.isSyncing) return;
                 this.state.isSyncing = true;
-                const toSync = this.state.journal;
+                const toAdd = this.state.journal;
 
                 try {
                     await this.db.collection('players').doc(this.uid).update({
-                        gold: firebase.firestore.FieldValue.increment(toSync)
+                        gold: firebase.firestore.FieldValue.increment(toAdd)
                     });
-                    this.state.journal -= toSync;
-                    localStorage.setItem('locus_cache', this.state.journal);
-                    
-                    const doc = await this.db.collection('players').doc(this.uid).get();
-                    this.state.gold = doc.data().gold;
-                } catch (e) { } finally {
-                    this.state.isSyncing = false;
-                    this.render();
-                }
+                    this.state.journal -= toAdd;
+                    const updatedDoc = await this.db.collection('players').doc(this.uid).get();
+                    this.state.gold = updatedDoc.data().gold;
+                } catch (e) { console.error("Sync Error:", e); }
+                finally { this.state.isSyncing = false; this.render(); }
             },
 
-            loops() {
-                setInterval(() => this.sync(), this.config.syncMs);
-                window.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') this.sync(); });
+            startLoops() {
+                setInterval(() => this.sync(), this.config.syncInterval);
             },
 
-            events() {
-                const btn = document.getElementById('click-btn');
-                const handle = (e) => {
+            bindEvents() {
+                const coin = document.getElementById('coin-trigger');
+                coin.addEventListener('touchstart', (e) => {
                     e.preventDefault();
-                    const x = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
-                    const y = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
-
-                    this.state.gold++;
-                    this.state.journal++;
-                    localStorage.setItem('locus_cache', this.state.journal);
-                    
+                    this.state.gold += 1;
+                    this.state.journal += 1;
                     this.render();
-                    this.vfx(x, y);
-                    if (this.tg.HapticFeedback) this.tg.HapticFeedback.impactOccurred('medium');
-                };
-                btn.addEventListener('touchstart', handle, {passive: false});
-            },
-
-            render() {
-                document.getElementById('gold-val').innerText = Math.floor(this.state.gold).toLocaleString();
-                const wBtn = document.getElementById('withdraw-btn');
-                if (this.state.gold >= this.config.min) {
-                    wBtn.className = "btn btn-withdraw ready";
-                    wBtn.innerText = "💰 ВЫВЕСТИ В STANDOFF 2";
-                } else {
-                    wBtn.className = "btn btn-withdraw";
-                    wBtn.innerText = `МИН. 750 (НУЖНО ЕЩЕ ${Math.ceil(this.config.min - this.state.gold)})`;
-                }
-            },
-
-            vfx(x, y) {
-                const el = document.createElement('div');
-                el.className = 'tap-vfx';
-                el.innerText = '+1';
-                el.style.left = `${x - 20}px`;
-                el.style.top = `${y - 40}px`;
-                document.body.appendChild(el);
-                setTimeout(() => el.remove(), 600);
-            },
-
-            // ВЫВОД STANDOFF 2
-            async startWithdraw() {
-                if (this.state.gold < this.config.min) return;
-
-                const id = prompt("Введите ваш ID Standoff 2 (8-9 цифр):");
-                
-                // Проверка на корректность ID Standoff 2
-                if (!id || id.length < 8 || id.length > 9 || isNaN(id)) {
-                    this.tg.showAlert("Ошибка! ID Standoff 2 должен содержать от 8 до 9 цифр.");
-                    return;
-                }
-
-                this.tg.showConfirm(`Вывести ${Math.floor(this.state.gold)} G на ID: ${id}?`, async (ok) => {
-                    if (ok) {
-                        try {
-                            const amount = Math.floor(this.state.gold);
-                            const request = {
-                                standoffId: id,
-                                amount: amount,
-                                status: 'Ожидание',
-                                date: new Date().toLocaleString(),
-                                userId: this.uid,
-                                username: this.tg.initDataUnsafe?.user?.username || "N/A"
-                            };
-
-                            // Сохраняем в базу для админа
-                            await this.db.collection('withdrawals').add(request);
-                            // Сохраняем в личную историю игрока
-                            await this.db.collection('players').doc(this.uid).collection('history').add(request);
-
-                            // Сброс баланса
-                            this.state.gold = 0;
-                            this.state.journal = 0;
-                            await this.db.collection('players').doc(this.uid).update({ gold: 0 });
-
-                            this.render();
-                            this.loadHistory();
-                            this.tg.showAlert("Заявка создана! Ожидайте пополнения на ваш ID.");
-                        } catch (e) {
-                            this.tg.showAlert("Произошла ошибка базы данных.");
-                        }
-                    }
+                    this.spawnVFX(e.touches[0].clientX, e.touches[0].clientY);
+                    if (this.tg.HapticFeedback) this.tg.HapticFeedback.impactOccurred('light');
                 });
             },
 
+            render() {
+                document.getElementById('balance').innerText = Math.floor(this.state.gold).toLocaleString();
+                const btn = document.getElementById('withdraw-init-btn');
+                if (this.state.gold >= this.config.min) {
+                    btn.className = "btn btn-withdraw active";
+                    btn.innerText = "🏦 ВЫВЕСТИ В STANDOFF 2";
+                } else {
+                    btn.className = "btn btn-withdraw";
+                    btn.innerText = `НУЖНО ЕЩЕ ${Math.ceil(this.config.min - this.state.gold)} G`;
+                }
+            },
+
+            spawnVFX(x, y) {
+                const v = document.createElement('div');
+                v.className = 'tap-vfx'; v.innerText = '+1';
+                v.style.left = x + 'px'; v.style.top = y + 'px';
+                document.body.appendChild(v);
+                setTimeout(() => v.remove(), 600);
+            },
+
+            // МОДАЛКА ВЫВОДА
+            openModal() { document.getElementById('withdraw-modal').style.display = 'flex'; },
+            closeModal() { document.getElementById('withdraw-modal').style.display = 'none'; },
+
+            async confirmWithdraw() {
+                const standoffId = document.getElementById('id-input-field').value;
+                if (!standoffId || standoffId.length < 8 || standoffId.length > 9) {
+                    this.tg.showAlert("Введите корректный ID Standoff 2 (8-9 цифр)!");
+                    return;
+                }
+
+                try {
+                    const amount = Math.floor(this.state.gold);
+                    const tx = {
+                        standoffId,
+                        amount,
+                        status: 'Ожидание',
+                        date: new Date().toLocaleString(),
+                        uid: this.uid
+                    };
+
+                    // Пытаемся записать в базу
+                    await this.db.collection('withdrawals').add(tx);
+                    await this.db.collection('players').doc(this.uid).collection('history').add(tx);
+                    
+                    // Обнуляем баланс
+                    this.state.gold = 0;
+                    this.state.journal = 0;
+                    await this.db.collection('players').doc(this.uid).update({ gold: 0 });
+
+                    this.closeModal();
+                    this.render();
+                    this.loadHistory();
+                    this.tg.showAlert("Заявка успешно создана! Ожидайте одобрения.");
+                } catch (e) {
+                    console.error("Database Error Details:", e);
+                    this.tg.showAlert("Ошибка базы данных. Проверьте соединение или настройки Firebase Firestore.");
+                }
+            },
+
             async loadHistory() {
-                const box = document.getElementById('history-box');
+                const cont = document.getElementById('history-container');
                 try {
                     const snap = await this.db.collection('players').doc(this.uid).collection('history').orderBy('date', 'desc').limit(5).get();
                     if (snap.empty) return;
-                    box.innerHTML = "";
+                    cont.innerHTML = "";
                     snap.forEach(doc => {
                         const d = doc.data();
-                        box.innerHTML += `
-                            <div class="list-item">
-                                <div><b>${d.amount} G</b><br><small>ID: ${d.standoffId}</small></div>
-                                <div class="status-badge">${d.status}</div>
+                        cont.innerHTML += `
+                            <div class="history-item">
+                                <div><b>${d.amount} G</b><br><small style="color:#555">ID: ${d.standoffId}</small></div>
+                                <div class="status-wait">${d.status}</div>
                             </div>`;
                     });
-                } catch (e) {}
+                } catch (e) { console.error(e); }
             },
 
-            setTab(id, el) {
+            switchPage(id, el) {
                 document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-                document.querySelectorAll('.nav-item').forEach(t => t.classList.remove('active'));
-                document.getElementById(`page-${id}`).classList.add('active');
+                document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+                document.getElementById('page-' + id).classList.add('active');
                 el.classList.add('active');
                 if (id === 'withdraw') this.loadHistory();
             },
 
-            invite() {
+            copyLink() {
                 const link = `https://t.me/Locus_Gold_bot/Locus_Gold?startapp=${this.uid}`;
-                const el = document.createElement('textarea');
-                el.value = link; document.body.appendChild(el); el.select();
-                document.execCommand('copy'); document.body.removeChild(el);
-                this.tg.showAlert("Ссылка скопирована! Отправь другу.");
+                this.tg.showAlert("Ссылка скопирована!");
             },
 
-            watchAd() {
-                this.tg.showAlert("Реклама временно на проверке. Зайдите позже!");
-            }
+            watchAd() { this.tg.showAlert("Реклама временно недоступна."); }
         };
 
         window.onload = () => App.init();
