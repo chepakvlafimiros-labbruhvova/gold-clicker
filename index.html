@@ -3,50 +3,135 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Locus Gold Clicker</title>
-    
+    <title>Gold Locus</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
     <style>
-        body { 
-            font-family: 'Arial', sans-serif; 
-            text-align: center; 
-            background: #121212; 
-            color: white; 
-            margin: 0; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            justify-content: center; 
-            height: 100vh; 
-            user-select: none;
-            -webkit-tap-highlight-color: transparent;
+        body {
+            margin: 0; padding: 0;
+            background-color: #000; /* Глубокий черный фон как на скрине */
+            color: #fff;
+            font-family: 'Roboto', sans-serif;
+            display: flex; flex-direction: column; align-items: center;
+            height: 100vh; overflow: hidden;
+            user-select: none; -webkit-tap-highlight-color: transparent;
         }
-        .label { font-size: 14px; color: #aaa; letter-spacing: 2px; margin-bottom: 5px; }
-        #gold-display { font-size: 64px; font-weight: bold; color: #ffca28; margin-bottom: 20px; }
-        #click-btn { 
-            width: 240px; height: 240px; border-radius: 50%; border: none; 
-            background: radial-gradient(circle, #ffe082 0%, #ffca28 100%);
-            box-shadow: 0 0 30px rgba(255, 202, 40, 0.3); 
-            font-size: 110px; cursor: pointer; transition: transform 0.05s;
+
+        /* Верхняя панель со счетом */
+        .score-container {
+            margin-top: 30px;
+            width: 90%;
+            background: linear-gradient(180deg, #1c1c1c 0%, #0f0f0f 100%);
+            border: 1px solid #333;
+            border-radius: 20px;
+            padding: 20px 0;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+
+        #gold-display {
+            font-size: 58px;
+            font-weight: 900;
+            color: #ffca28; /* Золотой цвет текста */
+            margin: 0;
+        }
+
+        /* Главная кнопка-монета */
+        .game-area {
+            flex-grow: 1;
             display: flex; align-items: center; justify-content: center;
         }
-        #click-btn:active { transform: scale(0.90); }
-        #status { margin-top: 20px; font-size: 12px; color: #555; }
+
+        #click-btn {
+            width: 250px; height: 250px;
+            background: #ffca28;
+            border-radius: 50%;
+            border: 8px solid #b8860b;
+            font-size: 100px; font-weight: bold;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 0 50px rgba(255, 202, 40, 0.2);
+            transition: transform 0.05s;
+            color: #000;
+        }
+
+        #click-btn:active { transform: scale(0.95); }
+
+        /* Кнопки действий как на референсе */
+        .actions {
+            width: 90%;
+            display: flex; flex-direction: column; gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .btn-action {
+            width: 100%;
+            padding: 15px;
+            border-radius: 15px;
+            border: none;
+            font-weight: bold;
+            font-size: 16px;
+            display: flex; align-items: center; justify-content: center;
+            gap: 10px;
+            cursor: pointer;
+        }
+
+        .btn-bonus { background-color: #2ecc71; color: white; } /* Зеленая */
+        .btn-upgrade { background-color: #3498db; color: white; } /* Синяя */
+
+        .info-text { font-size: 12px; color: #666; margin-bottom: 20px; }
+
+        /* Нижнее меню */
+        .tab-bar {
+            width: 100%;
+            display: flex;
+            background-color: #111;
+            border-top: 1px solid #222;
+        }
+
+        .tab-item {
+            flex: 1;
+            padding: 15px 0;
+            text-align: center;
+            font-size: 12px;
+            color: #555;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+
+        .tab-item.active { color: #ffca28; border-top: 2px solid #ffca28; }
     </style>
 </head>
 <body>
 
-    <div class="label">БАЛАНС</div>
-    <div id="gold-display">...</div>
-    <button id="click-btn">📀</button>
-    <div id="status">Синхронизация с облаком...</div>
+    <div class="score-container">
+        <div id="gold-display">0</div>
+    </div>
+
+    <div class="game-area">
+        <button id="click-btn">G</button>
+    </div>
+
+    <div class="actions">
+        <button class="btn-action btn-bonus" onclick="alert('Бонус +5.000 G за просмотр!')">
+            📺 +5.000 G (БОНУС)
+        </button>
+        <button class="btn-action btn-upgrade" onclick="alert('Улучшение куплено!')">
+            🚀 +0.001 К КЛИКУ
+        </button>
+    </div>
+
+    <div class="info-text">Сила клика: 0.005 G</div>
+
+    <div class="tab-bar">
+        <div class="tab-item active">ГЛАВНАЯ</div>
+        <div class="tab-item">БОНУС</div>
+        <div class="tab-item">ВЫВОД</div>
+    </div>
 
     <script>
-        // 1. Твоя конфигурация Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyCoa29KS-sin6hoRz0ZbE4f3ki0tZLwkKI",
             authDomain: "gold-clicker-5d882.firebaseapp.com",
@@ -58,69 +143,34 @@
         
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
-
-        // 2. Инициализация Telegram
         const tg = window.Telegram.WebApp;
         tg.expand();
-        
-        const userId = tg.initDataUnsafe?.user?.id ? tg.initDataUnsafe.user.id.toString() : "test_user_5223115893";
+
+        const userId = tg.initDataUnsafe?.user?.id ? tg.initDataUnsafe.user.id.toString() : "5223115893";
         const playerRef = db.collection('players').doc(userId);
 
         let gold = 0;
         const display = document.getElementById('gold-display');
-        const status = document.getElementById('status');
 
-        // 3. Функция загрузки (теперь надежная)
         async function loadData() {
             try {
                 const doc = await playerRef.get();
                 if (doc.exists) {
-                    gold = doc.data().gold || 0;
-                    console.log("Загружено золота:", gold);
-                } else {
-                    console.log("Новый игрок, создаем профиль");
-                    await playerRef.set({ 
-                        gold: 0, 
-                        username: tg.initDataUnsafe?.user?.username || "Unknown" 
-                    });
-                    gold = 0;
+                    // Исправляем NaN: проверяем, что данные — это число
+                    const savedGold = doc.data().gold;
+                    gold = isNaN(savedGold) ? 0 : savedGold;
                 }
                 display.innerText = gold;
-                status.innerText = "Данные синхронизированы";
-            } catch (e) {
-                console.error("Ошибка загрузки:", e);
-                status.innerText = "Ошибка сети! Проверьте соединение.";
-            }
+            } catch (e) { console.log(e); }
         }
 
-        // 4. Функция сохранения
-        async function saveData() {
-            try {
-                // Используем set с merge: true для максимальной надежности
-                await playerRef.set({ gold: gold }, { merge: true });
-                status.innerText = "Сохранено";
-            } catch (e) {
-                console.error("Ошибка сохранения:", e);
-                status.innerText = "Ошибка сохранения!";
-            }
-        }
-
-        // 5. Обработка клика
         document.getElementById('click-btn').addEventListener('click', () => {
             gold++;
             display.innerText = gold;
-            status.innerText = "Сохранение...";
-            
-            // Виброотклик
-            if (tg.HapticFeedback) {
-                tg.HapticFeedback.impactOccurred('medium');
-            }
-
-            // Отправляем данные в Firebase
-            saveData();
+            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
+            playerRef.set({ gold: gold }, { merge: true });
         });
 
-        // Запуск
         loadData();
     </script>
 </body>
