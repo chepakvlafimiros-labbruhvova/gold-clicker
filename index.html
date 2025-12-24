@@ -5,56 +5,73 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Locus Gold</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <script src="https://sad.adsgram.ai/js/adsgram-ad-sdk.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
     <style>
-        body {
-            margin: 0; padding: 0; background-color: #000; color: #fff;
-            font-family: 'Roboto', sans-serif; display: flex; flex-direction: column; height: 100vh;
-            /* Убираем выделение и синеву */
+        * {
             -webkit-tap-highlight-color: transparent;
             user-select: none;
             -webkit-user-select: none;
+            box-sizing: border-box;
         }
-        .page { display: none; flex-direction: column; align-items: center; width: 100%; flex-grow: 1; padding-bottom: 80px; }
+
+        body {
+            margin: 0; padding: 0; background-color: #000; color: #fff;
+            font-family: 'Roboto', sans-serif; display: flex; flex-direction: column; height: 100vh;
+            overflow: hidden;
+        }
+
+        .page { display: none; flex-direction: column; align-items: center; width: 100%; flex-grow: 1; padding-bottom: 80px; overflow-y: auto; }
         .page.active { display: flex; }
 
+        /* Плашка счета */
         .score-container {
             margin: 20px 0; width: 90%; background: #1a1a1a;
             border: 1px solid #333; border-radius: 20px; padding: 25px 0;
-            text-align: center;
+            text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            flex-shrink: 0;
         }
-        #gold-display { font-size: 64px; font-weight: 900; color: #ffca28; margin: 0; }
+        .score-label { font-size: 12px; color: #888; letter-spacing: 1px; margin-bottom: 5px; }
+        #gold-display { font-size: 58px; font-weight: 900; color: #ffca28; margin: 0; line-height: 1; }
 
-        .coin-section { flex-grow: 1; display: flex; align-items: center; justify-content: center; }
-        
-        /* Исправленная кнопка без синевы */
+        /* Монета */
+        .coin-section { flex-grow: 1; display: flex; align-items: center; justify-content: center; width: 100%; }
         #click-btn {
             width: 240px; height: 240px; background: #ffca28; border-radius: 50%;
-            border: 8px solid #b8860b; font-size: 100px; font-weight: bold; color: #000;
-            cursor: pointer; outline: none;
-            -webkit-tap-highlight-color: transparent;
-            box-shadow: 0 0 50px rgba(255, 202, 40, 0.4); 
-            transition: transform 0.05s;
+            border: 8px solid #b8860b; font-size: 90px; font-weight: bold; color: #000;
+            cursor: pointer; outline: none; border: 8px solid #b8860b;
+            box-shadow: 0 0 40px rgba(255, 202, 40, 0.2); transition: transform 0.05s;
             display: flex; align-items: center; justify-content: center;
         }
-        #click-btn:active { transform: scale(0.92); }
+        #click-btn:active { transform: scale(0.95); }
 
+        /* Кнопки */
         .actions { width: 90%; display: flex; flex-direction: column; gap: 12px; margin: 20px 0; }
-        .btn { padding: 18px; border-radius: 15px; border: none; font-weight: bold; font-size: 16px; color: #fff; }
-        .btn-ad { background: #2ecc71; }
-        .btn-upgrade { background: #3498db; }
+        .btn { 
+            padding: 18px; border-radius: 15px; border: none; font-weight: bold; 
+            font-size: 16px; cursor: pointer; color: #fff; text-align: center;
+        }
+        .btn-green { background: #27ae60; }
+        .btn-blue { background: #2980b9; }
+        .btn-withdraw { background: #333; color: #777; pointer-events: none; }
+        .btn-withdraw.active { background: #e67e22; color: #fff; pointer-events: auto; }
 
-        .tab-bar { position: fixed; bottom: 0; width: 100%; display: flex; background: #111; border-top: 1px solid #222; }
-        .tab { flex: 1; padding: 20px 0; text-align: center; font-size: 12px; color: #555; }
+        /* Списки и история */
+        .list-box { width: 90%; background: #111; border-radius: 15px; padding: 10px; border: 1px solid #222; }
+        .list-item { font-size: 13px; padding: 10px; border-bottom: 1px solid #222; display: flex; justify-content: space-between; }
+        .list-item:last-child { border-bottom: none; }
+
+        /* Таб-бар */
+        .tab-bar { position: fixed; bottom: 0; width: 100%; display: flex; background: #111; border-top: 1px solid #222; height: 70px; }
+        .tab { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 11px; color: #555; font-weight: bold; }
         .tab.active { color: #ffca28; border-top: 2px solid #ffca28; }
     </style>
 </head>
 <body>
 
     <div class="score-container">
+        <div class="score-label">ВАШ БАЛАНС</div>
         <div id="gold-display">0</div>
     </div>
 
@@ -62,13 +79,31 @@
         <div class="coin-section">
             <button id="click-btn">G</button>
         </div>
+    </div>
+
+    <div id="page-bonus" class="page">
         <div class="actions">
-            <button class="btn btn-ad" onclick="showRewardedAd()">📺 +10 G (РЕКЛАМА)</button>
+            <button class="btn btn-blue" onclick="inviteFriend()">🔗 ПРИГЛАСИТЬ ДРУГА</button>
+            <button class="btn btn-green" onclick="tg.showAlert('Реклама временно отключена')">📺 СМОТРЕТЬ РЕКЛАМУ</button>
+        </div>
+        <h3 style="width:90%; font-size:16px;">Рефералы</h3>
+        <div id="ref-list" class="list-box">
+            <div style="color:#555; text-align:center; padding:10px;">Список пуст</div>
         </div>
     </div>
 
+    <div id="page-withdraw" class="page">
+        <div class="actions">
+            <button id="withdraw-btn" class="btn btn-withdraw" onclick="processWithdraw()">💸 ВЫВЕСТИ (МИН. 750)</button>
+        </div>
+        <h3 style="width:90%; font-size:16px;">История выплат</h3>
+        <div id="withdraw-history" class="list-box"></div>
+    </div>
+
     <div class="tab-bar">
-        <div class="tab active">ГЛАВНАЯ</div>
+        <div class="tab active" onclick="switchPage('main', this)">ГЛАВНАЯ</div>
+        <div class="tab" onclick="switchPage('bonus', this)">БОНУСЫ</div>
+        <div class="tab" onclick="switchPage('withdraw', this)">ВЫВОД</div>
     </div>
 
     <script>
@@ -85,46 +120,89 @@
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        const AdController = window.Adsgram ? window.Adsgram.init({ blockId: "19883" }) : null;
         const userId = tg.initDataUnsafe?.user?.id ? tg.initDataUnsafe.user.id.toString() : "5223115893";
         const playerRef = db.collection('players').doc(userId);
 
         let gold = 0;
 
         async function init() {
-            const doc = await playerRef.get();
-            if (doc.exists) {
-                gold = Number(doc.data().gold) || 0;
-            } else {
-                await playerRef.set({ gold: 0 });
-            }
-            updateUI();
+            try {
+                const doc = await playerRef.get();
+                if (doc.exists) {
+                    const data = doc.data();
+                    gold = Number(data.gold) || 0;
+                } else {
+                    await playerRef.set({ gold: 0, username: tg.initDataUnsafe?.user?.username || "Player" });
+                }
+                updateUI();
+                loadHistory();
+            } catch (e) { console.error(e); }
         }
 
         function updateUI() {
             document.getElementById('gold-display').innerText = Math.floor(gold);
+            const wBtn = document.getElementById('withdraw-btn');
+            if (gold >= 750) {
+                wBtn.classList.add('active');
+                wBtn.innerText = "💸 ВЫВЕСТИ GOLD";
+            } else {
+                wBtn.classList.remove('active');
+                wBtn.innerText = "💸 ВЫВЕСТИ (МИН. 750)";
+            }
         }
 
-        // Клик теперь работает мгновенно
+        // Клик
         document.getElementById('click-btn').addEventListener('click', (e) => {
-            e.preventDefault(); // Защита от системных жестов
+            e.preventDefault();
             gold++;
             updateUI();
-            playerRef.update({ gold: gold }).catch(err => console.error("Ошибка базы:", err));
-            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+            playerRef.update({ gold: gold });
+            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
         });
 
-        async function showRewardedAd() {
-            if (!AdController) return tg.showAlert("Рекламный модуль не загружен");
-            
-            AdController.show().then(() => {
-                gold += 10;
+        // Переключение страниц
+        function switchPage(id, el) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById('page-' + id).classList.add('active');
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            el.classList.add('active');
+        }
+
+        // Рефералы
+        function inviteFriend() {
+            const link = `https://t.me/Locus_Gold_bot/Locus_Gold?startapp=${userId}`;
+            const el = document.createElement('textarea');
+            el.value = link;
+            document.body.appendChild(el);
+            el.select();
+            document.execCommand('copy');
+            document.body.removeChild(el);
+            tg.showAlert("Ссылка скопирована!");
+        }
+
+        // Вывод
+        async function processWithdraw() {
+            if (gold < 750) return;
+            const wallet = prompt("Введите реквизиты:");
+            if (wallet) {
+                const req = { amount: gold, wallet, status: 'pending', date: new Date().toLocaleString() };
+                await db.collection('withdrawals').add({ ...req, userId });
+                await playerRef.collection('history').add(req);
+                gold = 0;
+                await playerRef.update({ gold: 0 });
                 updateUI();
-                playerRef.update({ gold: gold });
-                tg.showAlert("Вы получили бонус!");
-            }).catch((err) => {
-                console.log("Ad error:", err);
-                tg.showAlert("Реклама пока не готова. Попробуйте позже.");
+                loadHistory();
+                tg.showAlert("Заявка создана!");
+            }
+        }
+
+        async function loadHistory() {
+            const cont = document.getElementById('withdraw-history');
+            const snap = await playerRef.collection('history').orderBy('date', 'desc').limit(10).get();
+            cont.innerHTML = snap.empty ? '<div style="color:#555; text-align:center; padding:10px;">Нет транзакций</div>' : "";
+            snap.forEach(doc => {
+                const d = doc.data();
+                cont.innerHTML += `<div class="list-item"><span>${d.date}</span><span>${d.amount}G</span><span style="color:#f1c40f">${d.status}</span></div>`;
             });
         }
 
