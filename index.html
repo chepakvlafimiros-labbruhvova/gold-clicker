@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Gold Locus - Bonus System</title>
+    <title>Locus Gold</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://sad.adsgram.ai/js/adsgram-ad-sdk.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
@@ -13,78 +14,76 @@
             margin: 0; padding: 0; background-color: #000; color: #fff;
             font-family: 'Roboto', sans-serif; display: flex; flex-direction: column; height: 100vh;
         }
-
-        /* Страницы */
-        .page { display: none; flex-direction: column; align-items: center; width: 100%; flex-grow: 1; overflow-y: auto; }
+        .page { display: none; flex-direction: column; align-items: center; width: 100%; flex-grow: 1; padding-bottom: 80px; }
         .page.active { display: flex; }
 
-        /* Верхний счетчик */
-        .score-panel {
-            width: 90%; background: #1a1a1a; border-radius: 20px;
-            padding: 15px 0; text-align: center; margin-top: 20px; border: 1px solid #333;
+        /* Дизайн счета как на скрине */
+        .score-container {
+            margin: 20px 0; width: 90%; background: #1a1a1a;
+            border: 1px solid #333; border-radius: 20px; padding: 25px 0;
+            text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.5);
         }
-        #gold-display { font-size: 48px; font-weight: 900; color: #ffca28; }
+        .score-label { font-size: 14px; color: #888; text-transform: uppercase; margin-bottom: 5px; }
+        #gold-display { font-size: 64px; font-weight: 900; color: #ffca28; margin: 0; text-shadow: 0 0 20px rgba(255,202,40,0.3); }
 
-        /* Монета */
+        /* Кнопка-монета */
         .coin-section { flex-grow: 1; display: flex; align-items: center; justify-content: center; }
         #click-btn {
-            width: 220px; height: 220px; background: #ffca28; border-radius: 50%;
-            border: 8px solid #b8860b; font-size: 80px; cursor: pointer;
+            width: 240px; height: 240px; background: #ffca28; border-radius: 50%;
+            border: 8px solid #b8860b; font-size: 100px; font-weight: bold; color: #000;
+            cursor: pointer; box-shadow: 0 0 50px rgba(255, 202, 40, 0.4); transition: transform 0.05s;
+            display: flex; align-items: center; justify-content: center;
         }
+        #click-btn:active { transform: scale(0.92); }
 
-        /* Список рефералов */
-        .ref-list { width: 90%; margin-top: 20px; }
-        .ref-item {
-            background: #111; padding: 10px; border-radius: 10px; margin-bottom: 8px;
-            display: flex; justify-content: space-between; align-items: center; border: 1px solid #222;
+        /* Кнопки действий */
+        .actions { width: 90%; display: flex; flex-direction: column; gap: 12px; margin: 20px 0; }
+        .btn { 
+            padding: 18px; border-radius: 15px; border: none; font-weight: bold; 
+            font-size: 16px; cursor: pointer; color: #fff; display: flex; align-items: center; justify-content: center; gap: 10px;
         }
-        .progress-bar { width: 100px; height: 10px; background: #333; border-radius: 5px; overflow: hidden; }
-        .progress-fill { height: 100%; background: #2ecc71; width: 0%; }
+        .btn-ad { background: #2ecc71; } /* Зеленая как на скрине */
+        .btn-upgrade { background: #3498db; } /* Синяя */
+        .btn-withdraw { background: #444; color: #888; cursor: not-allowed; }
+        .btn-withdraw.active { background: #e67e22; color: #fff; cursor: pointer; }
 
-        /* Кнопки */
-        .btn {
-            width: 90%; padding: 15px; border-radius: 12px; border: none;
-            font-weight: bold; cursor: pointer; margin: 10px 0; color: white;
-        }
-        .btn-blue { background: #3498db; }
-        .btn-green { background: #2ecc71; }
-        .btn-claim { background: #f1c40f; color: #000; display: none; }
-
-        /* Таб-бар */
-        .tab-bar { width: 100%; display: flex; background: #111; border-top: 1px solid #222; }
-        .tab { flex: 1; padding: 15px; text-align: center; font-size: 12px; color: #555; }
-        .tab.active { color: #ffca28; }
+        /* Навигация */
+        .tab-bar { position: fixed; bottom: 0; width: 100%; display: flex; background: #111; border-top: 1px solid #222; }
+        .tab { flex: 1; padding: 20px 0; text-align: center; font-size: 12px; color: #555; font-weight: bold; }
+        .tab.active { color: #ffca28; border-top: 2px solid #ffca28; }
     </style>
 </head>
 <body>
 
-    <div class="score-panel">
+    <div class="score-container">
+        <div class="score-label">ВАШЕ ЗОЛОТО</div>
         <div id="gold-display">0</div>
     </div>
 
     <div id="page-main" class="page active">
         <div class="coin-section">
-            <button id="click-btn" onclick="handleClick()">G</button>
+            <button id="click-btn">G</button>
+        </div>
+        <div class="actions">
+            <button class="btn btn-ad" onclick="showRewardedAd()">📺 +10.000 G (БОНУС)</button>
+            <button class="btn btn-upgrade" onclick="buyUpgrade()">🚀 +0.001 К КЛИКУ</button>
         </div>
     </div>
 
-    <div id="page-bonus" class="page">
-        <button class="btn btn-blue" onclick="watchAd()">📺 СМОТРЕТЬ РЕКЛАМУ (+10G)</button>
-        <button class="btn btn-green" onclick="copyInviteLink()">🔗 ПРИГЛАСИТЬ ДРУГА</button>
-        
-        <h3>Ваши приглашенные:</h3>
-        <div id="ref-list-container" class="ref-list">
-            </div>
-
-        <button id="claim-btn" class="btn btn-claim" onclick="claimPrize()">🎁 ЗАБРАТЬ ПРИЗ (100G)</button>
+    <div id="page-withdraw" class="page">
+        <div class="actions" style="margin-top: 50px;">
+            <button id="withdraw-btn" class="btn btn-withdraw" onclick="requestWithdraw()">💸 ВЫВЕСТИ (МИН. 750)</button>
+        </div>
+        <p style="color: #666; font-size: 12px; text-align: center; width: 80%;">Вывод доступен при достижении 750 золота.</p>
     </div>
 
     <div class="tab-bar">
-        <div class="tab active" onclick="showPage('main')">ГЛАВНАЯ</div>
-        <div class="tab" onclick="showPage('bonus')">БОНУСЫ</div>
+        <div class="tab active" onclick="showPage('main', this)">ГЛАВНАЯ</div>
+        <div class="tab" onclick="showPage('withdraw', this)">ВЫВОД</div>
     </div>
 
     <script>
+        // Конфиг Firebase из твоих скринов
         const firebaseConfig = {
             apiKey: "AIzaSyCoa29KS-sin6hoRz0ZbE4f3ki0tZLwkKI",
             authDomain: "gold-clicker-5d882.firebaseapp.com",
@@ -93,110 +92,95 @@
             messagingSenderId: "83489312782",
             appId: "1:83489312782:web:ee5b7bdc390e53e7dd6c5f"
         };
-        
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
         const tg = window.Telegram.WebApp;
         tg.expand();
 
+        // Инициализация AdsGram с твоим ID
+        const AdController = window.Adsgram.init({ blockId: "19883" });
+
         const userId = tg.initDataUnsafe?.user?.id ? tg.initDataUnsafe.user.id.toString() : "5223115893";
         const playerRef = db.collection('players').doc(userId);
 
         let gold = 0;
-        let adsWatched = 0;
+        let clickPower = 1;
 
-        // Инициализация при входе
         async function init() {
             const doc = await playerRef.get();
-            const data = doc.data() || {};
-            gold = data.gold || 0;
-            adsWatched = data.adsWatched || 0;
-            
-            // Проверка реферальной ссылки
-            const urlParams = new URLSearchParams(window.location.search);
-            const refId = tg.initDataUnsafe.start_param;
-            if (refId && refId !== userId && !data.referredBy) {
-                // Если зашли по ссылке, записываем к кому
-                await playerRef.set({ referredBy: refId }, { merge: true });
-                // Добавляем запись в список пригласившего
-                await db.collection('players').doc(refId).collection('myRefs').doc(userId).set({
-                    name: tg.initDataUnsafe.user.first_name || "Друг",
-                    ads: 0
-                });
+            if (doc.exists) {
+                const data = doc.data();
+                gold = Number(data.gold) || 0;
+                clickPower = data.clickPower || 1;
             }
-
             updateUI();
-            loadReferrals();
         }
 
         function updateUI() {
-            document.getElementById('gold-display').innerText = gold;
+            document.getElementById('gold-display').innerText = Math.floor(gold);
+            const wBtn = document.getElementById('withdraw-btn');
+            if (gold >= 750) {
+                wBtn.classList.add('active');
+            } else {
+                wBtn.classList.remove('active');
+            }
         }
 
-        // Клик
-        function handleClick() {
-            gold++;
+        // Логика клика
+        document.getElementById('click-btn').addEventListener('click', () => {
+            gold += clickPower;
             updateUI();
             playerRef.update({ gold: gold });
-            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
-        }
+            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
+        });
 
-        // Реклама
-        async function watchAd() {
-            // Имитация просмотра
-            adsWatched++;
-            gold += 10;
-            updateUI();
-            await playerRef.update({ gold: gold, adsWatched: adsWatched });
-            
-            // Если есть пригласивший — обновляем прогресс у него
-            const doc = await playerRef.get();
-            const refId = doc.data().referredBy;
-            if (refId) {
-                await db.collection('players').doc(refId).collection('myRefs').doc(userId).update({
-                    ads: adsWatched
-                });
+        // Функция показа рекламы
+        async function showRewardedAd() {
+            try {
+                const result = await AdController.show();
+                // Если пользователь досмотрел рекламу
+                gold += 10;
+                updateUI();
+                playerRef.update({ gold: gold });
+                tg.showAlert("Поздравляем! Вы получили 10 золотых!");
+            } catch (error) {
+                // Если реклама не загрузилась или была пропущена
+                console.error(error);
+                tg.showAlert("Реклама пока недоступна или была пропущена.");
             }
-            tg.showAlert("Вы получили +10G за просмотр!");
-            loadReferrals();
         }
 
-        // Загрузка списка приглашенных
-        async function loadReferrals() {
-            const container = document.getElementById('ref-list-container');
-            container.innerHTML = "";
-            let readyToClaim = false;
-
-            const snapshot = await playerRef.collection('myRefs').get();
-            snapshot.forEach(doc => {
-                const ref = doc.data();
-                const progress = Math.min((ref.ads / 5) * 100, 100);
-                if (ref.ads >= 5) readyToClaim = true;
-
-                container.innerHTML += `
-                    <div class="ref-item">
-                        <span>${ref.name}</span>
-                        <div>
-                            <span style="font-size:10px">${ref.ads}/5 реклам</span>
-                            <div class="progress-bar"><div class="progress-fill" style="width:${progress}%"></div></div>
-                        </div>
-                    </div>
-                `;
-            });
-
-            if (readyToClaim) document.getElementById('claim-btn').style.display = 'block';
+        function buyUpgrade() {
+            if (gold >= 100) {
+                gold -= 100;
+                clickPower += 0.5;
+                updateUI();
+                playerRef.update({ gold: gold, clickPower: clickPower });
+                tg.showAlert("Улучшение куплено!");
+            } else {
+                tg.showAlert("Нужно 100 золота для улучшения.");
+            }
         }
 
-        function copyInviteLink() {
-            const link = `https://t.me/Locus_Gold_bot?start=${userId}`;
-            tg.showAlert("Ваша ссылка: " + link);
+        function requestWithdraw() {
+            if (gold < 750) return;
+            const wallet = prompt("Введите ваш кошелек:");
+            if (wallet) {
+                db.collection('withdrawals').add({
+                    userId, wallet, amount: gold, status: 'pending', date: new Date().toISOString()
+                });
+                gold = 0;
+                playerRef.update({ gold: 0 });
+                updateUI();
+                tg.showAlert("Заявка на вывод создана!");
+            }
         }
 
-        function showPage(page) {
+        function showPage(pageId, el) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.getElementById('page-' + page).classList.add('active');
+            document.getElementById('page-' + pageId).classList.add('active');
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            if(page === 'bonus') loadReferrals();
+            el.classList.add('active');
         }
 
         init();
