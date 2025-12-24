@@ -48,6 +48,7 @@
             transition: transform 0.05s; cursor: pointer;
         }
         .coin-btn:active { transform: scale(0.92); }
+        .coin-btn.blocked { filter: grayscale(1); opacity: 0.5; pointer-events: none; }
 
         .actions-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; flex-shrink: 0; }
         .action-btn { background: #18181b; border: 1px solid #27272a; border-radius: 18px; padding: 15px 10px; text-align: center; cursor: pointer; }
@@ -76,15 +77,11 @@
         #tos-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 20px; visibility: hidden; opacity: 0; transition: 0.3s; }
         #tos-overlay.show { visibility: visible; opacity: 1; }
         
-        .tos-modal { background: #1c1c1e; width: 100%; max-width: 320px; border-radius: 24px; padding: 25px; text-align: center; border: 1px solid #2c2c2e; box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
+        .tos-modal { background: #1c1c1e; width: 100%; max-width: 320px; border-radius: 24px; padding: 25px; text-align: center; border: 1px solid #2c2c2e; }
         .tos-btn-main { background: linear-gradient(135deg, #ff9d00, #e68a00); color: #000; padding: 18px; border-radius: 15px; font-weight: 800; width: 100%; border: none; margin-bottom: 12px; font-size: 14px; cursor: pointer; }
         .tos-btn-agree { background: #fff; color: #000; padding: 15px; border-radius: 12px; width: 100%; border: none; font-weight: 700; cursor: pointer; }
 
         #full-tos { position: fixed; inset: 0; background: #000; z-index: 10000; padding: calc(var(--safe-top) + 20px) 25px 40px; overflow-y: auto; display: none; }
-        .tos-header { color: var(--accent); font-size: 24px; font-weight: 900; margin-bottom: 20px; text-align: center; }
-        .tos-section { margin-bottom: 20px; }
-        .tos-section h3 { color: #fff; font-size: 16px; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
-        .tos-section p { color: #bbb; font-size: 13px; line-height: 1.6; text-align: justify; }
 
         .float-text { position: absolute; color: var(--accent); font-weight: 900; pointer-events: none; animation: floatUp 0.7s forwards; z-index: 2000; }
         @keyframes floatUp { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-100px); } }
@@ -102,20 +99,9 @@
     </div>
 
     <div id="full-tos">
-        <div class="tos-header">LOCUS GOLD: TERMS OF SERVICE</div>
-        <div class="tos-section">
-            <h3>1. Общие положения</h3>
-            <p>Данное приложение является симулятором. Валюта Gold — виртуальная единица вознаграждения.</p>
-        </div>
-        <div class="tos-section">
-            <h3>2. Условия вывода</h3>
-            <p>Вывод доступен от 750 G на ID Standoff 2. Срок обработки: до 72 часов.</p>
-        </div>
-        <div class="tos-section">
-            <h3>3. Реклама</h3>
-            <p>Мы используем Adsgram. Просмотр рекламы подтверждает ваше согласие с правилами сервиса.</p>
-        </div>
-        <button class="tos-btn-main" style="margin-top: 20px;" onclick="UI.hideFullTos()">ПРИНЯТЬ И ВЕРНУТЬСЯ</button>
+        <h2 style="color:var(--accent); text-align:center; margin-bottom:20px;">LOCUS GOLD: TERMS</h2>
+        <p style="color:#ccc; font-size:14px; line-height:1.6;">1. Валюта Gold — виртуальная.<br>2. Вывод от 750 G.<br>3. Автокликеры запрещены.</p>
+        <button class="tos-btn-main" style="margin-top: 20px;" onclick="UI.hideFullTos()">ПРИНЯТЬ</button>
     </div>
 
     <div class="app-container active" id="view-mining">
@@ -132,30 +118,28 @@
             <div class="action-btn" onclick="Core.ad('gold')"><i>🎁</i><b>БОНУС +5.0 G</b><span>ADSGRAM</span></div>
             <div class="action-btn" onclick="Core.ad('pwr')"><i>⚡</i><b>СИЛА +0.005</b><span>РЕКЛАМА</span></div>
             <div class="action-btn upgrade-btn" onclick="Core.upgrade()">
-                🚀 <b>УЛУЧШИТЬ КЛИК ЗА 1.000 G</b><br><span style="font-size:10px">+0.005 к силе</span>
+                🚀 <b>УЛУЧШИТЬ КЛИК ЗА 1.000 G</b>
             </div>
         </div>
     </div>
 
     <div class="app-container" id="view-leaderboard">
-        <h2 style="text-align:center; margin-bottom:15px;">Таблица лидеров</h2>
+        <h2 style="text-align:center; margin-bottom:15px;">Топ-50 Игроков</h2>
         <div class="list-wrapper" id="leader-list"></div>
     </div>
 
     <div class="app-container" id="view-friends">
         <h2 style="text-align:center; margin-bottom:15px;">Рефералы</h2>
         <div class="stat-box" style="margin-bottom:20px">
-            <p style="font-size:12px; color:var(--text-dim)">100 G за каждого друга</p>
-            <button class="tos-btn-main" style="margin-top:10px" onclick="Core.invite()">ПРИГЛАСИТЬ ДРУЗЕЙ</button>
+            <button class="tos-btn-main" onclick="Core.invite()">ПРИГЛАСИТЬ ДРУЗЕЙ</button>
         </div>
         <div class="list-wrapper" id="friend-list"></div>
     </div>
 
     <div class="app-container" id="view-wallet">
-        <h2 style="text-align:center; margin-bottom:15px;">Вывод средств</h2>
+        <h2 style="text-align:center; margin-bottom:15px;">Вывод</h2>
         <div class="stat-box" style="margin-bottom:20px">
-            <p style="color:var(--text-dim); font-size:12px">Минимум: 750 G</p>
-            <button id="wd-btn" class="tos-btn-main" style="margin-top:10px; opacity:0.5" disabled>ОФОРМИТЬ ВЫВОД</button>
+            <button id="wd-btn" class="tos-btn-main" style="opacity:0.5" disabled>ВЫВЕСТИ GOLD</button>
         </div>
         <div class="list-wrapper" id="history-list"></div>
     </div>
@@ -170,15 +154,15 @@
     <script>
     const Core = {
         db: null, tg: window.Telegram.WebApp, uid: null,
-        gold: 0, pwr: 0.001, journal: 0, 
-        adId: "19895",
-        // Переменные для защиты от кликера
-        lastTaps: [],
-        antiCheatActive: false,
+        gold: 0, pwr: 0.001, journal: 0, adId: "19895",
+        // Античит переменные
+        lastTapTime: 0,
+        tapIntervals: [],
+        warningShown: false,
 
         async init() {
             this.tg.expand();
-            this.uid = this.tg.initDataUnsafe?.user?.id?.toString() || "WEB_TEST";
+            this.uid = this.tg.initDataUnsafe?.user?.id?.toString() || "DEV_USER";
             
             if (!firebase.apps.length) {
                 firebase.initializeApp({
@@ -201,7 +185,6 @@
 
             document.getElementById('coin').onclick = (e) => this.tap(e);
             setInterval(() => this.sync(), 5000);
-            this.checkReferral();
         },
 
         async accept() {
@@ -213,40 +196,39 @@
             this.render();
         },
 
-        async checkReferral() {
-            const startParam = this.tg.initDataUnsafe?.start_param;
-            if (startParam && startParam !== this.uid) {
-                const myDoc = await this.db.collection('players').doc(this.uid).get();
-                if (!myDoc.exists) { 
-                    await this.db.collection('players').doc(startParam).update({
-                        gold: firebase.firestore.FieldValue.increment(100)
-                    });
-                    await this.db.collection('players').doc(startParam).collection('referrals').add({
-                        name: this.tg.initDataUnsafe?.user?.first_name || "Друг",
-                        date: new Date()
-                    });
-                }
-            }
-        },
-
         tap(e) {
-            // АНТИКЛИКЕР ЛОГИКА
             const now = Date.now();
-            this.lastTaps.push(now);
-            // Оставляем только клики за последнюю секунду
-            this.lastTaps = this.lastTaps.filter(t => now - t < 1000);
+            const interval = now - this.lastTapTime;
 
-            if (this.lastTaps.length > 15) {
-                if (!this.antiCheatActive) {
-                    this.antiCheatActive = true;
-                    this.tg.showPopup({
-                        title: "Обнаружен автокликер!",
-                        message: "Использование сторонних программ запрещено. Чтобы увеличить добычу честно, вы можете улучшить силу клика в магазине или получить мгновенный бонус, просмотрев рекламу!",
-                        buttons: [{type: 'ok'}]
-                    }, () => { this.antiCheatActive = false; });
+            // Логика обнаружения интервалов
+            if (this.lastTapTime > 0) {
+                this.tapIntervals.push(interval);
+                if (this.tapIntervals.length > 10) this.tapIntervals.shift();
+
+                // 1. Проверка на слишком быстрый клик (менее 60мс = более 16 кликов/сек)
+                // 2. Проверка на стабильность (если разница между интервалами менее 2мс - это бот)
+                const isTooFast = interval < 60;
+                const isTooStable = this.tapIntervals.length === 10 && 
+                                    Math.max(...this.tapIntervals) - Math.min(...this.tapIntervals) < 3;
+
+                if (isTooFast || isTooStable) {
+                    if (!this.warningShown) {
+                        this.warningShown = true;
+                        document.getElementById('coin').classList.add('blocked');
+                        this.tg.showPopup({
+                            title: "Защита от кликера!",
+                            message: "Использование автокликеров запрещено! Вы можете улучшить силу клика в магазине или увеличить баланс через просмотр рекламы.",
+                            buttons: [{type: 'ok'}]
+                        }, () => {
+                            this.warningShown = false;
+                            document.getElementById('coin').classList.remove('blocked');
+                            this.tapIntervals = [];
+                        });
+                    }
+                    return;
                 }
-                return;
             }
+            this.lastTapTime = now;
 
             this.gold += this.pwr;
             this.journal += this.pwr;
@@ -261,74 +243,44 @@
             this.journal = 0;
             await this.db.collection('players').doc(this.uid).update({
                 gold: firebase.firestore.FieldValue.increment(toAdd),
-                pwr: this.pwr,
-                lastSync: new Date()
+                pwr: this.pwr
             });
         },
 
         ad(type) {
             const ad = window.Adsgram.init({ blockId: this.adId });
             ad.show().then(() => {
-                const bonus = (type === 'gold') ? 5 : 0;
-                const pwrBonus = (type === 'pwr') ? 0.005 : 0;
-                this.gold += bonus;
-                this.pwr += pwrBonus;
-                this.db.collection('players').doc(this.uid).update({
-                    gold: firebase.firestore.FieldValue.increment(bonus),
-                    pwr: firebase.firestore.FieldValue.increment(pwrBonus)
-                });
-                this.render();
-            }).catch(() => this.tg.showAlert("Реклама подготавливается..."));
+                if(type === 'gold') this.gold += 5; else this.pwr += 0.005;
+                this.sync(); this.render();
+            }).catch(() => this.tg.showAlert("Реклама не готова"));
         },
 
         upgrade() {
-            if(this.gold < 1) return this.tg.showAlert("Недостаточно Gold!");
-            this.gold -= 1;
-            this.pwr += 0.005;
-            this.sync();
-            this.render();
+            if(this.gold < 1) return this.tg.showAlert("Нужно 1.000 G");
+            this.gold -= 1; this.pwr += 0.005;
+            this.sync(); this.render();
         },
 
         render() {
             document.getElementById('u-gold').innerText = this.gold.toFixed(3);
             document.getElementById('u-pwr').innerText = this.pwr.toFixed(3);
-            
-            let rank = "BRONZE";
-            if(this.gold > 50) rank = "SILVER";
-            if(this.gold > 200) rank = "GOLD";
-            if(this.gold > 500) rank = "ELITE";
-            document.getElementById('u-rank').innerText = rank;
-
             const btn = document.getElementById('wd-btn');
             if(this.gold >= 750) { btn.disabled = false; btn.style.opacity = "1"; btn.onclick = () => this.withdraw(); }
         },
 
         async withdraw() {
-            const sid = prompt("Введите ваш ID Standoff 2:");
+            const sid = prompt("ID Standoff 2:");
             if(!sid || sid.length < 8) return;
-            const amount = Math.floor(this.gold);
-            await this.db.collection('withdrawals').add({ uid: this.uid, sid, amount, status: 'Ожидание', date: new Date() });
+            await this.db.collection('withdrawals').add({ uid: this.uid, sid, amount: Math.floor(this.gold), status: 'Ожидание', date: new Date() });
             this.gold = 0;
             await this.db.collection('players').doc(this.uid).update({ gold: 0 });
             this.render();
-            this.tg.showAlert("Заявка создана! Ожидайте обработки.");
+            this.tg.showAlert("Заявка создана!");
         },
 
         invite() {
             const link = `https://t.me/Locus_Gold_bot/app?startapp=${this.uid}`;
-            this.tg.openTelegramLink(`https://t.me/share/url?url=${link}&text=Забирай+бесплатную+голду!`);
-        },
-
-        async loadLeaders() {
-            const list = document.getElementById('leader-list');
-            list.innerHTML = "<center>Загрузка...</center>";
-            const snap = await this.db.collection('players').orderBy('gold', 'desc').limit(50).get();
-            list.innerHTML = "";
-            let i = 1;
-            snap.forEach(doc => {
-                const d = doc.data();
-                list.innerHTML += `<div class="list-item"><b>${i++}. ${d.name || 'Игрок'}</b><span>${Math.floor(d.gold)} G</span></div>`;
-            });
+            this.tg.openTelegramLink(`https://t.me/share/url?url=${link}&text=Бесплатная+голда!`);
         }
     };
 
@@ -338,26 +290,38 @@
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
             document.getElementById('view-' + id).classList.add('active');
             el.classList.add('active');
-            if(id === 'leaderboard') Core.loadLeaders();
+            if(id === 'leaderboard') this.loadLeaders();
             if(id === 'friends') this.loadFriends();
             if(id === 'wallet') this.loadHistory();
+        },
+        async loadLeaders() {
+            const list = document.getElementById('leader-list');
+            list.innerHTML = "Загрузка...";
+            // Лимит 50 игроков
+            const snap = await Core.db.collection('players').orderBy('gold', 'desc').limit(50).get();
+            list.innerHTML = "";
+            let i = 1;
+            snap.forEach(doc => {
+                const d = doc.data();
+                list.innerHTML += `<div class="list-item"><b>${i++}. ${d.name || 'Игрок'}</b><span>${Math.floor(d.gold)} G</span></div>`;
+            });
         },
         async loadFriends() {
             const list = document.getElementById('friend-list');
             const snap = await Core.db.collection('players').doc(Core.uid).collection('referrals').get();
-            list.innerHTML = snap.empty ? "<center>Список пуст</center>" : "";
+            list.innerHTML = snap.empty ? "Пусто" : "";
             document.getElementById('u-refs').innerText = snap.size;
             snap.forEach(doc => {
-                list.innerHTML += `<div class="list-item"><span>${doc.data().name}</span><span style="color:var(--accent)">+100 G</span></div>`;
+                list.innerHTML += `<div class="list-item"><span>${doc.data().name}</span><b>+100 G</b></div>`;
             });
         },
         async loadHistory() {
             const list = document.getElementById('history-list');
             const snap = await Core.db.collection('withdrawals').where('uid', '==', Core.uid).get();
-            list.innerHTML = snap.empty ? "<center>Нет операций</center>" : "";
+            list.innerHTML = snap.empty ? "Нет выплат" : "";
             snap.forEach(doc => {
                 const d = doc.data();
-                list.innerHTML += `<div class="list-item"><span>ID: ${d.sid} (${d.amount} G)</span><small>${d.status}</small></div>`;
+                list.innerHTML += `<div class="list-item"><span>ID: ${d.sid}</span><small>${d.status}</small></div>`;
             });
         },
         showFullTos() { document.getElementById('full-tos').style.display = 'block'; },
