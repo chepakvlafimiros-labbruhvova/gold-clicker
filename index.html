@@ -1,35 +1,106 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
-<meta charset="utf-8">
-<title>Gold Clicker</title>
-<style>
-body{
- background:#101010;
- color:white;
- text-align:center;
- font-family:Arial;
-}
-h1{margin-top:30px}
-#gold{font-size:28px;margin-top:10px}
-button{
- margin-top:25px;
- padding:18px 30px;
- font-size:22px;
- border-radius:10px;
- border:none;
- background:#FFD700;
-}
-</style>
-</head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Gold Clicker</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
+    <style>
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            text-align: center; 
+            background: #0f0f0f; 
+            color: white; 
+            margin: 0; 
+            overflow: hidden; 
+            user-select: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+        #gold-display { font-size: 56px; font-weight: bold; color: #ffca28; text-shadow: 0 0 20px rgba(255,202,40,0.5); }
+        .label { font-size: 18px; color: #888; margin-bottom: 10px; }
+        #click-btn { 
+            width: 220px; height: 220px; border-radius: 50%; border: none; 
+            background: radial-gradient(circle, #ffeb3b 0%, #fbc02d 100%);
+            box-shadow: 0 0 40px rgba(251, 192, 45, 0.4); 
+            font-size: 100px; cursor: pointer; transition: transform 0.05s;
+            display: flex; align-items: center; justify-content: center;
+            margin-top: 20px;
+        }
+        #click-btn:active { transform: scale(0.92); }
+    </style>
+</head>
 <body>
 
-<h1>Gold Clicker</h1>
-<p id="gold">Gold: 0</p>
-<button onclick="clickGold()">Click!</button>
+    <div class="label">ВАШЕ ЗОЛОТО</div>
+    <div id="gold-display">0</div>
+    <button id="click-btn">📀</button>
 
-<script src="script.js"></script>
+    <script>
+        // --- ВАША КОНФИГУРАЦИЯ FIREBASE ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyCoa29KS-sin6hoRz0ZbE4f3ki0tZLwkKI",
+            authDomain: "gold-clicker-5d882.firebaseapp.com",
+            projectId: "gold-clicker-5d882",
+            storageBucket: "gold-clicker-5d882.firebasestorage.app",
+            messagingSenderId: "83489312782",
+            appId: "1:83489312782:web:ee5b7bdc390e53e7dd6c5f"
+        };
+        
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
 
+        // --- ЛОГИКА TELEGRAM ---
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+        
+        // Получаем ID пользователя
+        const userId = tg.initDataUnsafe?.user?.id ? tg.initDataUnsafe.user.id.toString() : "test_user_123";
+        const playerRef = db.collection('players').doc(userId);
+
+        let gold = 0;
+        const display = document.getElementById('gold-display');
+
+        // --- ЗАГРУЗКА ДАННЫХ ПРИ СТАРТЕ ---
+        async function loadData() {
+            try {
+                const doc = await playerRef.get();
+                if (doc.exists) {
+                    gold = doc.data().gold || 0;
+                } else {
+                    // Создаем нового игрока, если его нет
+                    await playerRef.set({ 
+                        gold: 0, 
+                        username: tg.initDataUnsafe?.user?.username || "Unknown" 
+                    });
+                }
+                display.innerText = gold;
+            } catch (e) {
+                console.error("Ошибка загрузки:", e);
+            }
+        }
+
+        // --- ОБРАБОТКА КЛИКА ---
+        document.getElementById('click-btn').addEventListener('click', () => {
+            gold++;
+            display.innerText = gold;
+            
+            // Виброотклик Telegram
+            tg.HapticFeedback.impactOccurred('medium');
+
+            // Сохранение в Firebase (раз в 1 клик для теста, позже можно оптимизировать)
+            playerRef.update({ gold: gold }).catch(err => {
+                console.error("Ошибка сохранения:", err);
+            });
+        });
+
+        loadData();
+    </script>
 </body>
 </html>
