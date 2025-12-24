@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Locus Gold Elite Ultimate</title>
+    <title>Locus Gold Elite Pro</title>
     
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -15,135 +15,150 @@
             --bg: #000000;
             --surface: #111112;
             --accent: #ff9d00;
+            --accent-dim: #b36e00;
             --error: #ff3b30;
             --text-dim: #8e8e93;
-            --safe-top: env(safe-area-inset-top);
             --safe-bottom: env(safe-area-inset-bottom);
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', -apple-system, sans-serif; -webkit-tap-highlight-color: transparent; }
+        
         body { background: var(--bg); color: #fff; height: 100vh; overflow: hidden; position: fixed; width: 100%; display: flex; flex-direction: column; }
 
-        .app-container { position: absolute; inset: 0; display: none; flex-direction: column; padding: calc(var(--safe-top) + 15px) 15px calc(var(--safe-bottom) + 85px); }
-        .app-container.active { display: flex; animation: fadeIn 0.2s ease-out; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        /* Контейнеры экранов */
+        .screen { position: absolute; inset: 0; display: none; flex-direction: column; padding: 20px 16px calc(80px + var(--safe-bottom)); overflow-y: auto; }
+        .screen.active { display: flex; animation: screenIn 0.25s ease-out; }
+        @keyframes screenIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        .header { text-align: center; margin-bottom: 15px; }
-        .gold-display { font-size: 48px; font-weight: 900; color: var(--accent); letter-spacing: -1px; }
-        .rank-label { font-size: 10px; text-transform: uppercase; background: #222; padding: 3px 10px; border-radius: 12px; color: var(--accent); font-weight: 800; }
+        /* Шапка */
+        .rank-tag { align-self: center; background: #222; padding: 4px 14px; border-radius: 20px; color: var(--accent); font-size: 11px; font-weight: 800; text-transform: uppercase; margin-bottom: 10px; }
+        .balance-main { font-size: 52px; font-weight: 900; text-align: center; color: var(--accent); margin-bottom: 20px; letter-spacing: -1px; }
 
-        .stats-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 15px; }
-        .stat-card { background: var(--surface); border-radius: 16px; padding: 12px; border: 1px solid #222; text-align: center; }
-        .stat-card b { font-size: 16px; }
+        /* Статистика */
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 30px; }
+        .stat-box { background: var(--surface); border-radius: 18px; padding: 15px; text-align: center; border: 1px solid #1c1c1e; }
+        .stat-box span { display: block; color: var(--text-dim); font-size: 10px; text-transform: uppercase; font-weight: 700; margin-bottom: 4px; }
+        .stat-box b { font-size: 18px; color: #fff; }
 
-        .click-zone { flex: 1; display: flex; align-items: center; justify-content: center; position: relative; }
-        .coin {
-            width: 220px; height: 220px; border-radius: 50%;
-            background: radial-gradient(circle at 30% 30%, #ffc400, #ff8000);
-            border: 10px solid #1a1a1c; box-shadow: 0 0 40px rgba(255,157,0,0.15);
-            display: flex; align-items: center; justify-content: center;
-            font-size: 80px; font-weight: 900; color: rgba(0,0,0,0.1);
-            user-select: none; transition: transform 0.05s;
-        }
-        .coin:active { transform: scale(0.94); }
+        /* Монета */
+        .mining-area { flex: 1; display: flex; align-items: center; justify-content: center; position: relative; min-height: 250px; }
+        .coin-wrapper { position: relative; cursor: pointer; transition: transform 0.05s; user-select: none; }
+        .coin-wrapper:active { transform: scale(0.92); }
+        .coin-circle { width: 240px; height: 240px; border-radius: 50%; background: radial-gradient(circle at 30% 30%, #ffc400, #ff8000); border: 12px solid #1a1a1c; box-shadow: 0 0 50px rgba(255,157,0,0.1); display: flex; align-items: center; justify-content: center; }
+        .coin-circle span { font-size: 90px; font-weight: 900; color: rgba(0,0,0,0.15); }
 
-        .lock-mask { position: absolute; inset: 0; background: rgba(0,0,0,0.9); z-index: 100; display: none; flex-direction: column; align-items: center; justify-content: center; border-radius: 50%; border: 3px solid var(--error); }
-        .lock-mask.active { display: flex; }
+        /* Кнопки действий */
+        .actions-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px; }
+        .btn-act { background: var(--surface); border: 1px solid #222; border-radius: 20px; padding: 15px 10px; text-align: center; color: #fff; text-decoration: none; }
+        .btn-act img { width: 24px; margin-bottom: 6px; }
+        .btn-act b { display: block; font-size: 14px; }
+        .btn-act small { color: var(--accent); font-size: 10px; font-weight: 700; }
 
-        .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .btn-main { background: var(--surface); border: 1px solid #27272a; border-radius: 18px; padding: 16px 10px; text-align: center; color: #fff; cursor: pointer; }
-        .btn-main b { display: block; font-size: 14px; margin-bottom: 2px; }
-        .btn-main span { font-size: 9px; color: var(--accent); font-weight: 800; }
-        .btn-wide { grid-column: span 2; }
+        .btn-upgrade { grid-column: span 2; background: none; border: 1.5px solid var(--accent); padding: 20px; border-radius: 22px; margin-top: 10px; position: relative; overflow: hidden; }
+        .btn-upgrade:disabled { opacity: 0.4; border-color: #333; }
+        .btn-upgrade b { display: block; font-size: 15px; margin-bottom: 4px; }
+        .btn-upgrade span { color: var(--text-dim); font-size: 11px; }
 
-        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 2000; display: none; align-items: center; justify-content: center; padding: 25px; }
-        .modal-content { background: #1c1c1e; padding: 30px; border-radius: 24px; text-align: center; border: 1px solid var(--error); width: 100%; }
+        /* Нижнее меню (Как на фото) */
+        .nav-bar { position: fixed; bottom: 0; width: 100%; height: calc(65px + var(--safe-bottom)); background: #080808; border-top: 1px solid #161618; display: flex; padding-bottom: var(--safe-bottom); z-index: 1000; }
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-dim); transition: 0.2s; cursor: pointer; }
+        .nav-item.active { color: var(--accent); }
+        .nav-item i { font-size: 22px; margin-bottom: 4px; }
+        .nav-item span { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
 
-        .tabs { position: fixed; bottom: 0; width: 100%; height: calc(70px + var(--safe-bottom)); background: #080808; border-top: 1px solid #1c1c1e; display: flex; padding-bottom: var(--safe-bottom); }
-        .tab-btn { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-dim); border: none; background: none; }
-        .tab-btn.active { color: var(--accent); }
-        .tab-btn span { font-size: 9px; font-weight: 700; text-transform: uppercase; margin-top: 3px;}
+        /* Списки */
+        .list-container { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
+        .card-item { background: var(--surface); padding: 16px; border-radius: 18px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #1c1c1e; }
+        .card-info h4 { font-size: 14px; margin-bottom: 2px; }
+        .card-info p { font-size: 11px; color: var(--text-dim); }
+        .card-val { font-weight: 800; color: var(--accent); }
 
-        .scroll-area { flex: 1; overflow-y: auto; margin-top: 15px; }
-        .item-row { background: var(--surface); padding: 15px; border-radius: 15px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #222; }
+        /* Античит */
+        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.92); z-index: 2000; display: none; align-items: center; justify-content: center; padding: 30px; }
+        .modal-body { background: #1c1c1e; padding: 30px; border-radius: 28px; text-align: center; border: 1px solid var(--error); width: 100%; }
+        .modal-body h2 { color: var(--error); margin-bottom: 12px; }
+        .modal-body p { color: #fff; line-height: 1.5; margin-bottom: 25px; }
 
-        .f-pop { position: absolute; color: var(--accent); font-weight: 900; pointer-events: none; animation: fPop 0.6s ease-out forwards; font-size: 24px; z-index: 500; }
-        @keyframes fPop { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-100px); } }
+        .f-pop { position: absolute; color: var(--accent); font-weight: 900; pointer-events: none; animation: fPop 0.7s ease-out forwards; font-size: 26px; z-index: 500; text-shadow: 0 2px 10px rgba(0,0,0,0.5); }
+        @keyframes fPop { 0% { opacity: 1; transform: translateY(0) scale(1); } 100% { opacity: 0; transform: translateY(-120px) scale(1.2); } }
     </style>
 </head>
 <body>
 
-    <div class="modal-overlay" id="anticheat-modal">
-        <div class="modal-content">
-            <h2 style="color:var(--error); margin-bottom:15px;">ОШИБКА</h2>
-            <p style="font-size:15px; color:#fff; margin-bottom:25px; line-height:1.4;">
-                Нельзя использовать автокликер, улучшите мощность клика с помощью магазина или рекламы
-            </p>
-            <button class="btn-main btn-wide" id="ac-close-btn" style="background:var(--accent); color:#000; border:none; width:100%;">
-                <b>ХОРОШО</b>
+    <div class="modal" id="modal-ac">
+        <div class="modal-body">
+            <div style="font-size: 40px; margin-bottom: 10px;">🛡️</div>
+            <h2>СТОП-КЛИКЕР!</h2>
+            <p>Использование сторонних программ запрещено. Улучшайте силу клика или получайте бонусы за рекламу!</p>
+            <button class="btn-act btn-upgrade" style="background: var(--accent); color: #000; border: none; width: 100%;" onclick="App.closeAC()"><b>ХОРОШО, Я ПОНЯЛ</b></button>
+        </div>
+    </div>
+
+    <div class="screen active" id="scr-mining">
+        <div class="rank-tag" id="rank-name">BRONZE</div>
+        <div class="balance-main"><span id="val-gold">0.000</span> G</div>
+        
+        <div class="stats-grid">
+            <div class="stat-box"><span>Сила клика</span><b id="val-pwr">0.001</b></div>
+            <div class="stat-box"><span>Рефералы</span><b id="val-refs">0</b></div>
+        </div>
+
+        <div class="mining-area">
+            <div class="coin-wrapper" id="coin-trigger">
+                <div class="coin-circle"><span>G</span></div>
+            </div>
+        </div>
+
+        <div class="actions-grid">
+            <div class="btn-act" id="ad-bonus"><b>БОНУС +5.0 G</b><small>ADSGRAM</small></div>
+            <div class="btn-act" id="ad-power"><b>СИЛА +0.005</b><small>РЕКЛАМА</small></div>
+            <button class="btn-upgrade" id="btn-upg">
+                <b id="upg-title">УЛУЧШИТЬ ЗА 1.000 G</b>
+                <span id="upg-desc">+0.005 К СИЛЕ</span>
             </button>
         </div>
     </div>
 
-    <div class="app-container active" id="scr-mining">
-        <div class="header">
-            <span class="rank-label" id="rank-txt">BRONZE</span>
-            <div class="gold-display" id="gold-txt">0.000</div>
-            <div class="stats-row">
-                <div class="stat-card"><small>СИЛА КЛИКА</small><b id="pwr-txt">0.001</b></div>
-                <div class="stat-card"><small>РЕФЕРАЛЫ</small><b id="ref-count-txt">0</b></div>
-            </div>
-        </div>
-        <div class="click-zone">
-            <div class="lock-mask" id="click-lock"><div style="font-size:40px; font-weight:900; color:var(--error)" id="lock-timer">5</div></div>
-            <div class="coin" id="main-coin">G</div>
-        </div>
-        <div class="btn-grid">
-            <div class="btn-main" id="ad-gold-btn"><b>Бонус +5.0 G</b><span>РЕКЛАМА</span></div>
-            <div class="btn-main" id="ad-pwr-btn"><b>Сила +0.005</b><span>РЕКЛАМА</span></div>
-            <div class="btn-main btn-wide" id="upgrade-btn" style="border-color:var(--accent)"><b>Улучшить за 1.000 G</b></div>
-        </div>
+    <div class="screen" id="scr-top">
+        <h2 style="text-align:center; margin-bottom:20px;">Топ-50 Лидеров</h2>
+        <div class="list-container" id="list-top"></div>
     </div>
 
-    <div class="app-container" id="scr-top">
-        <h2 style="text-align:center;">Топ-50 Лидеров</h2>
-        <div class="scroll-area" id="top-list"></div>
+    <div class="screen" id="scr-friends">
+        <h2 style="text-align:center; margin-bottom:5px;">Реферальная система</h2>
+        <p style="text-align:center; color:var(--text-dim); font-size:12px; margin-bottom:20px;">Дарим 100.0 G за каждого друга!</p>
+        <button class="btn-act btn-upgrade" style="background:var(--accent); color:#000; border:none;" onclick="App.invite()"><b>ПРИГЛАСИТЬ</b></button>
+        <div class="list-container" id="list-friends" style="margin-top:20px;"></div>
     </div>
 
-    <div class="app-container" id="scr-friends">
-        <h2 style="text-align:center; margin-bottom:15px;">Пригласить друзей</h2>
-        <div class="stat-card" style="margin-bottom:15px">
-            <p>Дарим <b>+100 G</b> за каждого друга!</p>
-            <button class="btn-main btn-wide" id="invite-btn" style="margin-top:15px; background:var(--accent); color:#000; border:none; width:100%;"><b>ПРИГЛАСИТЬ</b></button>
-        </div>
-        <div class="scroll-area" id="friend-list"></div>
-    </div>
-
-    <div class="app-container" id="scr-wallet">
+    <div class="screen" id="scr-wallet">
         <h2 style="text-align:center; margin-bottom:15px;">Вывод Gold</h2>
-        <div class="stat-card">
-            <p style="color:var(--text-dim); font-size:12px; margin-bottom:15px;">Минимум: 750 G</p>
-            <button class="btn-main btn-wide" id="withdraw-btn" style="width:100%; transition: 0.3s;"><b>ВЫВЕСТИ</b></button>
+        <div class="stat-box" style="margin-bottom:20px;">
+            <span>Доступно для вывода (Мин. 750 G)</span>
+            <button class="btn-act btn-upgrade" id="btn-withdraw" style="width:100%; margin-top:10px;"><b>ВЫВЕСТИ</b></button>
         </div>
-        <div class="scroll-area" id="history-list"></div>
+        <h4 style="margin-bottom:10px; color:var(--text-dim); font-size:12px; text-transform:uppercase;">История выплат</h4>
+        <div class="list-container" id="list-history"></div>
     </div>
 
-    <nav class="tabs">
-        <button class="tab-btn active" data-target="mining"><span>Добыча</span></button>
-        <button class="tab-btn" data-target="top"><span>Топ</span></button>
-        <button class="tab-btn" data-target="friends"><span>Друзья</span></button>
-        <button class="tab-btn" data-target="wallet"><span>Вывод</span></button>
+    <nav class="nav-bar">
+        <div class="nav-item active" onclick="App.showScreen('mining', this)"><i>⛏️</i><span>Добыча</span></div>
+        <div class="nav-item" onclick="App.showScreen('top', this)"><i>🏆</i><span>Топ-50</span></div>
+        <div class="nav-item" onclick="App.showScreen('friends', this)"><i>👥</i><span>Друзья</span></div>
+        <div class="nav-item" onclick="App.showScreen('wallet', this)"><i>🏦</i><span>Вывод</span></div>
     </nav>
 
     <script>
     const App = {
         db: null, tg: window.Telegram.WebApp, uid: null,
-        gold: 0, pwr: 0.001, journal: 0, lastTaps: [], locked: false,
+        user: { gold: 0, pwr: 0.001, upgCount: 0, name: 'User' },
+        lastTaps: [], isLocked: false, syncTimer: null,
 
         async init() {
             this.tg.expand();
-            this.uid = this.tg.initDataUnsafe?.user?.id?.toString() || "WEB_USER";
-
+            this.uid = this.tg.initDataUnsafe?.user?.id?.toString() || "DEV_5223115893";
+            
+            // Инициализация Firebase
             firebase.initializeApp({
                 apiKey: "AIzaSyCoa29KS-sin6hoRz0ZbE4f3ki0tZLwkKI",
                 projectId: "gold-clicker-5d882",
@@ -151,180 +166,219 @@
             });
             this.db = firebase.firestore();
 
+            // Загрузка данных
             const doc = await this.db.collection('players').doc(this.uid).get();
             if(doc.exists) {
-                this.gold = doc.data().gold || 0;
-                this.pwr = doc.data().pwr || 0.001;
+                this.user = { ...this.user, ...doc.data() };
             } else {
-                await this.db.collection('players').doc(this.uid).set({
-                    name: this.tg.initDataUnsafe?.user?.first_name || "Игрок",
-                    gold: 0, pwr: 0.001, created: new Date()
-                });
+                this.user.name = this.tg.initDataUnsafe?.user?.first_name || "Игрок";
+                await this.db.collection('players').doc(this.uid).set(this.user);
             }
 
             this.bindEvents();
-            this.render();
-            setInterval(() => this.sync(), 8000);
+            this.updateUI();
+            
+            // Авто-сохранение каждые 10 секунд
+            setInterval(() => this.save(), 10000);
         },
 
         bindEvents() {
-            const tap = (id, fn) => {
-                const el = document.getElementById(id);
-                el.addEventListener('click', (e) => { e.preventDefault(); fn(e); });
-            };
-
-            tap('main-coin', (e) => this.handleTap(e));
-            tap('ad-gold-btn', () => this.showAd('gold'));
-            tap('ad-pwr-btn', () => this.showAd('pwr'));
-            tap('upgrade-btn', () => this.upgrade());
-            tap('invite-btn', () => this.invite());
-            tap('withdraw-btn', () => this.withdraw());
-            tap('ac-close-btn', () => document.getElementById('anticheat-modal').style.display = 'none');
-
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.onclick = () => {
-                    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-                    document.querySelectorAll('.app-container').forEach(c => c.classList.remove('active'));
-                    btn.classList.add('active');
-                    const t = btn.getAttribute('data-target');
-                    document.getElementById('scr-' + t).classList.add('active');
-                    if(t === 'top') this.loadTop();
-                    if(t === 'friends') this.loadFriends();
-                };
+            // Клик по монете
+            const coin = document.getElementById('coin-trigger');
+            coin.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                for(let i=0; i<e.changedTouches.length; i++) this.handleTap(e.changedTouches[i]);
             });
+
+            // Кнопки
+            document.getElementById('ad-bonus').onclick = () => this.showAd('gold');
+            document.getElementById('ad-power').onclick = () => this.showAd('pwr');
+            document.getElementById('btn-upg').onclick = () => this.upgrade();
+            document.getElementById('btn-withdraw').onclick = () => this.withdraw();
+            
+            // Следим за закрытием приложения
+            window.addEventListener('beforeunload', () => this.save());
         },
 
-        handleTap(e) {
-            if (this.locked) return;
+        handleTap(touch) {
+            if(this.isLocked) return;
+            
             const now = Date.now();
             this.lastTaps.push(now);
             this.lastTaps = this.lastTaps.filter(t => now - t < 1000);
 
-            if (this.lastTaps.length > 15) return this.triggerCheat();
+            if(this.lastTaps.length > 20) {
+                this.isLocked = true;
+                document.getElementById('modal-ac').style.display = 'flex';
+                return;
+            }
 
-            this.gold += this.pwr;
-            this.journal += this.pwr;
-            this.render();
-            this.pop(e.clientX, e.clientY);
+            this.user.gold += this.user.pwr;
+            this.updateUI();
+            this.spawnPop(touch.clientX, touch.clientY);
             if(this.tg.HapticFeedback) this.tg.HapticFeedback.impactOccurred('light');
         },
 
-        triggerCheat() {
-            this.locked = true;
-            document.getElementById('anticheat-modal').style.display = 'flex';
-            document.getElementById('click-lock').classList.add('active');
-            let s = 5;
-            const t = setInterval(() => {
-                s--;
-                document.getElementById('lock-timer').innerText = s;
-                if(s <= 0) {
-                    clearInterval(t);
-                    this.locked = false;
-                    document.getElementById('click-lock').classList.remove('active');
-                    document.getElementById('lock-timer').innerText = "5";
-                    this.lastTaps = [];
-                }
-            }, 1000);
-        },
-
-        showAd(type) {
-            const ad = Adsgram.init({ blockId: "19895" });
-            ad.show().then(() => {
-                if(type === 'gold') this.gold += 5; else this.pwr += 0.005;
-                this.sync(); this.render();
-            }).catch(() => this.tg.showAlert("Реклама не готова"));
+        // РАСЧЕТ ЦЕНЫ (Прогрессия из ТЗ)
+        getUpgradePrice() {
+            const count = this.user.upgCount || 0;
+            if (count >= 20) return 150;
+            if (count >= 10) return 15;
+            if (count >= 3) return 5;
+            return 1;
         },
 
         upgrade() {
-            if(this.gold < 1) return this.tg.showAlert("Нужно 1.000 G");
-            this.gold -= 1; this.pwr += 0.005;
-            this.sync(); this.render();
+            const price = this.getUpgradePrice();
+            if(this.user.gold < price) return this.tg.showAlert(`Недостаточно Gold! Нужно ${price} G`);
+            
+            this.user.gold -= price;
+            this.user.pwr += 0.005;
+            this.user.upgCount = (this.user.upgCount || 0) + 1;
+            
+            this.save();
+            this.updateUI();
+            this.tg.HapticFeedback.notificationOccurred('success');
+        },
+
+        async save() {
+            try {
+                await this.db.collection('players').doc(this.uid).update({
+                    gold: this.user.gold,
+                    pwr: this.user.pwr,
+                    upgCount: this.user.upgCount,
+                    lastSync: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                console.log("Saved safely.");
+            } catch(e) { console.error("Save error", e); }
+        },
+
+        updateUI() {
+            document.getElementById('val-gold').innerText = this.user.gold.toFixed(3);
+            document.getElementById('val-pwr').innerText = this.user.pwr.toFixed(3);
+            
+            const price = this.getUpgradePrice();
+            document.getElementById('upg-title').innerText = `УЛУЧШИТЬ ЗА ${price.toFixed(3)} G`;
+            
+            const btnW = document.getElementById('btn-withdraw');
+            btnW.disabled = this.user.gold < 750;
+            btnW.style.background = this.user.gold >= 750 ? 'var(--accent)' : 'none';
+            btnW.style.color = this.user.gold >= 750 ? '#000' : '#fff';
+        },
+
+        showScreen(id, el) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            
+            document.getElementById('scr-' + id).classList.add('active');
+            el.classList.add('active');
+
+            if(id === 'top') this.loadTop();
+            if(id === 'friends') this.loadFriends();
+            if(id === 'wallet') this.loadHistory();
+        },
+
+        async loadHistory() {
+            const container = document.getElementById('list-history');
+            container.innerHTML = '<p style="text-align:center; color:gray">Загрузка истории...</p>';
+            
+            // Фикс: Запрос именно по текущему UID
+            const snap = await this.db.collection('withdrawals')
+                .where('uid', '==', this.uid)
+                .orderBy('date', 'desc')
+                .get();
+            
+            container.innerHTML = snap.empty ? '<p style="text-align:center; color:gray; margin-top:20px;">Истории выплат пока нет</p>' : '';
+            
+            snap.forEach(doc => {
+                const d = doc.data();
+                container.innerHTML += `
+                    <div class="card-item">
+                        <div class="card-info">
+                            <h4>Вывод Gold</h4>
+                            <p>${d.date || 'Недавно'}</p>
+                        </div>
+                        <div class="card-val" style="color:${d.status === 'Выполнено' ? '#4cd964' : 'var(--accent)'}">${d.amount} G</div>
+                    </div>
+                `;
+            });
         },
 
         async withdraw() {
-            // ЖЕСТКАЯ ПРОВЕРКА БАЛАНСА
-            if (this.gold < 750) {
-                this.tg.showAlert(`Недостаточно средств. Ваш баланс: ${this.gold.toFixed(3)} G. Нужно минимум 750 G.`);
-                return; 
-            }
-
+            if(this.user.gold < 750) return;
             const sid = prompt("Введите ваш ID Standoff 2:");
             if(!sid || sid.length < 5) return;
 
-            await this.db.collection('withdrawals').add({ 
-                uid: this.uid, 
-                sid: sid, 
-                amount: Math.floor(this.gold), 
-                date: new Date(),
-                status: "pending"
-            });
+            const amount = Math.floor(this.user.gold);
+            const request = {
+                uid: this.uid,
+                sid: sid,
+                amount: amount,
+                status: "Ожидание",
+                date: new Date().toLocaleString()
+            };
 
-            this.gold = 0;
-            await this.db.collection('players').doc(this.uid).update({gold: 0});
-            this.render();
-            this.tg.showAlert("Заявка успешно создана!");
-        },
-
-        async sync() {
-            if (this.journal <= 0) return;
-            const d = this.journal; this.journal = 0;
-            await this.db.collection('players').doc(this.uid).update({
-                gold: firebase.firestore.FieldValue.increment(d),
-                pwr: this.pwr
-            });
-        },
-
-        render() {
-            document.getElementById('gold-txt').innerText = this.gold.toFixed(3);
-            document.getElementById('pwr-txt').innerText = this.pwr.toFixed(3);
-            
-            const wBtn = document.getElementById('withdraw-btn');
-            if(this.gold >= 750) {
-                wBtn.style.opacity = "1";
-                wBtn.style.background = "var(--accent)";
-                wBtn.style.color = "#000";
-                wBtn.style.borderColor = "transparent";
-            } else {
-                wBtn.style.opacity = "0.3";
-                wBtn.style.background = "transparent";
-                wBtn.style.color = "#fff";
-                wBtn.style.borderColor = "#27272a";
-            }
-        },
-
-        pop(x, y) {
-            const p = document.createElement('div');
-            p.className = 'f-pop'; p.innerText = `+${this.pwr.toFixed(3)}`;
-            p.style.left = (x || window.innerWidth/2) + 'px';
-            p.style.top = (y || window.innerHeight/2) + 'px';
-            document.body.appendChild(p);
-            setTimeout(() => p.remove(), 600);
+            await this.db.collection('withdrawals').add(request);
+            this.user.gold -= amount;
+            await this.save();
+            this.updateUI();
+            this.loadHistory();
+            this.tg.showAlert("Заявка принята! Обработка до 24 часов.");
         },
 
         async loadTop() {
-            const l = document.getElementById('top-list');
-            l.innerHTML = "Загрузка...";
+            const container = document.getElementById('list-top');
+            container.innerHTML = '';
             const snap = await this.db.collection('players').orderBy('gold', 'desc').limit(50).get();
-            l.innerHTML = "";
-            let i = 1;
+            let rank = 1;
             snap.forEach(doc => {
-                l.innerHTML += `<div class="item-row"><b>${i++}. ${doc.data().name}</b><span>${Math.floor(doc.data().gold)} G</span></div>`;
+                const d = doc.data();
+                container.innerHTML += `
+                    <div class="card-item">
+                        <div class="card-info"><h4>${rank++}. ${d.name || 'Аноним'}</h4></div>
+                        <div class="card-val">${Math.floor(d.gold)} G</div>
+                    </div>
+                `;
             });
         },
 
         async loadFriends() {
-            const l = document.getElementById('friend-list');
+            const container = document.getElementById('list-friends');
             const snap = await this.db.collection('players').doc(this.uid).collection('referrals').get();
-            document.getElementById('ref-count-txt').innerText = snap.size;
-            l.innerHTML = snap.empty ? "<center>Пока нет рефералов</center>" : "";
+            document.getElementById('val-refs').innerText = snap.size;
+            container.innerHTML = snap.empty ? '<p style="text-align:center; color:gray">У вас пока нет приглашенных друзей</p>' : '';
             snap.forEach(doc => {
-                l.innerHTML += `<div class="item-row"><span>${doc.data().name}</span><b>+100 G</b></div>`;
+                container.innerHTML += `<div class="card-item"><span>${doc.data().name}</span><b>+100 G</b></div>`;
             });
         },
 
         invite() {
             const link = `https://t.me/Locus_Gold_bot/app?startapp=${this.uid}`;
-            this.tg.openTelegramLink(`https://t.me/share/url?url=${link}&text=Забирай+голду+в+Locus!`);
+            this.tg.openTelegramLink(`https://t.me/share/url?url=${link}&text=Забирай бесплатную голду в Locus Gold!`);
+        },
+
+        showAd(type) {
+            if(!window.Adsgram) return this.tg.showAlert("Рекламная сеть недоступна");
+            const Ad = Adsgram.init({ blockId: "19895" });
+            Ad.show().then(() => {
+                if(type === 'gold') this.user.gold += 5; else this.user.pwr += 0.005;
+                this.save(); this.updateUI();
+            }).catch(e => this.tg.showAlert("Реклама не загружена. Попробуйте позже."));
+        },
+
+        spawnPop(x, y) {
+            const p = document.createElement('div');
+            p.className = 'f-pop';
+            p.innerText = `+${this.user.pwr.toFixed(3)}`;
+            p.style.left = x + 'px'; p.style.top = y + 'px';
+            document.body.appendChild(p);
+            setTimeout(() => p.remove(), 700);
+        },
+
+        closeAC() {
+            document.getElementById('modal-ac').style.display = 'none';
+            this.isLocked = false;
+            this.lastTaps = [];
         }
     };
 
