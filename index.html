@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Locus Gold Elite Ultimate</title>
+    <title>Locus Gold Elite Ultimate Edition</title>
     
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -11,6 +11,7 @@
     <script src="https://sad.adsgram.ai/js/sad.min.js"></script>
 
     <style>
+        /* Глобальные переменные и база */
         :root {
             --bg: #000000;
             --surface: #111112;
@@ -22,79 +23,96 @@
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', -apple-system, sans-serif; -webkit-tap-highlight-color: transparent; }
-        body { background: var(--bg); color: #fff; height: 100vh; overflow: hidden; position: fixed; width: 100%; display: flex; flex-direction: column; }
+        
+        body { 
+            background: var(--bg); 
+            color: #fff; 
+            height: 100vh; 
+            overflow: hidden; 
+            position: fixed; 
+            width: 100%; 
+            display: flex; 
+            flex-direction: column; 
+        }
 
+        /* Контейнеры экранов */
         .app-container {
             position: absolute; inset: 0; display: none; flex-direction: column;
             padding: calc(var(--safe-top) + 20px) 20px calc(var(--safe-bottom) + 90px);
+            animation: fadeIn 0.3s ease;
         }
         .app-container.active { display: flex; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* Баланс и Статистика */
-        .header-stats { text-align: center; margin-bottom: 20px; }
-        .gold-display { font-size: 52px; font-weight: 900; color: var(--accent); }
-        .rank-badge { font-size: 12px; text-transform: uppercase; background: #222; padding: 5px 15px; border-radius: 20px; color: var(--accent); font-weight: 800; display: inline-block; margin-bottom: 5px; }
+        /* Шапка статистики */
+        .header-stats { text-align: center; margin-bottom: 20px; flex-shrink: 0; }
+        .gold-display { font-size: 52px; font-weight: 900; color: var(--accent); text-shadow: 0 0 25px rgba(255,157,0,0.2); }
+        .rank-badge { font-size: 11px; text-transform: uppercase; background: #222; padding: 4px 12px; border-radius: 20px; color: var(--accent); font-weight: 800; display: inline-block; margin-bottom: 5px; }
 
-        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
-        .stat-box { background: var(--surface); border-radius: 16px; padding: 15px; text-align: center; border: 1px solid #27272a; }
-        .stat-box small { display: block; color: var(--text-dim); font-size: 11px; text-transform: uppercase; }
-        .stat-box b { font-size: 18px; }
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 15px; }
+        .stat-box { background: var(--surface); border-radius: 18px; padding: 14px; text-align: center; border: 1px solid #27272a; }
+        .stat-box small { display: block; color: var(--text-dim); font-size: 10px; text-transform: uppercase; margin-bottom: 2px; }
+        .stat-box b { font-size: 18px; font-weight: 700; }
 
-        /* Кликер */
+        /* Главная кнопка монеты */
         .clicker-area { flex: 1; display: flex; align-items: center; justify-content: center; position: relative; }
         .coin-btn {
-            width: 220px; height: 220px; border-radius: 50%;
-            background: radial-gradient(circle, #ffb700 0%, #ff8000 100%);
-            border: 10px solid #1a1a1c; box-shadow: 0 0 50px rgba(255, 157, 0, 0.25);
+            width: 230px; height: 230px; border-radius: 50%;
+            background: radial-gradient(circle at 35% 35%, #ffc400 0%, #ff8000 100%);
+            border: 12px solid #1a1a1c; box-shadow: 0 0 50px rgba(255, 157, 0, 0.2);
             display: flex; align-items: center; justify-content: center;
             font-size: 90px; font-weight: 900; color: rgba(0,0,0,0.1);
             transition: transform 0.05s; cursor: pointer; user-select: none;
         }
         .coin-btn:active { transform: scale(0.92); }
 
+        /* Оверлей блокировки при клике */
         .lock-ui { position: absolute; background: rgba(0,0,0,0.95); inset: 0; z-index: 100; display: none; flex-direction: column; align-items: center; justify-content: center; border-radius: 50%; border: 4px solid var(--error); }
         .lock-ui.show { display: flex; }
-        .lock-timer { font-size: 48px; font-weight: 900; color: var(--error); }
+        .lock-timer { font-size: 50px; font-weight: 900; color: var(--error); }
 
         /* Кнопки действий */
-        .actions-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 10px; }
-        .action-btn { background: var(--surface); border: 1px solid #27272a; border-radius: 20px; padding: 18px 10px; text-align: center; cursor: pointer; }
-        .action-btn:active { background: #1c1c1e; transform: scale(0.98); }
-        .action-btn b { display: block; font-size: 16px; font-weight: 900; text-transform: uppercase; } 
-        .action-btn span { font-size: 10px; color: var(--accent); font-weight: 800; text-transform: uppercase; }
+        .actions-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: auto; }
+        .action-btn { background: var(--surface); border: 1px solid #27272a; border-radius: 20px; padding: 16px 10px; text-align: center; cursor: pointer; }
+        .action-btn:active { background: #1c1c1e; transform: scale(0.97); }
+        .action-btn i { display: block; font-style: normal; font-size: 20px; margin-bottom: 2px; }
+        .action-btn b { display: block; font-size: 14px; font-weight: 800; text-transform: uppercase; }
+        .action-btn span { font-size: 9px; color: var(--accent); font-weight: 800; text-transform: uppercase; }
 
-        /* Модальное окно Античита */
-        #cheat-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 9999; display: none; align-items: center; justify-content: center; padding: 30px; }
-        .modal-box { background: #1c1c1e; padding: 35px; border-radius: 28px; text-align: center; border: 1px solid var(--error); width: 100%; box-shadow: 0 0 40px rgba(255, 59, 48, 0.2); }
-        
-        /* Кнопка ХОРОШО */
-        .ok-btn { background: var(--accent); color: #000; border: none; border-radius: 15px; padding: 15px; width: 100%; font-size: 18px; font-weight: 900; text-transform: uppercase; cursor: pointer; margin-top: 20px; }
-
-        /* Списки */
-        .list-wrapper { flex: 1; overflow-y: auto; margin-top: 10px; }
-        .list-item { background: var(--surface); padding: 16px; border-radius: 16px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #27272a; }
+        /* Списки и элементы */
+        .list-wrapper { flex: 1; overflow-y: auto; margin-top: 15px; padding-bottom: 20px; }
+        .list-item { background: var(--surface); padding: 16px; border-radius: 18px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #27272a; }
 
         /* Навигация */
         .nav-bar {
             position: fixed; bottom: 0; width: 100%; height: calc(75px + var(--safe-bottom));
-            background: #0a0a0b; border-top: 1px solid #1c1c1e; display: flex; padding-bottom: var(--safe-bottom);
+            background: #080808; border-top: 1px solid #1c1c1e; display: flex; padding-bottom: var(--safe-bottom);
         }
-        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-dim); background: none; border: none; }
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-dim); background: none; border: none; outline: none; }
         .nav-item.active { color: var(--accent); }
-        .nav-item i { font-size: 24px; font-style: normal; }
-        .nav-item span { font-size: 11px; font-weight: 800; margin-top: 5px; }
+        .nav-item i { font-size: 24px; font-style: normal; margin-bottom: 4px; }
+        .nav-item span { font-size: 10px; font-weight: 800; text-transform: uppercase; }
 
-        .float-txt { position: absolute; color: var(--accent); font-weight: 900; pointer-events: none; animation: floatUp 0.7s forwards; font-size: 20px; }
-        @keyframes floatUp { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-120px); } }
+        /* Модалка Античита */
+        #cheat-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.98); z-index: 9999; display: none; align-items: center; justify-content: center; padding: 30px; }
+        .modal-box { background: #1c1c1e; padding: 40px 30px; border-radius: 30px; text-align: center; border: 2px solid var(--error); width: 100%; max-width: 400px; }
+        
+        /* Кнопка ХОРОШО */
+        .ok-btn { background: var(--accent); color: #000; border: none; border-radius: 18px; padding: 18px; width: 100%; font-size: 16px; font-weight: 900; text-transform: uppercase; cursor: pointer; margin-top: 25px; }
+        .ok-btn:active { transform: scale(0.96); opacity: 0.9; }
+
+        /* Всплывающий текст клика */
+        .float-txt { position: absolute; color: var(--accent); font-weight: 900; pointer-events: none; animation: floatUp 0.8s forwards; font-size: 22px; z-index: 1000; }
+        @keyframes floatUp { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-130px); } }
     </style>
 </head>
 <body>
 
     <div id="cheat-modal">
         <div class="modal-box">
-            <div style="font-size: 50px; margin-bottom: 10px;">🛡️</div>
-            <h2 style="color:var(--error); margin-bottom:10px; font-size: 22px;">ОБНАРУЖЕН КЛИКЕР</h2>
-            <p style="font-size:14px; color:var(--text-dim); line-height: 1.4;">Использование автокликеров запрещено. Пожалуйста, играйте честно!</p>
+            <div style="font-size: 60px; margin-bottom: 15px;">👮</div>
+            <h2 style="color:var(--error); margin-bottom:10px; font-size: 24px;">АНТИЧИТ</h2>
+            <p style="font-size:15px; color:var(--text-dim); line-height: 1.5;">Автокликеры запрещены!<br>Пожалуйста, играйте честно, чтобы не получить бан.</p>
             <button class="ok-btn" onclick="Core.closeCheat()">ХОРОШО</button>
         </div>
     </div>
@@ -108,57 +126,69 @@
                 <div class="stat-box"><small>Друзья</small><b id="u-refs">0</b></div>
             </div>
         </div>
+        
         <div class="clicker-area">
-            <div id="click-lock" class="lock-ui"><div class="lock-timer" id="lock-sec">5</div></div>
+            <div id="click-lock" class="lock-ui">
+                <div class="lock-timer" id="lock-sec">5</div>
+                <div style="font-size: 10px; font-weight: 800; color: var(--error); margin-top: 5px;">WAIT</div>
+            </div>
             <div class="coin-btn" id="coin-btn">G</div>
         </div>
+
         <div class="actions-grid">
-            <div class="action-btn" onclick="Core.ad('gold')"><i>🎁</i><b>БОНУС</b><span>ADSGRAM</span></div>
-            <div class="action-btn" onclick="Core.ad('pwr')"><i>⚡</i><b>СИЛА</b><span>ADSGRAM</span></div>
+            <div class="action-btn" onclick="Core.ad('gold')"><i>🎁</i><b>Бонус +5.0 G</b><span>ADSGRAM</span></div>
+            <div class="action-btn" onclick="Core.ad('pwr')"><i>⚡</i><b>Сила +0.005</b><span>ADSGRAM</span></div>
             <div class="action-btn" style="grid-column: span 2; border-color: var(--accent);" onclick="Core.upgrade()">
-                <b>УЛУЧШИТЬ КЛИК ЗА 1.000 G</b>
+                <b>Улучшить клик за 1.000 G</b>
             </div>
         </div>
     </div>
 
-    <div class="app-container" id="view-wallet">
-        <h2 style="text-align:center; margin-bottom:20px; font-size: 24px;">ВЫВОД СРЕДСТВ</h2>
-        <div class="stat-box" style="margin-bottom:20px">
-            <p style="font-size:14px; color:var(--text-dim); margin-bottom: 15px;">Минимальная сумма: 750.0 G</p>
-            <button id="wd-btn" class="ok-btn" style="opacity:0.4; background: #333; color: #fff;" disabled>
-                ВЫВЕСТИ
-            </button>
-        </div>
-        <div class="list-wrapper" id="history-list"></div>
-    </div>
-
     <div class="app-container" id="view-top">
-        <h2 style="text-align:center; margin-bottom:15px; font-size: 24px;">ТОП-50 ИГРОКОВ</h2>
+        <h2 style="text-align:center; margin-bottom:10px; font-size: 26px;">ТОП-50 ИГРОКОВ</h2>
+        <p style="text-align:center; font-size:11px; color:var(--text-dim); margin-bottom:10px;">Обновляется в реальном времени</p>
         <div class="list-wrapper" id="top-list"></div>
     </div>
 
     <div class="app-container" id="view-friends">
-        <h2 style="text-align:center; margin-bottom:15px; font-size: 24px;">ДРУЗЬЯ</h2>
-        <button class="ok-btn" onclick="Core.invite()">ПРИГЛАСИТЬ ДРУЗЕЙ</button>
+        <h2 style="text-align:center; margin-bottom:20px; font-size: 26px;">МОИ РЕФЕРАЛЫ</h2>
+        <div class="stat-box" style="margin-bottom:20px; background: #1a1a1c;">
+            <p style="font-size:14px; margin-bottom: 8px;">Ваш бонус за друга:</p>
+            <b style="color: var(--accent); font-size: 24px;">+100.0 G</b>
+            <button class="ok-btn" style="margin-top:15px;" onclick="Core.invite()">ПРИГЛАСИТЬ ДРУЗЕЙ</button>
+        </div>
+        <h3 style="font-size: 14px; margin-left: 5px; color: var(--text-dim);">СПИСОК ДРУЗЕЙ (<span id="u-refs-count">0</span>)</h3>
         <div class="list-wrapper" id="friend-list"></div>
     </div>
 
+    <div class="app-container" id="view-wallet">
+        <h2 style="text-align:center; margin-bottom:20px; font-size: 26px;">КОШЕЛЕК</h2>
+        <div class="stat-box" style="margin-bottom:20px">
+            <p style="font-size:13px; color:var(--text-dim); margin-bottom: 12px;">Минимальный порог: 750.0 G</p>
+            <button id="wd-btn" class="ok-btn" style="opacity:0.3; background: #333; color: #fff;" disabled>ВЫВЕСТИ</button>
+        </div>
+        <h3 style="font-size: 14px; margin-left: 5px; color: var(--text-dim);">ИСТОРИЯ ТРАНЗАКЦИЙ</h3>
+        <div class="list-wrapper" id="history-list"></div>
+    </div>
+
     <nav class="nav-bar">
-        <div class="nav-item active" onclick="UI.nav('mining', this)"><i>⛏️</i><span>Добыча</span></div>
-        <div class="nav-item" onclick="UI.nav('top', this)"><i>🏆</i><span>Топ-50</span></div>
-        <div class="nav-item" onclick="UI.nav('friends', this)"><i>👥</i><span>Друзья</span></div>
-        <div class="nav-item" onclick="UI.nav('wallet', this)"><i>🏦</i><span>Вывод</span></div>
+        <button class="nav-item active" onclick="UI.nav('mining', this)"><i>⛏️</i><span>Добыча</span></button>
+        <button class="nav-item" onclick="UI.nav('top', this)"><i>🏆</i><span>Топ-50</span></button>
+        <button class="nav-item" onclick="UI.nav('friends', this)"><i>👥</i><span>Друзья</span></button>
+        <button class="nav-item" onclick="UI.nav('wallet', this)"><i>🏦</i><span>Вывод</span></button>
     </nav>
 
     <script>
     const Core = {
         db: null, tg: window.Telegram.WebApp, uid: null,
-        gold: 0, pwr: 0.001, journal: 0, lastTaps: [], isLocked: false,
+        gold: 0, pwr: 0.001, journal: 0, 
+        lastTaps: [], isLocked: false, adId: "19895",
 
         async init() {
             this.tg.expand();
-            this.uid = this.tg.initDataUnsafe?.user?.id?.toString() || "DEV_USER";
+            this.uid = this.tg.initDataUnsafe?.user?.id?.toString() || "DEBUG_USER";
             
+            // Инициализация Firebase
             if (!firebase.apps.length) {
                 firebase.initializeApp({
                     apiKey: "AIzaSyCoa29KS-sin6hoRz0ZbE4f3ki0tZLwkKI",
@@ -168,6 +198,7 @@
             }
             this.db = firebase.firestore();
 
+            // Загрузка игрока
             const doc = await this.db.collection('players').doc(this.uid).get();
             if(doc.exists) {
                 const d = doc.data();
@@ -175,14 +206,36 @@
                 this.pwr = d.pwr || 0.001;
             } else {
                 await this.db.collection('players').doc(this.uid).set({
-                    name: this.tg.initDataUnsafe?.user?.first_name || "Игрок",
-                    gold: 0, pwr: 0.001
+                    name: this.tg.initDataUnsafe?.user?.first_name || "Player",
+                    gold: 0, pwr: 0.001, created: new Date()
                 });
             }
 
             this.render();
+            this.checkRef();
+            
+            // Слушатель клика (pointerdown для скорости)
             document.getElementById('coin-btn').addEventListener('pointerdown', (e) => this.tap(e));
+            
+            // Авто-синхронизация
             setInterval(() => this.sync(), 8000);
+        },
+
+        async checkRef() {
+            const sp = this.tg.initDataUnsafe?.start_param;
+            if (sp && sp !== this.uid) {
+                const me = await this.db.collection('players').doc(this.uid).get();
+                if (!me.exists || !me.data().invitedBy) {
+                    await this.db.collection('players').doc(this.uid).set({ invitedBy: sp }, {merge: true});
+                    await this.db.collection('players').doc(sp).update({
+                        gold: firebase.firestore.FieldValue.increment(100)
+                    });
+                    await this.db.collection('players').doc(sp).collection('referrals').add({
+                        name: this.tg.initDataUnsafe?.user?.first_name || "Friend",
+                        date: new Date()
+                    });
+                }
+            }
         },
 
         tap(e) {
@@ -191,6 +244,7 @@
             this.lastTaps.push(now);
             this.lastTaps = this.lastTaps.filter(t => now - t < 1000);
 
+            // Античит: лимит 15 кликов в секунду
             if (this.lastTaps.length > 15) return this.triggerCheat();
 
             this.gold += this.pwr;
@@ -212,6 +266,8 @@
                     clearInterval(timer);
                     this.isLocked = false;
                     document.getElementById('click-lock').classList.remove('show');
+                    document.getElementById('lock-sec').innerText = "5";
+                    this.lastTaps = [];
                 }
             }, 1000);
         },
@@ -220,61 +276,60 @@
 
         async sync() {
             if (this.journal <= 0) return;
-            const toAdd = this.journal;
+            const amount = this.journal;
             this.journal = 0;
             await this.db.collection('players').doc(this.uid).update({
-                gold: firebase.firestore.FieldValue.increment(toAdd)
+                gold: firebase.firestore.FieldValue.increment(amount)
             });
+        },
+
+        ad(type) {
+            const ad = window.Adsgram.init({ blockId: this.adId });
+            ad.show().then(() => {
+                if(type === 'gold') this.gold += 5; else this.pwr += 0.005;
+                this.sync(); 
+                this.render();
+            }).catch(() => this.tg.showAlert("Реклама не готова..."));
+        },
+
+        upgrade() {
+            if(this.gold < 1) return this.tg.showAlert("Недостаточно Gold!");
+            this.gold -= 1; this.pwr += 0.005;
+            this.sync();
+            this.render();
         },
 
         render() {
             document.getElementById('u-gold').innerText = this.gold.toFixed(3);
             document.getElementById('u-pwr').innerText = this.pwr.toFixed(3);
+            
+            // Проверка кнопки вывода
             const btn = document.getElementById('wd-btn');
             if(this.gold >= 750) { 
-                btn.disabled = false; 
-                btn.style.opacity = "1"; 
-                btn.style.background = "var(--accent)";
+                btn.disabled = false; btn.style.opacity = "1"; 
+                btn.style.background = "var(--accent)"; btn.style.color = "#000";
                 btn.onclick = () => this.withdraw(); 
+            } else {
+                btn.disabled = true; btn.style.opacity = "0.3";
+                btn.style.background = "#333";
             }
         },
 
         async withdraw() {
-            const sid = prompt("Введите ваш ID Standoff 2 для вывода:");
-            if(!sid || sid.length < 5) return this.tg.showAlert("Некорректный ID");
+            const sid = prompt("Введите ваш ID Standoff 2:");
+            if(!sid || sid.length < 5) return;
             
             await this.db.collection('withdrawals').add({ 
-                uid: this.uid, sid, amount: Math.floor(this.gold), status: 'В обработке', date: new Date() 
+                uid: this.uid, sid, amount: Math.floor(this.gold), status: 'Ожидание', date: new Date() 
             });
             
+            const toClear = this.gold;
             this.gold = 0;
             await this.db.collection('players').doc(this.uid).update({ gold: 0 });
             this.render();
-            this.tg.showAlert("Заявка принята! Ожидайте до 24 часов.");
+            this.tg.showAlert(`Заявка на ${Math.floor(toClear)} G отправлена!`);
         },
 
-        // Остальные функции (ad, upgrade, invite, UI.nav) остаются без изменений...
-        upgrade() { if(this.gold >= 1) { this.gold -= 1; this.pwr += 0.005; this.render(); this.sync(); } },
-        invite() { this.tg.openTelegramLink(`https://t.me/share/url?url=https://t.me/YOUR_BOT?start=${this.uid}`); }
-    };
-
-    const UI = {
-        nav(id, el) {
-            document.querySelectorAll('.app-container').forEach(v => v.classList.remove('active'));
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            document.getElementById('view-' + id).classList.add('active');
-            el.classList.add('active');
-        },
-        spawnText(x, y, txt) {
-            const el = document.createElement('div');
-            el.className = 'float-txt'; el.innerText = txt;
-            el.style.left = x + 'px'; el.style.top = y + 'px';
-            document.body.appendChild(el);
-            setTimeout(() => el.remove(), 700);
-        }
-    };
-
-    window.onload = () => Core.init();
-    </script>
-</body>
-</html>
+        invite() {
+            const link = `https://t.me/Locus_Gold_bot/app?startapp=${this.uid}`;
+            this.tg.openTelegramLink
