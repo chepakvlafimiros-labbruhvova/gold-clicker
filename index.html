@@ -3,236 +3,272 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Locus Gold: Syndicate</title>
+    <title>Locus Syndicate: Legend</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://sad.adsgram.ai/js/sad.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root {
-            --neon: #00f2ff;
-            --danger: #ff3b30;
-            --warning: #ffcc00;
-            --bg: #0a0a0c;
-            --card: #16161a;
-            --border: #2c2c34;
+            --neon: #00f2ff; --danger: #ff3b30; --warning: #ffcc00;
+            --bg: #0a0a0c; --card: #16161a; --border: #2c2c34;
+            --edu: #a855f7; --crime: #ff4500;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
         body { background: var(--bg); color: #fff; height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
 
         /* HUD */
-        .hud { padding: 15px 20px; background: var(--card); border-bottom: 1px solid var(--border); display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .stat-group { display: flex; flex-direction: column; gap: 5px; }
-        .stat-info { display: flex; justify-content: space-between; font-size: 10px; text-transform: uppercase; font-weight: bold; color: #8e8e93; }
-        .stat-info span.val { color: #fff; }
+        .hud { padding: 15px; background: var(--card); border-bottom: 1px solid var(--border); display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+        .stat-box { background: #000; padding: 5px; border-radius: 8px; text-align: center; border: 1px solid #222; }
+        .stat-box small { display: block; font-size: 8px; color: #8e8e93; text-transform: uppercase; }
+        .stat-box b { font-size: 12px; }
+        
+        .cash-main { grid-column: span 3; font-size: 36px; font-weight: 900; color: var(--neon); text-align: center; margin: 10px 0; }
 
-        .bar { width: 100%; height: 6px; background: #000; border-radius: 3px; overflow: hidden; }
-        .bar-f { height: 100%; transition: width 0.3s; }
-        .hp-f { background: var(--danger); }
-        .en-f { background: var(--neon); }
-        .hg-f { background: var(--warning); }
+        .progress-grid { grid-column: span 3; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .p-bar-wrap { font-size: 9px; color: #8e8e93; }
+        .p-bar { width: 100%; height: 4px; background: #000; border-radius: 2px; margin-top: 3px; overflow: hidden; }
+        .p-fill { height: 100%; transition: width 0.4s; }
 
-        .cash-display { grid-column: span 2; text-align: center; padding-top: 10px; border-top: 1px solid #222; font-size: 28px; font-weight: 900; color: var(--neon); }
-
-        /* MAIN AREA */
-        .viewport { flex: 1; overflow-y: auto; padding: 20px; }
+        /* CONTENT */
+        .viewport { flex: 1; overflow-y: auto; padding: 15px; padding-bottom: 110px; }
         .screen { display: none; }
         .screen.active { display: block; }
 
-        .card { background: var(--card); border-radius: 20px; padding: 20px; margin-bottom: 15px; border: 1px solid var(--border); position: relative; }
-        .card h3 { font-size: 18px; margin-bottom: 8px; }
-        .card p { font-size: 13px; color: #8e8e93; margin-bottom: 15px; }
+        .card { background: var(--card); border-radius: 16px; padding: 16px; margin-bottom: 12px; border: 1px solid var(--border); }
+        .card-h { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .card-h h3 { font-size: 14px; text-transform: uppercase; letter-spacing: 1px; }
 
-        .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .btn { background: #1c1c22; border: 1px solid var(--border); padding: 15px 10px; border-radius: 14px; color: #fff; text-align: center; cursor: pointer; display: flex; flex-direction: column; gap: 4px; }
-        .btn:active { transform: scale(0.96); background: #25252d; }
-        .btn b { font-size: 14px; }
-        .btn span { font-size: 9px; color: var(--neon); font-weight: bold; }
-        .btn.disabled { opacity: 0.4; pointer-events: none; }
+        .item-list { display: flex; flex-direction: column; gap: 8px; }
+        .action-row { display: flex; justify-content: space-between; align-items: center; background: #1c1c22; padding: 12px; border-radius: 12px; border: 1px solid #282830; }
+        .info b { display: block; font-size: 13px; }
+        .info span { font-size: 10px; color: var(--neon); }
+        
+        .act-btn { background: var(--neon); color: #000; border: none; padding: 8px 14px; border-radius: 8px; font-weight: 800; font-size: 11px; }
+        .act-btn:disabled { background: #333; color: #666; }
+        .act-btn.crime { background: var(--crime); color: #fff; }
 
-        /* NOTIFICATIONS */
-        #toast-container { position: fixed; top: 100px; left: 50%; transform: translateX(-50%); z-index: 1000; pointer-events: none; width: 80%; }
-        .toast { background: rgba(0, 242, 255, 0.1); border: 1px solid var(--neon); color: #fff; padding: 10px 15px; border-radius: 10px; font-size: 12px; text-align: center; margin-bottom: 5px; animation: fIn 0.3s ease, fOut 0.3s ease 2s forwards; backdrop-filter: blur(5px); }
-
-        @keyframes fIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes fOut { to { opacity: 0; transform: translateY(-10px); } }
+        /* PRISON OVERLAY */
+        #prison { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 1000; display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 30px; }
 
         /* NAV */
-        .nav { background: var(--card); border-top: 1px solid var(--border); display: flex; padding-bottom: env(safe-area-inset-bottom); }
-        .nav-item { flex: 1; padding: 12px 5px; text-align: center; color: #8e8e93; font-size: 9px; text-transform: uppercase; font-weight: 800; }
+        .nav { position: fixed; bottom: 0; width: 100%; background: var(--card); border-top: 1px solid var(--border); display: flex; padding-bottom: env(safe-area-inset-bottom); }
+        .nav-item { flex: 1; padding: 12px 0; text-align: center; color: #8e8e93; font-size: 8px; text-transform: uppercase; font-weight: 800; }
         .nav-item.active { color: var(--neon); }
-        .nav-item i { font-size: 18px; margin-bottom: 4px; display: block; }
+        .nav-item i { font-size: 20px; margin-bottom: 4px; display: block; }
     </style>
 </head>
 <body>
 
-    <div id="toast-container"></div>
+    <div id="prison">
+        <i class="fas fa-bars" style="font-size: 50px; color: var(--crime); margin-bottom: 20px;"></i>
+        <h2>ВЫ В ТЮРЬМЕ</h2>
+        <p id="prison-timer" style="font-size: 24px; margin: 20px 0;">00:00</p>
+        <p style="color: #8e8e93;">Нарушение закона привело к последствиям. Ждите окончания срока.</p>
+    </div>
 
     <div class="hud">
-        <div class="stat-group">
-            <div class="stat-info">Здоровье <span class="val" id="hp-txt">100</span></div>
-            <div class="bar"><div id="hp-bar" class="bar-f hp-f" style="width: 100%"></div></div>
+        <div class="stat-box"><small>День</small><b id="val-day">1</b></div>
+        <div class="stat-box"><small>EDU</small><b id="val-edu">0</b></div>
+        <div class="stat-box"><small>Items</small><b id="val-inv">0</b></div>
+        
+        <div class="cash-main" id="val-cash">$0</div>
+
+        <div class="progress-grid">
+            <div class="p-bar-wrap">HP <div class="p-bar"><div id="bar-hp" class="p-fill" style="background:var(--danger)"></div></div></div>
+            <div class="p-bar-wrap">EN <div class="p-bar"><div id="bar-en" class="p-fill" style="background:var(--neon)"></div></div></div>
         </div>
-        <div class="stat-group">
-            <div class="stat-info">Голод <span class="val" id="hg-txt">100</span></div>
-            <div class="bar"><div id="hg-bar" class="bar-f hg-f" style="width: 100%"></div></div>
-        </div>
-        <div class="stat-group" style="grid-column: span 2;">
-            <div class="stat-info">Энергия <span class="val" id="en-txt">100</span></div>
-            <div class="bar"><div id="en-bar" class="bar-f en-f" style="width: 100%"></div></div>
-        </div>
-        <div class="cash-display" id="cash-txt">$0</div>
     </div>
 
     <div class="viewport">
-        <div id="scr-street" class="screen active">
+        <div id="scr-life" class="screen active">
             <div class="card">
-                <h3>Трущобы Готэма</h3>
-                <p>Выживание здесь стоит дорого. Мусор — ваш единственный доход.</p>
-                <div class="btn-grid">
-                    <div class="btn" onclick="Game.action('scavenge')">
-                        <b>Мусорный бак</b>
-                        <span>-8 EN | +$1-4</span>
+                <div class="card-h"><h3>Выживание</h3></div>
+                <div class="item-list">
+                    <div class="action-row">
+                        <div class="info"><b>Сбор бутылок</b><span>+$1-5 | -10 EN</span></div>
+                        <button class="act-btn" onclick="Core.do('scavenge')">GO</button>
                     </div>
-                    <div class="btn" onclick="Game.action('beg')">
-                        <b>Просить мелочь</b>
-                        <span>-12 EN | +$0-10</span>
+                    <div class="action-row">
+                        <div class="info"><b>Сон в приюте</b><span>+70 EN | -20 Hunger</span></div>
+                        <button class="act-btn" onclick="Core.do('sleep')">REST</button>
                     </div>
                 </div>
             </div>
 
             <div class="card">
-                <h3>Магазин "24/7"</h3>
-                <div class="btn-grid">
-                    <div class="btn" onclick="Game.action('buy_bread')">
-                        <b>Хлеб ($5)</b>
-                        <span>+20 Голод</span>
+                <div class="card-h"><h3>Криминал</h3></div>
+                <div class="item-list">
+                    <div class="action-row">
+                        <div class="info"><b>Украсть кошелек</b><span>+$100 | Риск 40%</span></div>
+                        <button class="act-btn crime" onclick="Core.crime('pickpocket', 0.4, 100)">STEAL</button>
                     </div>
-                    <div class="btn" onclick="Game.action('buy_meds')">
-                        <b>Бинты ($20)</b>
-                        <span>+30 Здоровье</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card" style="border-color: var(--warning);">
-                <h3>Ночлег в подворотне</h3>
-                <p>Бесплатно, но грязно. Риск простудиться.</p>
-                <div class="btn" style="width: 100%; border-color: var(--warning);" onclick="Game.action('sleep')">
-                    <b>Уснуть на картоне</b>
-                    <span>+60 EN | -15 HG | -5 HP</span>
                 </div>
             </div>
         </div>
 
         <div id="scr-work" class="screen">
-            <h2 style="text-align:center; padding: 20px;">Работы закрыты</h2>
-            <p style="text-align:center; color:#555;">Купите чистую одежду, чтобы начать работать.</p>
+            <div class="card">
+                <div class="card-h"><h3>Университет</h3></div>
+                <div class="item-list" id="edu-list"></div>
+            </div>
+            <div class="card">
+                <div class="card-h"><h3>Вакансии</h3></div>
+                <div class="item-list" id="job-list"></div>
+            </div>
+        </div>
+
+        <div id="scr-shop" class="screen">
+            <div class="card">
+                <div class="card-h"><h3>Магазин вещей</h3></div>
+                <div class="item-list" id="shop-list"></div>
+            </div>
         </div>
     </div>
 
     <nav class="nav">
-        <div class="nav-item active" onclick="UI.nav('street', this)"><i class="fas fa-street-view"></i>Улица</div>
-        <div class="nav-item" onclick="UI.nav('work', this)"><i class="fas fa-briefcase"></i>Работа</div>
-        <div class="nav-item" onclick="Game.showAd()"><i class="fas fa-play-circle" style="color:var(--warning)"></i>Бонус</div>
+        <div class="nav-item active" onclick="UI.nav('life', this)"><i class="fas fa-user-ninja"></i>Жизнь</div>
+        <div class="nav-item" onclick="UI.nav('work', this)"><i class="fas fa-university"></i>Путь</div>
+        <div class="nav-item" onclick="UI.nav('shop', this)"><i class="fas fa-shopping-cart"></i>Шоп</div>
+        <div class="nav-item" onclick="Core.showAd()"><i class="fas fa-ad" style="color:var(--warning)"></i>Бонус</div>
     </nav>
 
     <script>
-        const Game = {
-            state: { cash: 0, hp: 100, energy: 100, hunger: 100 },
+        const Core = {
+            s: { 
+                cash: 0, hp: 100, en: 100, edu: 0, day: 1, 
+                inv: [], prison: 0, multiplier: 1, enBonus: 0 
+            },
+
+            data: {
+                jobs: [
+                    { n: 'Грузчик', p: 20, req: 0, en: 30 },
+                    { n: 'Курьер', p: 60, req: 15, en: 25 },
+                    { n: 'Офис-менеджер', p: 250, req: 80, en: 20 },
+                    { n: 'Директор', p: 1200, req: 300, en: 15 }
+                ],
+                edu: [
+                    { n: 'Школа', c: 50, v: 10 },
+                    { n: 'Колледж', c: 500, v: 50 },
+                    { n: 'МВА', c: 5000, v: 150 }
+                ],
+                items: [
+                    { n: 'Кроссовки', c: 150, b: 'en', v: 5, d: 'Экономия энергии' },
+                    { n: 'Костюм', c: 800, b: 'p', v: 1.5, d: 'x1.5 к зарплате' },
+                    { n: 'Смартфон', c: 2000, b: 'p', v: 2, d: 'x2 к зарплате' }
+                ]
+            },
 
             init() {
-                const save = localStorage.getItem('syndicate_v2');
-                if(save) this.state = JSON.parse(save);
-                this.updateUI();
-                setInterval(() => this.tick(), 10000); // Каждые 10 сек пассивный голод
+                const save = localStorage.getItem('hobo_pro_save');
+                if(save) this.s = JSON.parse(save);
+                this.update();
+                setInterval(() => this.tick(), 5000);
             },
 
             tick() {
-                this.state.hunger = Math.max(0, this.state.hunger - 1);
-                if(this.state.hunger <= 0) {
-                    this.state.hp = Math.max(0, this.state.hp - 2);
-                    this.toast("Вы умираете от голода!", true);
+                if(this.s.prison > 0) {
+                    this.s.prison--;
+                    UI.prison(this.s.prison);
+                } else {
+                    document.getElementById('prison').style.display = 'none';
                 }
-                this.updateUI();
+                this.update();
             },
 
-            action(type) {
-                switch(type) {
-                    case 'scavenge':
-                        if(this.state.energy < 8) return this.toast("Нет сил...");
-                        this.state.energy -= 8;
-                        let found = Math.floor(Math.random() * 4) + 1;
-                        if(Math.random() > 0.8) {
-                            this.state.hp -= 10;
-                            this.toast("Порезались об стекло! -10 HP", true);
-                        }
-                        this.state.cash += found;
-                        this.toast(`Найдено: $${found}`);
-                        break;
-
-                    case 'sleep':
-                        this.state.energy = Math.min(100, this.state.energy + 60);
-                        this.state.hunger = Math.max(0, this.state.hunger - 15);
-                        this.state.hp = Math.max(0, this.state.hp - 5);
-                        this.toast("Вы поспали, но проголодались и замерзли.");
-                        break;
-
-                    case 'buy_bread':
-                        if(this.state.cash < 5) return this.toast("Нет денег!");
-                        this.state.cash -= 5;
-                        this.state.hunger = Math.min(100, this.state.hunger + 20);
-                        this.toast("Хлеб съеден.");
-                        break;
-
-                    case 'buy_meds':
-                        if(this.state.cash < 20) return this.toast("Нет денег!");
-                        this.state.cash -= 20;
-                        this.state.hp = Math.min(100, this.state.hp + 30);
-                        this.toast("Раны обработаны.");
-                        break;
+            do(act) {
+                if(this.s.prison > 0) return;
+                if(act === 'scavenge') {
+                    if(this.s.en < 10) return;
+                    this.s.en -= 10; this.s.cash += (Math.floor(Math.random()*5)+1) * this.s.multiplier;
                 }
-                this.save();
-                this.updateUI();
+                if(act === 'sleep') {
+                    this.s.en = Math.min(100, this.s.en + 70);
+                    this.s.day++;
+                    this.s.hp = Math.max(0, this.s.hp - 2);
+                }
+                this.update(); this.save();
             },
 
-            updateUI() {
-                document.getElementById('cash-txt').innerText = `$${this.state.cash}`;
-                document.getElementById('hp-bar').style.width = this.state.hp + '%';
-                document.getElementById('en-bar').style.width = this.state.energy + '%';
-                document.getElementById('hg-bar').style.width = this.state.hunger + '%';
-                document.getElementById('hp-txt').innerText = this.state.hp;
-                document.getElementById('en-txt').innerText = Math.floor(this.state.energy);
-                document.getElementById('hg-txt').innerText = this.state.hunger;
+            crime(id, risk, reward) {
+                if(Math.random() < risk) {
+                    this.s.prison = 30; // 30 секунд тюрьмы
+                    UI.prison(30);
+                } else {
+                    this.s.cash += reward;
+                }
+                this.s.en = Math.max(0, this.s.en - 20);
+                this.update(); this.save();
+            },
 
-                if(this.state.hp <= 0) {
-                    alert("Вы погибли в трущобах...");
-                    this.state = { cash: 0, hp: 100, energy: 100, hunger: 100 };
-                    this.save();
-                    location.reload();
+            buy(type, idx) {
+                const item = this.data[type][idx];
+                const cost = item.c;
+                if(this.s.cash >= cost) {
+                    this.s.cash -= cost;
+                    if(type === 'edu') this.s.edu += item.v;
+                    if(type === 'items') {
+                        this.s.inv.push(item.n);
+                        if(item.b === 'p') this.s.multiplier *= item.v;
+                        if(item.b === 'en') this.s.enBonus += item.v;
+                    }
+                    this.update(); this.save();
                 }
             },
 
-            toast(msg, critical = false) {
-                const c = document.getElementById('toast-container');
-                const t = document.createElement('div');
-                t.className = 'toast';
-                if(critical) t.style.borderColor = 'var(--danger)';
-                t.innerText = msg;
-                c.appendChild(t);
-                setTimeout(() => t.remove(), 2300);
+            work(idx) {
+                const j = this.data.jobs[idx];
+                let energyCost = j.en - this.s.enBonus;
+                if(this.s.en >= energyCost) {
+                    this.s.en -= energyCost;
+                    this.s.cash += j.p * this.s.multiplier;
+                    this.update(); this.save();
+                }
             },
 
-            save() { localStorage.setItem('syndicate_v2', JSON.stringify(this.state)); },
+            update() {
+                document.getElementById('val-cash').innerText = `$${Math.floor(this.s.cash).toLocaleString()}`;
+                document.getElementById('val-day').innerText = this.s.day;
+                document.getElementById('val-edu').innerText = this.s.edu;
+                document.getElementById('val-inv').innerText = this.s.inv.length;
+                document.getElementById('bar-hp').style.width = this.s.hp + '%';
+                document.getElementById('bar-en').style.width = this.s.en + '%';
 
-            showAd() {
-                if(typeof Adsgram === 'undefined') return this.toast("Реклама недоступна");
-                const ad = Adsgram.init({ blockId: "19895" });
-                ad.show().then(() => {
-                    this.state.cash += 50;
-                    this.updateUI();
-                    this.toast("Спонсор прислал вам $50!");
+                // Рендер списков
+                this.renderList('edu-list', this.data.edu, 'edu');
+                this.renderList('job-list', this.data.jobs, 'job');
+                this.renderList('shop-list', this.data.items, 'items');
+
+                if(this.s.hp <= 0) { alert("Вы умерли от старости и лишений..."); this.reset(); }
+            },
+
+            renderList(id, arr, type) {
+                const el = document.getElementById(id);
+                el.innerHTML = '';
+                arr.forEach((item, i) => {
+                    let locked = false;
+                    if(type === 'job' && this.s.edu < item.req) locked = true;
+                    if(type === 'items' && this.s.inv.includes(item.n)) return;
+
+                    el.innerHTML += `
+                        <div class="action-row ${locked ? 'locked' : ''}">
+                            <div class="info">
+                                <b>${item.n}</b>
+                                <span>${type === 'job' ? '+$'+item.p : '$'+item.c} | ${item.req !== undefined ? 'EDU:'+item.req : item.d || ''}</span>
+                            </div>
+                            <button class="act-btn" ${locked ? 'disabled' : ''} onclick="Core.${type==='job'?'work':'buy'}('${type}', ${i})">
+                                ${type === 'job' ? 'WORK' : 'BUY'}
+                            </button>
+                        </div>
+                    `;
                 });
+            },
+
+            save() { localStorage.setItem('hobo_pro_save', JSON.stringify(this.s)); },
+            reset() { this.s = {cash:0, hp:100, en:100, edu:0, day:1, inv:[], prison:0, multiplier:1, enBonus:0}; this.save(); location.reload(); },
+            showAd() { 
+                const ad = Adsgram.init({ blockId: "19895" });
+                ad.show().then(() => { this.s.cash += 1000; this.update(); }); 
             }
         };
 
@@ -242,10 +278,15 @@
                 document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
                 document.getElementById('scr-' + id).classList.add('active');
                 el.classList.add('active');
+            },
+            prison(sec) {
+                const el = document.getElementById('prison');
+                el.style.display = 'flex';
+                document.getElementById('prison-timer').innerText = `00:${sec < 10 ? '0'+sec : sec}`;
             }
         };
 
-        window.onload = () => Game.init();
+        window.onload = () => Core.init();
     </script>
 </body>
 </html>
