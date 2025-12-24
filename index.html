@@ -13,50 +13,48 @@
         body {
             margin: 0; padding: 0; background-color: #000; color: #fff;
             font-family: 'Roboto', sans-serif; display: flex; flex-direction: column; height: 100vh;
+            /* Убираем выделение и синеву */
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+            -webkit-user-select: none;
         }
         .page { display: none; flex-direction: column; align-items: center; width: 100%; flex-grow: 1; padding-bottom: 80px; }
         .page.active { display: flex; }
 
-        /* Дизайн счета как на скрине */
         .score-container {
             margin: 20px 0; width: 90%; background: #1a1a1a;
             border: 1px solid #333; border-radius: 20px; padding: 25px 0;
-            text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            text-align: center;
         }
-        .score-label { font-size: 14px; color: #888; text-transform: uppercase; margin-bottom: 5px; }
-        #gold-display { font-size: 64px; font-weight: 900; color: #ffca28; margin: 0; text-shadow: 0 0 20px rgba(255,202,40,0.3); }
+        #gold-display { font-size: 64px; font-weight: 900; color: #ffca28; margin: 0; }
 
-        /* Кнопка-монета */
         .coin-section { flex-grow: 1; display: flex; align-items: center; justify-content: center; }
+        
+        /* Исправленная кнопка без синевы */
         #click-btn {
             width: 240px; height: 240px; background: #ffca28; border-radius: 50%;
             border: 8px solid #b8860b; font-size: 100px; font-weight: bold; color: #000;
-            cursor: pointer; box-shadow: 0 0 50px rgba(255, 202, 40, 0.4); transition: transform 0.05s;
+            cursor: pointer; outline: none;
+            -webkit-tap-highlight-color: transparent;
+            box-shadow: 0 0 50px rgba(255, 202, 40, 0.4); 
+            transition: transform 0.05s;
             display: flex; align-items: center; justify-content: center;
         }
         #click-btn:active { transform: scale(0.92); }
 
-        /* Кнопки действий */
         .actions { width: 90%; display: flex; flex-direction: column; gap: 12px; margin: 20px 0; }
-        .btn { 
-            padding: 18px; border-radius: 15px; border: none; font-weight: bold; 
-            font-size: 16px; cursor: pointer; color: #fff; display: flex; align-items: center; justify-content: center; gap: 10px;
-        }
-        .btn-ad { background: #2ecc71; } /* Зеленая как на скрине */
-        .btn-upgrade { background: #3498db; } /* Синяя */
-        .btn-withdraw { background: #444; color: #888; cursor: not-allowed; }
-        .btn-withdraw.active { background: #e67e22; color: #fff; cursor: pointer; }
+        .btn { padding: 18px; border-radius: 15px; border: none; font-weight: bold; font-size: 16px; color: #fff; }
+        .btn-ad { background: #2ecc71; }
+        .btn-upgrade { background: #3498db; }
 
-        /* Навигация */
         .tab-bar { position: fixed; bottom: 0; width: 100%; display: flex; background: #111; border-top: 1px solid #222; }
-        .tab { flex: 1; padding: 20px 0; text-align: center; font-size: 12px; color: #555; font-weight: bold; }
+        .tab { flex: 1; padding: 20px 0; text-align: center; font-size: 12px; color: #555; }
         .tab.active { color: #ffca28; border-top: 2px solid #ffca28; }
     </style>
 </head>
 <body>
 
     <div class="score-container">
-        <div class="score-label">ВАШЕ ЗОЛОТО</div>
         <div id="gold-display">0</div>
     </div>
 
@@ -65,25 +63,15 @@
             <button id="click-btn">G</button>
         </div>
         <div class="actions">
-            <button class="btn btn-ad" onclick="showRewardedAd()">📺 +10.000 G (БОНУС)</button>
-            <button class="btn btn-upgrade" onclick="buyUpgrade()">🚀 +0.001 К КЛИКУ</button>
+            <button class="btn btn-ad" onclick="showRewardedAd()">📺 +10 G (РЕКЛАМА)</button>
         </div>
-    </div>
-
-    <div id="page-withdraw" class="page">
-        <div class="actions" style="margin-top: 50px;">
-            <button id="withdraw-btn" class="btn btn-withdraw" onclick="requestWithdraw()">💸 ВЫВЕСТИ (МИН. 750)</button>
-        </div>
-        <p style="color: #666; font-size: 12px; text-align: center; width: 80%;">Вывод доступен при достижении 750 золота.</p>
     </div>
 
     <div class="tab-bar">
-        <div class="tab active" onclick="showPage('main', this)">ГЛАВНАЯ</div>
-        <div class="tab" onclick="showPage('withdraw', this)">ВЫВОД</div>
+        <div class="tab active">ГЛАВНАЯ</div>
     </div>
 
     <script>
-        // Конфиг Firebase из твоих скринов
         const firebaseConfig = {
             apiKey: "AIzaSyCoa29KS-sin6hoRz0ZbE4f3ki0tZLwkKI",
             authDomain: "gold-clicker-5d882.firebaseapp.com",
@@ -97,90 +85,47 @@
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        // Инициализация AdsGram с твоим ID
-        const AdController = window.Adsgram.init({ blockId: "19883" });
-
+        const AdController = window.Adsgram ? window.Adsgram.init({ blockId: "19883" }) : null;
         const userId = tg.initDataUnsafe?.user?.id ? tg.initDataUnsafe.user.id.toString() : "5223115893";
         const playerRef = db.collection('players').doc(userId);
 
         let gold = 0;
-        let clickPower = 1;
 
         async function init() {
             const doc = await playerRef.get();
             if (doc.exists) {
-                const data = doc.data();
-                gold = Number(data.gold) || 0;
-                clickPower = data.clickPower || 1;
+                gold = Number(doc.data().gold) || 0;
+            } else {
+                await playerRef.set({ gold: 0 });
             }
             updateUI();
         }
 
         function updateUI() {
             document.getElementById('gold-display').innerText = Math.floor(gold);
-            const wBtn = document.getElementById('withdraw-btn');
-            if (gold >= 750) {
-                wBtn.classList.add('active');
-            } else {
-                wBtn.classList.remove('active');
-            }
         }
 
-        // Логика клика
-        document.getElementById('click-btn').addEventListener('click', () => {
-            gold += clickPower;
+        // Клик теперь работает мгновенно
+        document.getElementById('click-btn').addEventListener('click', (e) => {
+            e.preventDefault(); // Защита от системных жестов
+            gold++;
             updateUI();
-            playerRef.update({ gold: gold });
-            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
+            playerRef.update({ gold: gold }).catch(err => console.error("Ошибка базы:", err));
+            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
         });
 
-        // Функция показа рекламы
         async function showRewardedAd() {
-            try {
-                const result = await AdController.show();
-                // Если пользователь досмотрел рекламу
+            if (!AdController) return tg.showAlert("Рекламный модуль не загружен");
+            
+            AdController.show().then(() => {
                 gold += 10;
                 updateUI();
                 playerRef.update({ gold: gold });
-                tg.showAlert("Поздравляем! Вы получили 10 золотых!");
-            } catch (error) {
-                // Если реклама не загрузилась или была пропущена
-                console.error(error);
-                tg.showAlert("Реклама пока недоступна или была пропущена.");
-            }
-        }
-
-        function buyUpgrade() {
-            if (gold >= 100) {
-                gold -= 100;
-                clickPower += 0.5;
-                updateUI();
-                playerRef.update({ gold: gold, clickPower: clickPower });
-                tg.showAlert("Улучшение куплено!");
-            } else {
-                tg.showAlert("Нужно 100 золота для улучшения.");
-            }
-        }
-
-        function requestWithdraw() {
-            if (gold < 750) return;
-            const wallet = prompt("Введите ваш кошелек:");
-            if (wallet) {
-                db.collection('withdrawals').add({
-                    userId, wallet, amount: gold, status: 'pending', date: new Date().toISOString()
-                });
-                gold = 0;
-                playerRef.update({ gold: 0 });
-                updateUI();
-                tg.showAlert("Заявка на вывод создана!");
-            }
-        }
-
-        function showPage(pageId, el) {
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.getElementById('page-' + pageId).classList.add('active');
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            el.classList.add('active');
+                tg.showAlert("Вы получили бонус!");
+            }).catch((err) => {
+                console.log("Ad error:", err);
+                tg.showAlert("Реклама пока не готова. Попробуйте позже.");
+            });
         }
 
         init();
