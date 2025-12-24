@@ -1,221 +1,334 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Locus Space Evolution</title>
+    <title>Nebula: Zero | Galactic Command</title>
     
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
     <script src="https://sad.adsgram.ai/js/sad.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
     <style>
         :root {
-            --bg: #0a0a0b;
-            --surface: #161618;
-            --accent: #00d2ff; /* Сменили агрессивный оранжевый на технологичный голубой */
-            --error: #ff3b30;
-            --text-dim: #8e8e93;
-            --safe-bottom: env(safe-area-inset-bottom);
+            --neon: #00f2ff;
+            --bg-deep: #020205;
+            --panel: rgba(18, 18, 26, 0.95);
+            --border: #1f1f2e;
+            --gold: #ffcc00;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
-        body { background: var(--bg); color: #fff; height: 100vh; overflow: hidden; position: fixed; width: 100%; display: flex; flex-direction: column; }
-
-        .screen { position: absolute; inset: 0; display: none; flex-direction: column; padding: 20px 20px calc(80px + var(--safe-bottom)); overflow-y: auto; }
-        .screen.active { display: flex; }
-
-        /* HEADER */
-        .gold-header { text-align: center; margin-top: 10px; }
-        .gold-count { font-size: 48px; font-weight: 900; color: #fff; text-shadow: 0 0 20px rgba(0,210,255,0.3); }
-        .gold-label { font-size: 12px; color: var(--accent); letter-spacing: 2px; text-transform: uppercase; font-weight: 800; }
-
-        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 25px 0; }
-        .stat-card { background: var(--surface); border-radius: 16px; padding: 12px; text-align: center; border: 1px solid #2c2c2e; }
-        .stat-card span { display: block; color: var(--text-dim); font-size: 9px; font-weight: 800; text-transform: uppercase; }
-        .stat-card b { font-size: 16px; color: #fff; }
-
-        /* COIN / OBJECT */
-        .click-area { flex: 1; display: flex; align-items: center; justify-content: center; }
-        .coin {
-            width: 200px; height: 200px; border-radius: 40px; /* Квадрат со скруглениями выглядит более современно */
-            background: linear-gradient(135deg, #00d2ff, #3a7bd5);
-            box-shadow: 0 0 50px rgba(0, 210, 255, 0.2);
-            display: flex; align-items: center; justify-content: center;
-            transition: transform 0.05s; cursor: pointer;
-        }
-        .coin:active { transform: scale(0.95); }
-        .coin i { font-size: 80px; font-style: normal; }
-
-        /* BUTTONS */
-        .action-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .btn-act { background: var(--surface); border: 1px solid #333; border-radius: 16px; padding: 15px 5px; text-align: center; }
-        .btn-act b { display: block; font-size: 13px; color: #fff; }
-        .btn-act small { color: var(--accent); font-size: 9px; font-weight: 700; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Orbitron', sans-serif; -webkit-tap-highlight-color: transparent; }
         
-        .btn-upg { grid-column: span 2; background: linear-gradient(90deg, #1a1a1c, #252528); border: 1px solid var(--accent); }
+        body { 
+            background: var(--bg-deep); 
+            color: #fff; 
+            height: 100vh; 
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
 
-        /* NAVIGATION */
-        .nav { position: fixed; bottom: 0; width: 100%; height: calc(70px + var(--safe-bottom)); background: #000; border-top: 1px solid #222; display: flex; padding-bottom: var(--safe-bottom); }
-        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-dim); text-decoration: none; opacity: 0.6; }
-        .nav-item.active { color: var(--accent); opacity: 1; }
-        .nav-item i { font-size: 20px; margin-bottom: 4px; font-style: normal; }
-        .nav-item span { font-size: 9px; font-weight: 700; }
+        /* CANVAS BACKGROUND */
+        #space-canvas {
+            position: fixed;
+            top: 0; left: 0;
+            z-index: -1;
+        }
 
-        .list-item { background: var(--surface); padding: 15px; border-radius: 14px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+        /* TOP HUD */
+        .hud {
+            padding: 20px;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .res-group { display: flex; gap: 15px; }
+        .res-item { text-align: center; }
+        .res-item i { color: var(--neon); font-size: 14px; display: block; }
+        .res-item span { font-size: 12px; font-weight: bold; }
+
+        /* MAIN INTERFACE */
+        .main-container {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            mask-image: linear-gradient(to bottom, black 90%, transparent 100%);
+        }
+
+        .screen { display: none; animation: fadeIn 0.4s ease; }
+        .screen.active { display: block; }
+
+        /* MODULE CARDS */
+        .card {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 2px; height: 100%;
+            background: var(--neon);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: #111;
+            margin-top: 10px;
+            border-radius: 2px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--neon);
+            width: 0%;
+            transition: width 0.3s;
+        }
+
+        /* NAVIGATION CUSTOM */
+        .nav-bar {
+            background: var(--panel);
+            border-top: 1px solid var(--border);
+            display: flex;
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+
+        .nav-btn {
+            flex: 1;
+            padding: 15px 5px;
+            text-align: center;
+            color: var(--dim);
+            font-size: 11px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .nav-btn.active { color: var(--neon); box-shadow: inset 0 2px 0 var(--neon); }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* TABS INSIDE SCREENS */
+        .sub-nav { display: flex; gap: 10px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 5px; }
+        .sub-btn { 
+            padding: 8px 16px; background: #1a1a24; border: 1px solid var(--border); 
+            border-radius: 20px; font-size: 10px; white-space: nowrap; 
+        }
+
     </style>
 </head>
 <body>
 
-    <div class="screen active" id="scr-main">
-        <div class="gold-header">
-            <div class="gold-count" id="gold-val">0</div>
-            <div class="gold-label">XP POINTS</div>
+    <canvas id="space-canvas"></canvas>
+
+    <div class="hud">
+        <div class="res-group">
+            <div class="res-item"><i class="fas fa-atom"></i><span id="res-matter">0</span></div>
+            <div class="res-item"><i class="fas fa-bolt"></i><span id="res-energy">0</span></div>
         </div>
-        <div class="stats-grid">
-            <div class="stat-card"><span>POWER</span><b id="pwr-val">1</b></div>
-            <div class="stat-card"><span>LEVEL</span><b id="lvl-val">1</b></div>
+        <div class="rank-info">
+            <small style="color:var(--neon)">LEVEL</small>
+            <b id="player-lvl">1</b>
         </div>
-        <div class="click-area"><div class="coin" id="coin-btn"><i>💎</i></div></div>
-        <div class="action-btns">
-            <div class="btn-act" onclick="Game.showAd('gold')"><b>FREE BOOST</b><small>WATCH AD</small></div>
-            <div class="btn-act" onclick="Game.showAd('pwr')"><b>EVOLVE</b><small>WATCH AD</small></div>
-            <div class="btn-act btn-upg" id="upg-btn" onclick="Game.upgrade()">
-                <b id="upg-txt">UPGRADE (10 XP)</b>
-                <small>INCREASE CLICK POWER</small>
+    </div>
+
+    <div class="main-container">
+        
+        <div id="scr-command" class="screen active">
+            <div class="card" id="central-reactor" onclick="Engine.tap()">
+                <h3>CENTRAL REACTOR</h3>
+                <p style="font-size: 11px; color: #888;">Tap to catalyze dark matter</p>
+                <div class="progress-bar"><div class="progress-fill" id="energy-bar"></div></div>
             </div>
+
+            <div id="automated-modules">
+                </div>
         </div>
-    </div>
 
-    <div class="screen" id="scr-wallet">
-        <h2 style="text-align:center; margin-bottom:20px;">INVENTORY</h2>
-        <div class="stat-card" style="margin-bottom:25px; padding: 25px;">
-            <p style="font-size: 12px; color: var(--text-dim);">Collect 10,000 XP to unlock special rewards and mystery boxes.</p>
-            <div style="height: 10px; background: #000; border-radius: 5px; margin: 15px 0; overflow: hidden;">
-                <div id="progress-bar" style="width: 0%; height: 100%; background: var(--accent);"></div>
-            </div>
-            <button class="btn-act" id="wd-btn" style="width:100%; background:#333; color:#aaa; border:none;" onclick="Game.withdraw()">UNLOCK REWARD</button>
+        <div id="scr-tech" class="screen">
+            <h3>TECHNOLOGY TREE</h3>
+            <div id="tech-tree"></div>
         </div>
-        <div id="history-list"></div>
+
+        <div id="scr-fleet" class="screen">
+            <h3>GALACTIC EXPEDITIONS</h3>
+            <div id="mission-list"></div>
+        </div>
+
     </div>
 
-    <div class="screen" id="scr-top"><h2 style="text-align:center; margin-bottom:20px;">GLOBAL RANKING</h2><div id="top-list"></div></div>
-    
-    <div class="screen" id="scr-ref">
-        <h2 style="text-align:center; margin-bottom:20px;">COMMUNITY</h2>
-        <p style="text-align: center; color: var(--text-dim); margin-bottom: 20px; font-size: 13px;">Invite friends to grow your network and earn 10% of their activity.</p>
-        <button class="btn-act btn-upg" style="width:100%;" onclick="Game.invite()"><b>INVITE FRIEND</b></button>
+    <div class="nav-bar">
+        <div class="nav-btn active" onclick="UI.navigate('command', this)"><i class="fas fa-microchip"></i><br>Base</div>
+        <div class="nav-btn" onclick="UI.navigate('tech', this)"><i class="fas fa-flask"></i><br>Tech</div>
+        <div class="nav-btn" onclick="UI.navigate('fleet', this)"><i class="fas fa-rocket"></i><br>Fleet</div>
+        <div class="nav-btn" onclick="UI.navigate('market', this)"><i class="fas fa-box"></i><br>Market</div>
     </div>
-
-    <nav class="nav">
-        <div class="nav-item active" onclick="UI.nav('main', this)"><i>⚡</i><span>Main</span></div>
-        <div class="nav-item" onclick="UI.nav('top', this)"><i>🏆</i><span>Top</span></div>
-        <div class="nav-item" onclick="UI.nav('ref', this)"><i>🤝</i><span>Social</span></div>
-        <div class="nav-item" onclick="UI.nav('wallet', this)"><i>📦</i><span>Rewards</span></div>
-    </nav>
 
     <script>
-    // Замените эти данные на ваши рабочие ключи Firebase
-    const Game = {
-        db: null, tg: window.Telegram.WebApp, uid: null,
-        data: { gold: 0, pwr: 1, upg: 0, name: 'Explorer' },
-        
-        async init() {
-            this.tg.expand();
-            this.uid = this.tg.initDataUnsafe?.user?.id?.toString() || "DEV_USER";
-            
-            firebase.initializeApp({
-                apiKey: "AIzaSyCoa29KS-sin6hoRz0ZbE4f3ki0tZLwkKI",
-                projectId: "gold-clicker-5d882",
-                appId: "1:83489312782:web:ee5b7bdc390e53e7dd6c5f"
-            });
-            this.db = firebase.firestore();
+        /**
+         * GLOBAL GAME ENGINE - NEBULA: ZERO
+         * Краткая документация:
+         * 1. Engine - логика ресурсов и тиков.
+         * 2. ResearchManager - дерево технологий.
+         * 3. ExpeditionSystem - механика миссий.
+         * 4. RenderCore - отрисовка Canvas.
+         */
 
-            const doc = await this.db.collection('players').doc(this.uid).get();
-            if(doc.exists) this.data = doc.data();
-            else this.saveCloud();
+        const Engine = {
+            state: {
+                matter: 0,
+                energy: 100,
+                maxEnergy: 100,
+                level: 1,
+                exp: 0,
+                lastTick: Date.now(),
+                modules: [
+                    { id: 'miner', name: 'Nano Miner', count: 0, baseCost: 15, power: 0.5 },
+                    { id: 'bot', name: 'Logic Drone', count: 0, baseCost: 100, power: 2.5 }
+                ]
+            },
 
-            this.render();
-            document.getElementById('coin-btn').onclick = (e) => this.tap(e);
-            setInterval(() => this.saveCloud(), 15000);
-        },
+            init() {
+                this.load();
+                this.startLoops();
+                UI.renderModules();
+                RenderCore.init();
+            },
 
-        tap(e) {
-            this.data.gold += this.data.pwr;
-            this.render();
-            if(this.tg.HapticFeedback) this.tg.HapticFeedback.impactOccurred('light');
-        },
+            tap() {
+                this.state.matter += 1;
+                this.state.exp += 0.1;
+                this.checkLevel();
+                UI.updateHUD();
+                Telegram.WebApp.HapticFeedback.impactOccurred('medium');
+            },
 
-        getPrice() { return Math.floor(10 * Math.pow(1.5, this.data.upg)); },
+            checkLevel() {
+                const nextLevel = this.state.level * 100;
+                if(this.state.exp >= nextLevel) {
+                    this.state.level++;
+                    Telegram.WebApp.showAlert(`Level Up! Current Rank: ${this.state.level}`);
+                }
+            },
 
-        upgrade() {
-            const p = this.getPrice();
-            if(this.data.gold < p) return;
-            this.data.gold -= p;
-            this.data.pwr += 1;
-            this.data.upg++;
-            this.render();
-            this.saveCloud();
-        },
+            startLoops() {
+                // Основной цикл 60 FPS для Canvas
+                const loop = () => {
+                    RenderCore.draw();
+                    requestAnimationFrame(loop);
+                };
+                loop();
 
-        async saveCloud() {
-            await this.db.collection('players').doc(this.uid).set(this.data, {merge: true});
-        },
+                // Экономический тик (1 секунда)
+                setInterval(() => {
+                    this.processEconomy();
+                }, 1000);
+            },
 
-        render() {
-            document.getElementById('gold-val').innerText = Math.floor(this.data.gold).toLocaleString();
-            document.getElementById('pwr-val').innerText = this.data.pwr;
-            document.getElementById('upg-txt').innerText = `UPGRADE (${this.getPrice()} XP)`;
-            
-            const prog = Math.min((this.data.gold / 10000) * 100, 100);
-            document.getElementById('progress-bar').style.width = prog + '%';
-        },
+            processEconomy() {
+                let production = 0;
+                this.state.modules.forEach(m => {
+                    production += m.count * m.power;
+                });
+                this.state.matter += production;
+                UI.updateHUD();
+            },
 
-        async withdraw() {
-            // Убрали Standoff 2 ID. Теперь это просто "Claim".
-            if(this.data.gold < 10000) return this.tg.showAlert("Collect 10,000 XP first!");
-            this.tg.showAlert("Success! Our team will verify your progress within 48 hours.");
-        },
+            buyModule(id) {
+                const mod = this.state.modules.find(m => m.id === id);
+                const cost = Math.floor(mod.baseCost * Math.pow(1.15, mod.count));
+                
+                if(this.state.matter >= cost) {
+                    this.state.matter -= cost;
+                    mod.count++;
+                    UI.renderModules();
+                    UI.updateHUD();
+                }
+            },
 
-        async loadTop() {
-            const list = document.getElementById('top-list');
-            list.innerHTML = "Loading...";
-            const snap = await this.db.collection('players').orderBy('gold', 'desc').limit(20).get();
-            list.innerHTML = "";
-            snap.forEach(doc => {
-                const d = doc.data();
-                list.innerHTML += `<div class="list-item"><span>${d.name || 'User'}</span><b>${Math.floor(d.gold)}</b></div>`;
-            });
-        },
+            save() {
+                localStorage.setItem('nebula_zero_state', JSON.stringify(this.state));
+            },
 
-        showAd(type) {
-            // Для модерации лучше использовать тестовый блок или быть уверенным, что Adsgram не забанил домен
-            if(typeof Adsgram === 'undefined') return alert("Ad Blocked");
-            const ad = Adsgram.init({ blockId: "19895" });
-            ad.show().then(() => {
-                if(type === 'gold') this.data.gold += 500; else this.data.pwr += 5;
-                this.render(); this.saveCloud();
-            }).catch(() => {});
-        },
+            load() {
+                const data = localStorage.getItem('nebula_zero_state');
+                if(data) this.state = Object.assign(this.state, JSON.parse(data));
+            }
+        };
 
-        invite() {
-            const link = `https://t.me/Locus_Gold_bot/app?startapp=${this.uid}`;
-            this.tg.openTelegramLink(`https://t.me/share/url?url=${link}&text=Join my mining team!`);
-        }
-    };
+        const UI = {
+            navigate(screenId, btn) {
+                document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+                document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+                document.getElementById('scr-' + screenId).classList.add('active');
+                btn.classList.add('active');
+            },
 
-    const UI = {
-        nav(id, el) {
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            document.getElementById('scr-' + id).classList.add('active');
-            el.classList.add('active');
-            if(id === 'top') Game.loadTop();
-        }
-    };
+            updateHUD() {
+                document.getElementById('res-matter').innerText = Math.floor(Engine.state.matter);
+                document.getElementById('res-energy').innerText = Math.floor(Engine.state.energy);
+                document.getElementById('player-lvl').innerText = Engine.state.level;
+            },
 
-    window.onload = () => Game.init();
+            renderModules() {
+                const container = document.getElementById('automated-modules');
+                container.innerHTML = '';
+                Engine.state.modules.forEach(m => {
+                    const cost = Math.floor(m.baseCost * Math.pow(1.15, m.count));
+                    container.innerHTML += `
+                        <div class="card">
+                            <div style="display:flex; justify-content:space-between">
+                                <b>${m.name} [v.${m.count}]</b>
+                                <button class="sub-btn" onclick="Engine.buyModule('${m.id}')">UPGRADE (${cost})</button>
+                            </div>
+                            <small style="color:#666">Produces ${m.power} matter/s</small>
+                        </div>
+                    `;
+                });
+            }
+        };
+
+        const RenderCore = {
+            canvas: null, ctx: null, stars: [],
+            init() {
+                this.canvas = document.getElementById('space-canvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.resize();
+                window.onresize = () => this.resize();
+                for(let i=0; i<100; i++) this.stars.push({
+                    x: Math.random() * this.canvas.width,
+                    y: Math.random() * this.canvas.height,
+                    s: Math.random() * 2
+                });
+            },
+            resize() {
+                this.canvas.width = window.innerWidth;
+                this.canvas.height = window.innerHeight;
+            },
+            draw() {
+                this.ctx.fillStyle = '#020205';
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                this.ctx.fillStyle = '#fff';
+                this.stars.forEach(s => {
+                    this.ctx.beginPath();
+                    this.ctx.arc(s.x, s.y, s.s, 0, Math.PI*2);
+                    this.ctx.fill();
+                    s.y += 0.2;
+                    if(s.y > this.canvas.height) s.y = 0;
+                });
+            }
+        };
+
+        window.onload = () => Engine.init();
     </script>
 </body>
 </html>
