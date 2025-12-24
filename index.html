@@ -20,206 +20,190 @@
             --text-dim: #8e8e93;
             --success: #32d74b;
             --error: #ff453a;
-            --nav-height: 80px;
+            --nav-height: 85px;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', -apple-system, sans-serif; -webkit-tap-highlight-color: transparent; }
         
         body { 
-            background-color: var(--bg); 
-            color: var(--text-main); 
-            height: 100vh; 
-            overflow: hidden; 
-            display: flex; 
-            flex-direction: column;
-            user-select: none;
-            -webkit-user-select: none;
+            background-color: var(--bg); color: var(--text-main); height: 100vh; 
+            overflow: hidden; display: flex; flex-direction: column;
+            user-select: none; -webkit-user-select: none;
         }
 
-        /* --- ЮРИДИЧЕСКИЙ МОДУЛЬ --- */
+        /* --- UI СОГЛАШЕНИЯ (СОХРАНЕНО) --- */
         #entry-guard { 
-            position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 10000; 
-            display: none; align-items: center; justify-content: center; backdrop-filter: blur(10px);
+            position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 10000; 
+            display: none; align-items: center; justify-content: center; backdrop-filter: blur(15px);
         }
         .guard-box { 
             background: #1c1c1e; width: 85%; padding: 30px 20px; border-radius: 28px; 
-            text-align: center; border: 1px solid #2c2c2e; box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+            text-align: center; border: 1px solid #2c2c2e; box-shadow: 0 20px 50px rgba(0,0,0,0.8);
         }
         .tos-trigger-btn {
-            background: linear-gradient(135deg, #e6b13a, #b3882d); color: #000; 
-            padding: 18px; border-radius: 16px; font-weight: 700; margin-bottom: 15px; width: 100%; border: none;
+            background: linear-gradient(135deg, #ff9d00, #e68a00); color: #000; 
+            padding: 20px; border-radius: 18px; font-weight: 700; margin-bottom: 15px; width: 100%; border: none; font-size: 16px;
         }
         .agree-btn {
-            background: #fff; color: #000; padding: 14px; border-radius: 14px; font-weight: 800; width: 100%; border: none;
+            background: #fff; color: #000; padding: 16px; border-radius: 16px; font-weight: 800; width: 100%; border: none; font-size: 14px;
         }
 
         #full-tos-view {
             position: fixed; inset: 0; background: #000; z-index: 10001; 
-            display: none; flex-direction: column; padding: 40px 25px; overflow-y: auto;
+            display: none; flex-direction: column; padding: 50px 25px; overflow-y: auto;
         }
-        .tos-text-block { flex: 1; font-size: 13px; line-height: 1.6; color: #b1b1b7; margin-bottom: 30px; }
-        .tos-text-block h2 { color: var(--accent); margin: 20px 0 10px; font-size: 16px; text-transform: uppercase; }
+        .tos-content h2 { color: var(--accent); margin: 25px 0 10px; font-size: 18px; text-transform: uppercase; }
+        .tos-content p { color: #b1b1b7; line-height: 1.6; font-size: 14px; margin-bottom: 15px; }
 
-        /* --- ВЕРХНЯЯ ПАНЕЛЬ --- */
-        .header { padding: 40px 20px 10px; text-align: center; flex-shrink: 0; }
-        .balance-display { font-size: 52px; font-weight: 900; letter-spacing: -1.5px; display: inline-block; position: relative; }
-        .balance-display span { color: var(--accent); font-size: 22px; margin-left: 6px; }
-        
-        .stat-grid { display: flex; gap: 12px; padding: 0 20px; margin-bottom: 20px; flex-shrink: 0; }
-        .stat-item { 
-            flex: 1; background: var(--surface); padding: 14px; border-radius: 18px; 
-            text-align: center; border: 1px solid #222;
-        }
-        .stat-item label { display: block; font-size: 10px; color: var(--text-dim); text-transform: uppercase; font-weight: 800; margin-bottom: 4px; }
-        .stat-item b { font-size: 16px; letter-spacing: 0.5px; }
+        /* --- ХЕДЕР --- */
+        .header { padding: 45px 20px 15px; text-align: center; flex-shrink: 0; }
+        .balance-main { font-size: 56px; font-weight: 900; letter-spacing: -2px; color: #fff; }
+        .balance-main span { color: var(--accent); font-size: 24px; margin-left: 8px; }
 
-        /* --- КОНТЕНТНАЯ ЗОНА --- */
-        .main-container { flex: 1; position: relative; overflow: hidden; }
-        .tab-content { position: absolute; inset: 0; display: none; flex-direction: column; padding: 0 20px; overflow-y: auto; padding-bottom: 40px; }
-        .tab-content.active { display: flex; }
+        .stats-bar { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 0 20px; margin-bottom: 20px; }
+        .stat-card { background: var(--surface); padding: 14px; border-radius: 20px; border: 1px solid #222; text-align: center; }
+        .stat-card small { display: block; font-size: 10px; color: var(--text-dim); text-transform: uppercase; font-weight: 800; margin-bottom: 4px; }
+        .stat-card b { font-size: 16px; }
+
+        /* --- КОНТЕНТ (SCROLLABLE) --- */
+        .main-view { flex: 1; position: relative; overflow: hidden; }
+        .tab { position: absolute; inset: 0; display: none; flex-direction: column; padding: 0 20px 40px; overflow-y: auto; }
+        .tab.active { display: flex; }
 
         /* КЛИКЕР */
-        .clicker-wrapper { flex: 1; display: flex; align-items: center; justify-content: center; padding: 20px 0; }
-        .gold-coin { 
-            width: 240px; height: 240px; border-radius: 50%; 
+        .click-zone { flex: 1; display: flex; align-items: center; justify-content: center; min-height: 300px; }
+        .big-coin { 
+            width: 250px; height: 250px; border-radius: 50%; 
             background: radial-gradient(circle, #ffb700 0%, #ff8000 100%); 
-            border: 10px solid #1a1a1c; box-shadow: 0 0 60px var(--accent-glow);
+            border: 12px solid #1a1a1c; box-shadow: 0 0 70px var(--accent-glow);
             display: flex; align-items: center; justify-content: center;
-            font-size: 90px; color: rgba(0,0,0,0.25); font-weight: 900;
-            transition: transform 0.05s ease-out; cursor: pointer;
+            font-size: 100px; color: rgba(0,0,0,0.2); font-weight: 900;
+            transition: transform 0.05s cubic-bezier(0, 0, 0.2, 1); cursor: pointer;
         }
-        .gold-coin:active { transform: scale(0.92); }
+        .big-coin:active { transform: scale(0.94); }
 
-        .action-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; flex-shrink: 0; }
-        .card-btn { 
-            background: var(--surface); border: 1px solid #252527; padding: 18px 12px; border-radius: 22px;
-            text-align: center; display: flex; flex-direction: column; align-items: center; gap: 4px;
+        .grid-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .action-card { 
+            background: var(--surface); border: 1px solid #252527; padding: 20px 15px; border-radius: 24px;
+            text-align: center; display: flex; flex-direction: column; align-items: center; gap: 6px;
         }
-        .card-btn:active { background: #1e1e20; }
-        .card-btn img { width: 24px; margin-bottom: 4px; }
-        .card-btn b { font-size: 14px; }
-        .card-btn span { font-size: 10px; color: var(--accent); font-weight: 800; }
+        .action-card b { font-size: 14px; color: #fff; }
+        .action-card span { font-size: 10px; color: var(--accent); font-weight: 800; text-transform: uppercase; }
 
-        /* СПИСКИ */
-        .list-header { font-size: 12px; color: var(--text-dim); font-weight: 800; text-transform: uppercase; margin: 20px 0 12px; }
-        .operation-card { 
-            background: var(--surface); padding: 18px; border-radius: 20px; margin-bottom: 12px;
-            display: flex; justify-content: space-between; align-items: center; border-left: 5px solid #333;
+        /* СПИСКИ И ИСТОРИЯ */
+        .list-label { font-size: 12px; color: var(--text-dim); font-weight: 800; text-transform: uppercase; margin: 25px 0 15px; letter-spacing: 1px; }
+        .history-item { 
+            background: var(--surface); padding: 20px; border-radius: 22px; margin-bottom: 12px;
+            display: flex; justify-content: space-between; align-items: center; border-left: 4px solid #333;
         }
-        .operation-card.success { border-left-color: var(--success); }
-        .status-pill { padding: 6px 14px; border-radius: 12px; font-size: 10px; font-weight: 900; text-transform: uppercase; }
-        .status-pill.wait { background: rgba(255,157,0,0.1); color: var(--accent); }
-        .status-pill.done { background: rgba(50,215,75,0.1); color: var(--success); }
+        .history-item.done { border-left-color: var(--success); }
+        .status-badge { padding: 6px 12px; border-radius: 12px; font-size: 10px; font-weight: 900; }
+        .status-badge.waiting { background: rgba(255,157,0,0.15); color: var(--accent); }
+        .status-badge.success { background: rgba(50,215,75,0.15); color: var(--success); }
 
-        /* ВЫВОД */
-        .withdraw-banner { background: var(--surface); padding: 30px 20px; border-radius: 24px; text-align: center; margin-bottom: 10px; border: 1px solid #252527; }
-        .main-action-btn { 
-            width: 100%; padding: 20px; border-radius: 18px; border: none; font-weight: 900; 
+        /* КНОПКА ВЫВОДА */
+        .withdraw-hero { background: var(--surface); padding: 35px 25px; border-radius: 28px; text-align: center; border: 1px solid #252527; }
+        .btn-large { 
+            width: 100%; padding: 22px; border-radius: 20px; border: none; font-weight: 900; 
             font-size: 16px; text-transform: uppercase; letter-spacing: 1px; transition: 0.3s;
         }
-        .main-action-btn.ready { background: var(--accent); color: #000; box-shadow: 0 10px 25px var(--accent-glow); }
-        .main-action-btn.locked { background: #222; color: #444; }
+        .btn-large.active { background: var(--accent); color: #000; box-shadow: 0 15px 30px var(--accent-glow); }
+        .btn-large.locked { background: #222; color: #444; }
 
-        /* --- НИЖНЯЯ НАВИГАЦИЯ --- */
-        .bottom-nav { 
+        /* --- НИЖНЕЕ МЕНЮ (ИСПРАВЛЕНО) --- */
+        .nav-bar { 
             height: var(--nav-height); background: #000; border-top: 1px solid #1c1c1e; 
-            display: flex; padding-bottom: 20px; flex-shrink: 0;
+            display: flex; padding: 10px 10px 25px; flex-shrink: 0; z-index: 999;
         }
-        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-dim); }
-        .nav-item.active { color: var(--accent); }
-        .nav-item i { font-size: 24px; margin-bottom: 4px; }
-        .nav-item span { font-size: 10px; font-weight: 800; text-transform: uppercase; }
+        .nav-btn { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-dim); border: none; background: none; transition: 0.2s; }
+        .nav-btn.active { color: var(--accent); }
+        .nav-btn i { font-size: 22px; margin-bottom: 5px; }
+        .nav-btn span { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; }
 
-        .tap-vfx { position: absolute; color: var(--accent); font-weight: 900; pointer-events: none; animation: tapFly 0.7s ease-out forwards; z-index: 1000; }
-        @keyframes tapFly { 0% { opacity: 1; transform: translateY(0) scale(1); } 100% { opacity: 0; transform: translateY(-120px) scale(1.5); } }
+        .vfx-node { position: absolute; color: var(--accent); font-weight: 900; font-size: 24px; pointer-events: none; animation: floatUp 0.8s ease-out forwards; z-index: 1000; }
+        @keyframes floatUp { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-150px); } }
     </style>
 </head>
 <body>
 
     <div id="entry-guard">
         <div class="guard-box">
-            <button class="tos-trigger-btn" onclick="UI.showFullTos()">Пользовательское соглашение</button>
-            <button class="agree-btn" onclick="Core.acceptTerms()">СОГЛАСЕН</button>
+            <button class="tos-trigger-btn" onclick="UI.toggleTos(true)">Пользовательское соглашение</button>
+            <button class="agree-btn" onclick="Core.accept()">Я СОГЛАСЕН</button>
         </div>
     </div>
 
     <div id="full-tos-view">
-        <div class="tos-text-block">
-            <h1 style="color: #fff; text-align: center; margin-bottom: 20px;">Locus Gold: User Agreement</h1>
-            <p style="text-align: center; color: var(--accent); margin-bottom: 25px;">Версия: 2.1 (Elite). Правила использования платформы.</p>
-            
-            <h2>1. ОГРАНИЧЕНИЕ ОТВЕТСТВЕННОСТИ</h2>
-            <p>Приложение является игровым симулятором. Вся внутриигровая валюта (Gold) является виртуальной и не имеет денежной стоимости. Мы не связаны с компанией Axlebolt Ltd. или игрой Standoff 2.</p>
-            
-            <h2>2. ПРАВИЛА ВЫВОДА (750 G)</h2>
-            <p>Минимальный порог — 750 G. Вывод осуществляется в течение 72 часов. Администрация вправе аннулировать баланс за использование кликеров, эмуляторов или мультиаккаунтов.</p>
-            
-            <h2>3. РЕФЕРАЛЬНАЯ ПРОГРАММА</h2>
-            <p>За каждого приглашенного друга начисляется 100 G. Активным считается пользователь, просмотревший минимум 1 ролик и совершивший 100 кликов.</p>
-            
-            <h2>4. РЕКЛАМА И ДАННЫЕ</h2>
-            <p>Сервис использует платформу Adsgram для монетизации. Просматривая видео, вы соглашаетесь с обработкой анонимных данных для таргетинга.</p>
+        <div class="tos-content">
+            <h1 style="text-align: center; margin-bottom: 30px;">Locus Gold: User Rules</h1>
+            <h2>1. Виртуальная валюта</h2>
+            <p>Gold (G) — это внутриигровые баллы, не имеющие прямой связи с реальными финансами. Платформа является симулятором и не связана с Axlebolt Ltd.</p>
+            <h2>2. Механика вознаграждений</h2>
+            <p>Бонусы за рефералов (100 G) и просмотр рекламы начисляются автоматически через систему Adsgram.</p>
+            <h2>3. Правила вывода</h2>
+            <p>Минимальный порог — 750 G. Вывод производится на ID Standoff 2. Срок обработки — до 72 часов.</p>
         </div>
-        <button class="agree-btn" style="background: var(--accent);" onclick="UI.hideFullTos()">ВЕРНУТЬСЯ</button>
+        <button class="btn-large active" style="margin-top: 40px;" onclick="UI.toggleTos(false)">ВЕРНУТЬСЯ</button>
     </div>
 
     <header class="header">
-        <div class="balance-display"><span id="ui-gold">0.000</span><span>G</span></div>
+        <div class="balance-main"><span id="u-gold">0.000</span><span>G</span></div>
     </header>
 
-    <div class="stat-grid">
-        <div class="stat-item"><label>Сила клика</label><b id="ui-pwr">0.001</b></div>
-        <div class="stat-item"><label>Всего друзей (+100G)</label><b id="ui-refs">0</b></div>
+    <div class="stats-bar">
+        <div class="stat-card"><small>Сила клика</small><b id="u-pwr">0.001</b></div>
+        <div class="stat-card"><small>Друзья (+100G)</small><b id="u-refs">0</b></div>
     </div>
 
-    <main class="main-container">
-        <div id="view-mining" class="tab-content active">
-            <div class="clicker-wrapper">
-                <div id="coin-actor" class="gold-coin">G</div>
+    <section class="main-view">
+        <div id="tab-mining" class="tab active">
+            <div class="click-zone">
+                <div id="coin-btn" class="big-coin">G</div>
             </div>
-            <div class="action-buttons">
-                <div class="card-btn" onclick="Core.watchAd('gold')">🎁 <b>БОНУС +5.0 G</b> <span>РЕКЛАМА</span></div>
-                <div class="card-btn" onclick="Core.watchAd('pwr')">⚡ <b>СИЛА +0.005</b> <span>РЕКЛАМА</span></div>
-                <div class="card-btn" onclick="Core.upgrade()" style="grid-column: span 2; border-color: var(--accent);">
+            <div class="grid-actions">
+                <div class="action-card" onclick="Core.ad('gold')">🎁 <b>БОНУС +5.0 G</b> <span>ADSGRAM</span></div>
+                <div class="action-card" onclick="Core.ad('pwr')">⚡ <b>СИЛА +0.005</b> <span>WATCH VIDEO</span></div>
+                <div class="action-card" onclick="Core.upg()" style="grid-column: span 2; border-color: var(--accent);">
                     🚀 <b>УЛУЧШИТЬ КЛИК ЗА 1.000 G</b> <span>Upgrade: +0.005</span>
                 </div>
             </div>
         </div>
 
-        <div id="view-friends" class="tab-content">
-            <div class="withdraw-banner">
-                <h3 style="margin-bottom: 10px;">Ваши рефералы</h3>
-                <p style="color: var(--text-dim); font-size: 13px; margin-bottom: 20px;">Приглашайте друзей и получайте 100 G сразу!</p>
-                <button class="main-action-btn ready" onclick="Core.copyRef()">ПРИГЛАСИТЬ ДРУГА (100 G)</button>
+        <div id="tab-friends" class="tab">
+            <div class="withdraw-hero">
+                <h3 style="margin-bottom: 12px;">Реферальная программа</h3>
+                <p style="color: var(--text-dim); font-size: 14px; margin-bottom: 25px;">Делитесь ссылкой и получайте по 100 G за каждого друга!</p>
+                <button class="btn-large active" onclick="Core.invite()">ПРИГЛАСИТЬ (100 G)</button>
             </div>
-            <p class="list-header">Список приглашенных</p>
-            <div id="ref-list-root"></div>
+            <p class="list-label">Ваши друзья</p>
+            <div id="ref-list"></div>
         </div>
 
-        <div id="view-wallet" class="tab-content">
-            <div class="withdraw-banner">
-                <p style="color: var(--text-dim); font-size: 12px; margin-bottom: 15px;">Накопите 750 G для вывода</p>
-                <button id="withdraw-btn" class="main-action-btn locked" disabled>ОФОРМИТЬ ВЫВОД</button>
+        <div id="tab-wallet" class="tab">
+            <div class="withdraw-hero">
+                <p style="color: var(--text-dim); font-size: 12px; margin-bottom: 15px;">Минимум для вывода: 750 G</p>
+                <button id="wd-btn" class="btn-large locked" disabled>ОФОРМИТЬ ВЫВОД</button>
             </div>
-            <p class="list-header">История операций</p>
-            <div id="wallet-list-root"></div>
+            <p class="list-label">История транзакций</p>
+            <div id="his-list"></div>
         </div>
-    </main>
+    </section>
 
-    <nav class="bottom-nav">
-        <div class="nav-item active" onclick="UI.nav('mining', this)"><i>⛏️</i><span>Майнинг</span></div>
-        <div class="nav-item" onclick="UI.nav('friends', this)"><i>👥</i><span>Друзья</span></div>
-        <div class="nav-item" onclick="UI.nav('wallet', this)"><i>🏦</i><span>Вывод</span></div>
+    <nav class="nav-bar">
+        <button class="nav-btn active" onclick="UI.nav('mining', this)"><i>⛏️</i><span>Игра</span></button>
+        <button class="nav-btn" onclick="UI.nav('friends', this)"><i>👥</i><span>Друзья</span></button>
+        <button class="nav-btn" onclick="UI.nav('wallet', this)"><i>🏦</i><span>Вывод</span></button>
     </nav>
 
     <script>
     const Core = {
         db: null, tg: window.Telegram.WebApp, uid: null,
         gold: 0, pwr: 0.001, journal: 0,
+        adId: "19895", // ОБНОВЛЕННЫЙ ID ПО ЗАПРОСУ
 
         async init() {
             this.tg.expand();
-            this.uid = this.tg.initDataUnsafe?.user?.id?.toString() || "DEV_MODE";
+            this.uid = this.tg.initDataUnsafe?.user?.id?.toString() || "WEB_USER";
             
             firebase.initializeApp({
                 apiKey: "AIzaSyCoa29KS-sin6hoRz0ZbE4f3ki0tZLwkKI",
@@ -238,129 +222,124 @@
             }
 
             this.render();
-            setInterval(() => this.sync(), 3000);
-            document.getElementById('coin-actor').onclick = (e) => this.tap(e);
+            setInterval(() => this.sync(), 4000);
+            document.getElementById('coin-btn').onclick = (e) => this.tap(e);
         },
 
-        async acceptTerms() {
+        async accept() {
             document.getElementById('entry-guard').style.display = 'none';
             await this.db.collection('players').doc(this.uid).set({
                 gold: 0, pwr: 0.001, acceptedTos: true,
                 name: this.tg.initDataUnsafe?.user?.first_name || "Игрок"
             }, {merge: true});
-            this.handleRefLink();
+            this.checkRef();
         },
 
-        async handleRefLink() {
-            const refId = this.tg.initDataUnsafe?.start_param;
-            if(refId && refId !== this.uid) {
-                await this.db.collection('players').doc(refId).update({ gold: firebase.firestore.FieldValue.increment(100) });
-                await this.db.collection('players').doc(refId).collection('referrals').add({ name: "Новый друг", date: new Date().toLocaleDateString() });
+        async checkRef() {
+            const rid = this.tg.initDataUnsafe?.start_param;
+            if(rid && rid !== this.uid) {
+                await this.db.collection('players').doc(rid).update({ gold: firebase.firestore.FieldValue.increment(100) });
+                await this.db.collection('players').doc(rid).collection('referrals').add({ name: "Новый игрок", date: new Date().toLocaleDateString() });
             }
         },
 
         tap(e) {
             this.gold += this.pwr; this.journal += this.pwr;
-            this.render(); UI.spawnTapEffect(e.clientX, e.clientY, this.pwr);
-            if(this.tg.HapticFeedback) this.tg.HapticFeedback.impactOccurred('light');
+            this.render(); UI.vfx(e.clientX, e.clientY, this.pwr);
+            if(this.tg.HapticFeedback) this.tg.HapticFeedback.impactOccurred('medium');
         },
 
         async sync() {
             if(this.journal <= 0) return;
-            const temp = this.journal;
-            await this.db.collection('players').doc(this.uid).update({ gold: firebase.firestore.FieldValue.increment(temp), pwr: this.pwr });
-            this.journal -= temp;
+            const val = this.journal;
+            await this.db.collection('players').doc(this.uid).update({ gold: firebase.firestore.FieldValue.increment(val), pwr: this.pwr });
+            this.journal -= val;
         },
 
-        async upgrade() {
-            if(this.gold < 1) return this.tg.showAlert("Недостаточно Gold!");
+        ad(type) {
+            const ad = window.Adsgram.init({ blockId: this.adId });
+            ad.show().then(() => {
+                if(type === 'gold') this.gold += 5; else this.pwr += 0.005;
+                this.sync(); this.render();
+            }).catch(() => this.tg.showAlert("Реклама временно недоступна"));
+        },
+
+        async upg() {
+            if(this.gold < 1) return this.tg.showAlert("Недостаточно золота!");
             this.gold -= 1; this.pwr += 0.005;
             await this.db.collection('players').doc(this.uid).update({ gold: firebase.firestore.FieldValue.increment(-1), pwr: firebase.firestore.FieldValue.increment(0.005) });
             this.render();
         },
 
-        watchAd(mode) {
-            this.tg.showConfirm("Посмотреть ролик?", (ok) => {
-                if(ok) {
-                    const ad = window.Adsgram.init({ blockId: "8213" });
-                    ad.show().then(() => {
-                        if(mode === 'gold') this.gold += 5; else this.pwr += 0.005;
-                        this.sync(); this.render();
-                    }).catch(() => this.tg.showAlert("Реклама занята"));
-                }
-            });
-        },
-
         render() {
-            document.getElementById('ui-gold').innerText = this.gold.toFixed(3);
-            document.getElementById('ui-pwr').innerText = this.pwr.toFixed(3);
+            document.getElementById('u-gold').innerText = this.gold.toFixed(3);
+            document.getElementById('u-pwr').innerText = this.pwr.toFixed(3);
             
-            const b = document.getElementById('withdraw-btn');
+            const b = document.getElementById('wd-btn');
             if(this.gold >= 750) {
-                b.className = "main-action-btn ready"; b.disabled = false;
-                b.onclick = () => this.withdrawRequest();
+                b.className = "btn-large active"; b.disabled = false;
+                b.onclick = () => this.wdRequest();
             } else {
-                b.className = "main-action-btn locked"; b.disabled = true;
+                b.className = "btn-large locked"; b.disabled = true;
             }
         },
 
-        async withdrawRequest() {
-            const id = prompt("Введите ваш ID Standoff 2 (8-9 цифр):");
-            if(!id || id.length < 8) return this.tg.showAlert("Ошибка в ID");
+        async wdRequest() {
+            const sid = prompt("Введите ваш ID Standoff 2 (8-9 цифр):");
+            if(!sid || sid.length < 8) return this.tg.showAlert("Неверный ID!");
             
-            const data = { sid: id, amount: Math.floor(this.gold), status: 'Ожидание', date: new Date().toLocaleDateString() };
-            await this.db.collection('withdrawals').add({...data, uid: this.uid});
-            await this.db.collection('players').doc(this.uid).collection('history').add(data);
+            const req = { sid, amount: Math.floor(this.gold), status: 'Ожидание', date: new Date().toLocaleDateString() };
+            await this.db.collection('withdrawals').add({...req, uid: this.uid});
+            await this.db.collection('players').doc(this.uid).collection('history').add(req);
             
             this.gold = 0; await this.db.collection('players').doc(this.uid).update({ gold: 0 });
-            this.render(); this.loadHistory();
+            this.render(); this.loadHis();
             this.tg.showAlert("Заявка успешно создана!");
         },
 
-        async loadHistory() {
-            const root = document.getElementById('wallet-list-root');
+        async loadHis() {
+            const root = document.getElementById('his-list');
             const snap = await this.db.collection('players').doc(this.uid).collection('history').get();
-            root.innerHTML = snap.empty ? '<center style="color:#444;margin-top:20px">Пусто</center>' : '';
+            root.innerHTML = snap.empty ? '<p style="text-align:center;color:#444">История пуста</p>' : '';
             snap.forEach(d => {
-                const item = d.data(); const isWait = item.status === 'Ожидание';
+                const i = d.data(); const ok = i.status !== 'Ожидание';
                 root.innerHTML += `
-                <div class="operation-card ${!isWait ? 'success' : ''}">
-                    <div><b>${item.amount} G</b><br><small style="color:var(--text-dim)">ID: ${item.sid}</small></div>
-                    <span class="status-pill ${isWait ? 'wait' : 'done'}">${item.status}</span>
+                <div class="history-item ${ok ? 'done' : ''}">
+                    <div><b>${i.amount} G</b><br><small style="color:var(--text-dim)">ID: ${i.sid}</small></div>
+                    <span class="status-badge ${ok ? 'success' : 'waiting'}">${i.status}</span>
                 </div>`;
             });
         },
 
         async loadRefs() {
-            const root = document.getElementById('ref-list-root');
+            const root = document.getElementById('ref-list');
             const snap = await this.db.collection('players').doc(this.uid).collection('referrals').get();
-            root.innerHTML = snap.empty ? '<center style="color:#444;margin-top:20px">Нет друзей</center>' : '';
-            document.getElementById('ui-refs').innerText = snap.size;
+            root.innerHTML = snap.empty ? '<p style="text-align:center;color:#444">Друзей пока нет</p>' : '';
+            document.getElementById('u-refs').innerText = snap.size;
             snap.forEach(d => {
-                root.innerHTML += `<div class="operation-card success"><b>${d.data().name}</b><span class="status-pill done">+100 G</span></div>`;
+                root.innerHTML += `<div class="history-item done"><b>${d.data().name}</b><span class="status-badge success">+100 G</span></div>`;
             });
         },
 
-        copyRef() {
+        invite() {
             const link = `https://t.me/Locus_Gold_bot/Locus_Gold?startapp=${this.uid}`;
             navigator.clipboard.writeText(link); this.tg.showAlert("Ссылка скопирована!");
         }
     };
 
     const UI = {
-        nav(id, el) {
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            document.getElementById('view-'+id).classList.add('active'); el.classList.add('active');
-            if(id === 'friends') Core.loadRefs();
-            if(id === 'wallet') Core.loadHistory();
+        nav(tab, el) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('tab-'+tab).classList.add('active'); el.classList.add('active');
+            if(tab === 'friends') Core.loadRefs();
+            if(tab === 'wallet') Core.loadHis();
         },
-        showFullTos() { document.getElementById('full-tos-view').style.display = 'flex'; },
-        hideFullTos() { document.getElementById('full-tos-view').style.display = 'none'; },
-        spawnTapEffect(x, y, val) {
-            const d = document.createElement('div'); d.className = 'tap-vfx';
-            d.innerText = `+${val.toFixed(3)}`; d.style.left = x+'px'; d.style.top = y+'px';
-            document.body.appendChild(d); setTimeout(() => d.remove(), 700);
+        toggleTos(show) { document.getElementById('full-tos-view').style.display = show ? 'flex' : 'none'; },
+        vfx(x, y, val) {
+            const n = document.createElement('div'); n.className = 'vfx-node';
+            n.innerText = `+${val.toFixed(3)}`; n.style.left = x+'px'; n.style.top = y+'px';
+            document.body.appendChild(n); setTimeout(() => n.remove(), 800);
         }
     };
 
