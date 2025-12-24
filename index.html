@@ -51,7 +51,6 @@
 
         .actions-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; flex-shrink: 0; }
         .action-btn { background: #18181b; border: 1px solid #27272a; border-radius: 18px; padding: 15px 10px; text-align: center; cursor: pointer; }
-        .action-btn:active { background: #222; }
         .action-btn i { display: block; font-style: normal; font-size: 18px; margin-bottom: 3px; }
         .action-btn b { font-size: 12px; display: block; }
         .action-btn span { font-size: 9px; color: var(--accent); font-weight: 800; text-transform: uppercase; }
@@ -173,6 +172,9 @@
         db: null, tg: window.Telegram.WebApp, uid: null,
         gold: 0, pwr: 0.001, journal: 0, 
         adId: "19895",
+        // Переменные для защиты от кликера
+        lastTaps: [],
+        antiCheatActive: false,
 
         async init() {
             this.tg.expand();
@@ -228,6 +230,24 @@
         },
 
         tap(e) {
+            // АНТИКЛИКЕР ЛОГИКА
+            const now = Date.now();
+            this.lastTaps.push(now);
+            // Оставляем только клики за последнюю секунду
+            this.lastTaps = this.lastTaps.filter(t => now - t < 1000);
+
+            if (this.lastTaps.length > 15) {
+                if (!this.antiCheatActive) {
+                    this.antiCheatActive = true;
+                    this.tg.showPopup({
+                        title: "Обнаружен автокликер!",
+                        message: "Использование сторонних программ запрещено. Чтобы увеличить добычу честно, вы можете улучшить силу клика в магазине или получить мгновенный бонус, просмотрев рекламу!",
+                        buttons: [{type: 'ok'}]
+                    }, () => { this.antiCheatActive = false; });
+                }
+                return;
+            }
+
             this.gold += this.pwr;
             this.journal += this.pwr;
             this.render();
@@ -318,4 +338,37 @@
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
             document.getElementById('view-' + id).classList.add('active');
             el.classList.add('active');
-            if(id === 'leaderboard') Core.loadLeaders
+            if(id === 'leaderboard') Core.loadLeaders();
+            if(id === 'friends') this.loadFriends();
+            if(id === 'wallet') this.loadHistory();
+        },
+        async loadFriends() {
+            const list = document.getElementById('friend-list');
+            const snap = await Core.db.collection('players').doc(Core.uid).collection('referrals').get();
+            list.innerHTML = snap.empty ? "<center>Список пуст</center>" : "";
+            document.getElementById('u-refs').innerText = snap.size;
+            snap.forEach(doc => {
+                list.innerHTML += `<div class="list-item"><span>${doc.data().name}</span><span style="color:var(--accent)">+100 G</span></div>`;
+            });
+        },
+        async loadHistory() {
+            const list = document.getElementById('history-list');
+            const snap = await Core.db.collection('withdrawals').where('uid', '==', Core.uid).get();
+            list.innerHTML = snap.empty ? "<center>Нет операций</center>" : "";
+            snap.forEach(doc => {
+                const d = doc.data();
+                list.innerHTML += `<div class="list-item"><span>ID: ${d.sid} (${d.amount} G)</span><small>${d.status}</small></div>`;
+            });
+        },
+        showFullTos() { document.getElementById('full-tos').style.display = 'block'; },
+        hideFullTos() { document.getElementById('full-tos').style.display = 'none'; },
+        spawnText(x, y, txt) {
+            const el = document.createElement('div');
+            el.className = 'float-text'; el.innerText = txt;
+            el.style.left = x + 'px'; el.style.top = y + 'px';
+            document.body.appendChild(el);
+            setTimeout(() => el.remove(), 700);
+        }
+    };
+
+    window.onload = () => Core.init
