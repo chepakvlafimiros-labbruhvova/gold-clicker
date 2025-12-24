@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Nebula: Zero | Galactic Command</title>
+    <title>Path to Neon: Syndicate</title>
     
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://sad.adsgram.ai/js/sad.min.js"></script>
@@ -11,324 +11,300 @@
 
     <style>
         :root {
-            --neon: #00f2ff;
-            --bg-deep: #020205;
-            --panel: rgba(18, 18, 26, 0.95);
-            --border: #1f1f2e;
             --gold: #ffcc00;
+            --neon: #00f2ff;
+            --danger: #ff3b30;
+            --bg: #0a0a0c;
+            --surface: #16161a;
+            --border: #2c2c34;
+            --text-dim: #8e8e93;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Orbitron', sans-serif; -webkit-tap-highlight-color: transparent; }
-        
-        body { 
-            background: var(--bg-deep); 
-            color: #fff; 
-            height: 100vh; 
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background: var(--bg); color: #fff; height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
 
-        /* CANVAS BACKGROUND */
-        #space-canvas {
-            position: fixed;
-            top: 0; left: 0;
-            z-index: -1;
-        }
-
-        /* TOP HUD */
+        /* HUD - ВЕРХНЯЯ ПАНЕЛЬ СТАТУСА */
         .hud {
-            padding: 20px;
-            background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            padding: 15px 20px;
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
         }
 
-        .res-group { display: flex; gap: 15px; }
-        .res-item { text-align: center; }
-        .res-item i { color: var(--neon); font-size: 14px; display: block; }
-        .res-item span { font-size: 12px; font-weight: bold; }
+        .stat-item { font-size: 12px; }
+        .stat-item i { color: var(--neon); margin-right: 5px; }
+        .stat-val { font-weight: 800; display: block; }
 
-        /* MAIN INTERFACE */
-        .main-container {
-            flex: 1;
-            padding: 20px;
-            overflow-y: auto;
-            mask-image: linear-gradient(to bottom, black 90%, transparent 100%);
-        }
+        /* PROGRESS BARS */
+        .bar-container { width: 100%; height: 6px; background: #000; border-radius: 3px; margin-top: 5px; overflow: hidden; }
+        .bar-fill { height: 100%; transition: width 0.3s; }
+        .hp-fill { background: var(--danger); }
+        .en-fill { background: var(--neon); }
 
-        .screen { display: none; animation: fadeIn 0.4s ease; }
+        /* MAIN CONTENT */
+        .viewport { flex: 1; overflow-y: auto; padding: 20px; }
+        .screen { display: none; }
         .screen.active { display: block; }
 
-        /* MODULE CARDS */
+        /* CARDS & ACTIONS */
         .card {
-            background: var(--panel);
+            background: var(--surface);
+            border-radius: 16px;
+            padding: 15px;
+            margin-bottom: 15px;
             border: 1px solid var(--border);
+        }
+
+        .action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        
+        .btn {
+            background: #23232a;
+            border: 1px solid var(--border);
+            padding: 12px;
             border-radius: 12px;
-            padding: 16px;
-            margin-bottom: 12px;
-            position: relative;
-            overflow: hidden;
+            color: #fff;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.2s;
         }
 
-        .card::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; width: 2px; height: 100%;
-            background: var(--neon);
-        }
+        .btn:active { transform: scale(0.95); background: #2c2c34; }
+        .btn.primary { border-color: var(--neon); color: var(--neon); }
+        .btn small { display: block; font-size: 9px; opacity: 0.6; margin-top: 4px; }
 
-        .progress-bar {
-            width: 100%;
-            height: 4px;
-            background: #111;
-            margin-top: 10px;
-            border-radius: 2px;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: var(--neon);
-            width: 0%;
-            transition: width 0.3s;
-        }
-
-        /* NAVIGATION CUSTOM */
-        .nav-bar {
-            background: var(--panel);
+        /* NAVIGATION */
+        .nav {
+            background: var(--surface);
             border-top: 1px solid var(--border);
             display: flex;
             padding-bottom: env(safe-area-inset-bottom);
         }
 
-        .nav-btn {
-            flex: 1;
-            padding: 15px 5px;
-            text-align: center;
-            color: var(--dim);
-            font-size: 11px;
-            text-transform: uppercase;
-            cursor: pointer;
-            transition: 0.3s;
+        .nav-item {
+            flex: 1; padding: 15px 5px; text-align: center;
+            color: var(--text-dim); font-size: 10px; text-transform: uppercase;
         }
 
-        .nav-btn.active { color: var(--neon); box-shadow: inset 0 2px 0 var(--neon); }
+        .nav-item.active { color: var(--neon); }
+        .nav-item i { font-size: 18px; margin-bottom: 5px; display: block; }
 
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* TABS INSIDE SCREENS */
-        .sub-nav { display: flex; gap: 10px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 5px; }
-        .sub-btn { 
-            padding: 8px 16px; background: #1a1a24; border: 1px solid var(--border); 
-            border-radius: 20px; font-size: 10px; white-space: nowrap; 
+        /* LOGS */
+        #game-logs {
+            height: 100px; background: #000; padding: 10px;
+            font-family: monospace; font-size: 10px; color: #0f0;
+            overflow-y: auto; border-top: 1px solid var(--border);
         }
-
     </style>
 </head>
 <body>
 
-    <canvas id="space-canvas"></canvas>
-
     <div class="hud">
-        <div class="res-group">
-            <div class="res-item"><i class="fas fa-atom"></i><span id="res-matter">0</span></div>
-            <div class="res-item"><i class="fas fa-bolt"></i><span id="res-energy">0</span></div>
+        <div class="stat-item">
+            <i class="fas fa-wallet"></i><small>CASH</small>
+            <span class="stat-val" id="val-cash">$0</span>
         </div>
-        <div class="rank-info">
-            <small style="color:var(--neon)">LEVEL</small>
-            <b id="player-lvl">1</b>
+        <div class="stat-item">
+            <i class="fas fa-heart"></i><small>HEALTH</small>
+            <div class="bar-container"><div id="hp-bar" class="bar-fill hp-fill" style="width: 100%"></div></div>
+        </div>
+        <div class="stat-item">
+            <i class="fas fa-bolt"></i><small>ENERGY</small>
+            <div class="bar-container"><div id="en-bar" class="bar-fill en-fill" style="width: 100%"></div></div>
         </div>
     </div>
 
-    <div class="main-container">
-        
-        <div id="scr-command" class="screen active">
-            <div class="card" id="central-reactor" onclick="Engine.tap()">
-                <h3>CENTRAL REACTOR</h3>
-                <p style="font-size: 11px; color: #888;">Tap to catalyze dark matter</p>
-                <div class="progress-bar"><div class="progress-fill" id="energy-bar"></div></div>
-            </div>
-
-            <div id="automated-modules">
+    <div class="viewport">
+        <div id="scr-street" class="screen active">
+            <div class="card">
+                <h3>Улицы Готэм-Сити</h3>
+                <p style="color: var(--text-dim); font-size: 13px; margin: 10px 0;">Вы начинаете с низов. Соберите бутылки или попробуйте найти еду.</p>
+                <div class="action-grid">
+                    <div class="btn" onclick="Game.doAction('search_trash')">
+                        <b>Поиск в мусоре</b>
+                        <small>-5 Energy | +$1-3</small>
+                    </div>
+                    <div class="btn" onclick="Game.doAction('beg')">
+                        <b>Попрошайничать</b>
+                        <small>-10 Energy | +$0-10</small>
+                    </div>
                 </div>
+            </div>
+            
+            <div class="card" id="sleep-card">
+                <h3>Ночлег</h3>
+                <div class="btn primary" onclick="Game.doAction('sleep')">
+                    <b>Спать на коробке</b>
+                    <small>Восстановить Энергию</small>
+                </div>
+            </div>
         </div>
 
-        <div id="scr-tech" class="screen">
-            <h3>TECHNOLOGY TREE</h3>
-            <div id="tech-tree"></div>
+        <div id="scr-work" class="screen">
+            <div class="card">
+                <h3>Центр Занятости</h3>
+                <div id="job-list">
+                    </div>
+            </div>
         </div>
 
-        <div id="scr-fleet" class="screen">
-            <h3>GALACTIC EXPEDITIONS</h3>
-            <div id="mission-list"></div>
+        <div id="scr-biz" class="screen">
+            <div class="card">
+                <h3>Мои Предприятия</h3>
+                <div id="biz-list">
+                    <p style="text-align:center; color:var(--text-dim)">У вас пока нет бизнеса. Накопите $5,000 для первой кофейни.</p>
+                </div>
+            </div>
         </div>
-
     </div>
 
-    <div class="nav-bar">
-        <div class="nav-btn active" onclick="UI.navigate('command', this)"><i class="fas fa-microchip"></i><br>Base</div>
-        <div class="nav-btn" onclick="UI.navigate('tech', this)"><i class="fas fa-flask"></i><br>Tech</div>
-        <div class="nav-btn" onclick="UI.navigate('fleet', this)"><i class="fas fa-rocket"></i><br>Fleet</div>
-        <div class="nav-btn" onclick="UI.navigate('market', this)"><i class="fas fa-box"></i><br>Market</div>
-    </div>
+    <div id="game-logs"></div>
+
+    <nav class="nav">
+        <div class="nav-item active" onclick="UI.nav('street', this)"><i class="fas fa-home"></i>Улица</div>
+        <div class="nav-item" onclick="UI.nav('work', this)"><i class="fas fa-briefcase"></i>Работа</div>
+        <div class="nav-item" onclick="UI.nav('biz', this)"><i class="fas fa-city"></i>Бизнес</div>
+        <div class="nav-item" onclick="Game.showAd()"><i class="fas fa-ad" style="color: var(--gold)"></i>Бонус</div>
+    </nav>
 
     <script>
         /**
-         * GLOBAL GAME ENGINE - NEBULA: ZERO
-         * Краткая документация:
-         * 1. Engine - логика ресурсов и тиков.
-         * 2. ResearchManager - дерево технологий.
-         * 3. ExpeditionSystem - механика миссий.
-         * 4. RenderCore - отрисовка Canvas.
+         * GLOBAL GAME ENGINE: PATH TO NEON
+         * Modules: Character, Economy, World, Events
          */
 
-        const Engine = {
-            state: {
-                matter: 0,
+        const Game = {
+            player: {
+                cash: 0,
+                hp: 100,
                 energy: 100,
-                maxEnergy: 100,
-                level: 1,
+                intellect: 1,
+                karma: 0,
+                lvl: 1,
                 exp: 0,
-                lastTick: Date.now(),
-                modules: [
-                    { id: 'miner', name: 'Nano Miner', count: 0, baseCost: 15, power: 0.5 },
-                    { id: 'bot', name: 'Logic Drone', count: 0, baseCost: 100, power: 2.5 }
-                ]
+                inventory: []
             },
+
+            // Система работ (от бомжа до CEO)
+            jobs: [
+                { id: 'cleaner', name: 'Уборщик', pay: 15, req: 0, en: 20 },
+                { id: 'courier', name: 'Курьер', pay: 45, req: 2, en: 30 },
+                { id: 'coder', name: 'Junior Dev', pay: 150, req: 10, en: 40 }
+            ],
 
             init() {
+                this.tg = window.Telegram.WebApp;
+                this.tg.expand();
                 this.load();
-                this.startLoops();
-                UI.renderModules();
-                RenderCore.init();
+                this.updateUI();
+                this.startTick();
+                this.log("Система инициализирована. Добро пожаловать в Неон-Сити.");
             },
 
-            tap() {
-                this.state.matter += 1;
-                this.state.exp += 0.1;
-                this.checkLevel();
-                UI.updateHUD();
-                Telegram.WebApp.HapticFeedback.impactOccurred('medium');
-            },
-
-            checkLevel() {
-                const nextLevel = this.state.level * 100;
-                if(this.state.exp >= nextLevel) {
-                    this.state.level++;
-                    Telegram.WebApp.showAlert(`Level Up! Current Rank: ${this.state.level}`);
+            // Главная фишка: Динамическое выполнение действий
+            doAction(type) {
+                if(this.player.energy < 10 && type !== 'sleep') {
+                    return this.log("Слишком устал... Нужен отдых.");
                 }
+
+                switch(type) {
+                    case 'search_trash':
+                        let found = Math.floor(Math.random() * 4);
+                        this.player.cash += found;
+                        this.player.energy -= 5;
+                        this.player.exp += 1;
+                        this.log(`Найдено в мусоре: $${found}`);
+                        break;
+                    case 'beg':
+                        let beg = Math.random() > 0.5 ? Math.floor(Math.random() * 11) : 0;
+                        this.player.cash += beg;
+                        this.player.energy -= 10;
+                        this.log(beg > 0 ? `Прохожий дал вам $${beg}` : "Вас проигнорировали.");
+                        break;
+                    case 'sleep':
+                        this.player.energy = 100;
+                        this.player.hp = Math.min(100, this.player.hp + 10);
+                        this.log("Вы поспали. Энергия восстановлена.");
+                        break;
+                }
+                this.updateUI();
             },
 
-            startLoops() {
-                // Основной цикл 60 FPS для Canvas
-                const loop = () => {
-                    RenderCore.draw();
-                    requestAnimationFrame(loop);
-                };
-                loop();
-
-                // Экономический тик (1 секунда)
+            startTick() {
+                // Пассивное выгорание и восстановление
                 setInterval(() => {
-                    this.processEconomy();
-                }, 1000);
+                    if(this.player.hp <= 0) this.gameOver();
+                    this.updateUI();
+                }, 5000);
             },
 
-            processEconomy() {
-                let production = 0;
-                this.state.modules.forEach(m => {
-                    production += m.count * m.power;
-                });
-                this.state.matter += production;
-                UI.updateHUD();
-            },
-
-            buyModule(id) {
-                const mod = this.state.modules.find(m => m.id === id);
-                const cost = Math.floor(mod.baseCost * Math.pow(1.15, mod.count));
+            updateUI() {
+                document.getElementById('val-cash').innerText = `$${Math.floor(this.player.cash)}`;
+                document.getElementById('hp-bar').style.width = this.player.hp + '%';
+                document.getElementById('en-bar').style.width = this.player.energy + '%';
                 
-                if(this.state.matter >= cost) {
-                    this.state.matter -= cost;
-                    mod.count++;
-                    UI.renderModules();
-                    UI.updateHUD();
+                // Рендер работ в зависимости от уровня
+                const jobList = document.getElementById('job-list');
+                jobList.innerHTML = '';
+                this.jobs.forEach(j => {
+                    if(this.player.lvl >= j.req) {
+                        jobList.innerHTML += `
+                            <div class="btn" style="margin-bottom:10px" onclick="Game.work('${j.id}')">
+                                <b>${j.name}</b>
+                                <small>Зарплата: $${j.pay} | Энергия: -${j.en}</small>
+                            </div>
+                        `;
+                    }
+                });
+            },
+
+            work(id) {
+                const job = this.jobs.find(j => j.id === id);
+                if(this.player.energy >= job.en) {
+                    this.player.cash += job.pay;
+                    this.player.energy -= job.en;
+                    this.player.exp += 5;
+                    this.log(`Вы отработали смену: +$${job.pay}`);
+                    this.updateUI();
+                } else {
+                    this.log("Недостаточно энергии для работы.");
                 }
             },
 
-            save() {
-                localStorage.setItem('nebula_zero_state', JSON.stringify(this.state));
+            showAd() {
+                // Реклама дает "Набор выживания"
+                const ad = Adsgram.init({ blockId: "19895" });
+                ad.show().then(() => {
+                    this.player.cash += 100;
+                    this.player.energy = 100;
+                    this.log("Спонсорская помощь: +$100 и Энергия");
+                    this.updateUI();
+                });
             },
 
+            log(msg) {
+                const l = document.getElementById('game-logs');
+                l.innerHTML = `> ${msg}<br>` + l.innerHTML;
+            },
+
+            save() { localStorage.setItem('neon_save', JSON.stringify(this.player)); },
             load() {
-                const data = localStorage.getItem('nebula_zero_state');
-                if(data) this.state = Object.assign(this.state, JSON.parse(data));
+                const s = localStorage.getItem('neon_save');
+                if(s) this.player = JSON.parse(s);
             }
         };
 
         const UI = {
-            navigate(screenId, btn) {
+            nav(id, el) {
                 document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-                document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-                document.getElementById('scr-' + screenId).classList.add('active');
-                btn.classList.add('active');
-            },
-
-            updateHUD() {
-                document.getElementById('res-matter').innerText = Math.floor(Engine.state.matter);
-                document.getElementById('res-energy').innerText = Math.floor(Engine.state.energy);
-                document.getElementById('player-lvl').innerText = Engine.state.level;
-            },
-
-            renderModules() {
-                const container = document.getElementById('automated-modules');
-                container.innerHTML = '';
-                Engine.state.modules.forEach(m => {
-                    const cost = Math.floor(m.baseCost * Math.pow(1.15, m.count));
-                    container.innerHTML += `
-                        <div class="card">
-                            <div style="display:flex; justify-content:space-between">
-                                <b>${m.name} [v.${m.count}]</b>
-                                <button class="sub-btn" onclick="Engine.buyModule('${m.id}')">UPGRADE (${cost})</button>
-                            </div>
-                            <small style="color:#666">Produces ${m.power} matter/s</small>
-                        </div>
-                    `;
-                });
+                document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+                document.getElementById('scr-' + id).classList.add('active');
+                el.classList.add('active');
             }
         };
 
-        const RenderCore = {
-            canvas: null, ctx: null, stars: [],
-            init() {
-                this.canvas = document.getElementById('space-canvas');
-                this.ctx = this.canvas.getContext('2d');
-                this.resize();
-                window.onresize = () => this.resize();
-                for(let i=0; i<100; i++) this.stars.push({
-                    x: Math.random() * this.canvas.width,
-                    y: Math.random() * this.canvas.height,
-                    s: Math.random() * 2
-                });
-            },
-            resize() {
-                this.canvas.width = window.innerWidth;
-                this.canvas.height = window.innerHeight;
-            },
-            draw() {
-                this.ctx.fillStyle = '#020205';
-                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-                this.ctx.fillStyle = '#fff';
-                this.stars.forEach(s => {
-                    this.ctx.beginPath();
-                    this.ctx.arc(s.x, s.y, s.s, 0, Math.PI*2);
-                    this.ctx.fill();
-                    s.y += 0.2;
-                    if(s.y > this.canvas.height) s.y = 0;
-                });
-            }
-        };
-
-        window.onload = () => Engine.init();
+        window.onload = () => Game.init();
     </script>
 </body>
 </html>
