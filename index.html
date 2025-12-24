@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Locus Gold Elite</title>
+    <title>Locus Gold Elite v2.0</title>
     
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -11,331 +11,392 @@
     <script src="https://sad.adsgram.ai/js/sad.min.js"></script>
 
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+
         :root {
-            --bg: #000000;
-            --surface: #111111;
+            --bg: #050505;
+            --surface: #121214;
             --accent: #ff9d00;
-            --text-dim: #8e8e93;
+            --accent-glow: rgba(255, 157, 0, 0.4);
+            --error: #ff4b4b;
+            --text-main: #ffffff;
+            --text-dim: #a1a1aa;
             --safe-top: env(safe-area-inset-top);
             --safe-bottom: env(safe-area-inset-bottom);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
-        body { background: var(--bg); color: #fff; height: 100vh; overflow: hidden; position: fixed; width: 100%; display: flex; flex-direction: column; }
+        
+        body { 
+            background: var(--bg); 
+            color: var(--text-main); 
+            height: 100vh; 
+            overflow: hidden; 
+            position: fixed; 
+            width: 100%; 
+            display: flex; 
+            flex-direction: column; 
+        }
+
+        /* Анимация появления */
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
         .app-container {
             position: absolute; inset: 0; display: none; flex-direction: column;
-            padding: calc(var(--safe-top) + 20px) 20px calc(var(--safe-bottom) + 80px);
+            padding: calc(var(--safe-top) + 20px) 20px calc(var(--safe-bottom) + 90px);
+            animation: fadeIn 0.4s ease-out;
         }
         .app-container.active { display: flex; }
 
-        .header-stats { text-align: center; margin-bottom: 20px; flex-shrink: 0; }
-        .gold-display { font-size: 48px; font-weight: 900; color: var(--accent); text-shadow: 0 0 20px rgba(255,157,0,0.3); }
-        .rank-badge { font-size: 12px; text-transform: uppercase; background: #222; padding: 4px 12px; border-radius: 20px; color: var(--accent); font-weight: 800; }
+        /* Хедер баланса */
+        .balance-card {
+            text-align: center;
+            padding: 20px;
+            background: linear-gradient(180deg, var(--surface) 0%, transparent 100%);
+            border-radius: 24px;
+            margin-bottom: 20px;
+        }
+        .gold-value { font-size: 52px; font-weight: 900; color: var(--accent); letter-spacing: -2px; }
+        .gold-label { font-size: 14px; color: var(--text-dim); text-transform: uppercase; font-weight: 700; }
 
-        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px; }
-        .stat-box { background: #18181b; border-radius: 16px; padding: 12px; text-align: center; border: 1px solid #27272a; }
-        .stat-box small { display: block; color: var(--text-dim); font-size: 10px; text-transform: uppercase; margin-bottom: 3px; font-weight: 700; }
-        .stat-box b { font-size: 16px; }
+        /* Сетка характеристик */
+        .stats-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 15px; }
+        .stat-item { background: var(--surface); padding: 12px; border-radius: 16px; border: 1px solid #27272a; text-align: center; }
+        .stat-item span { display: block; font-size: 10px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px; }
+        .stat-item b { font-size: 16px; color: #fff; }
 
-        .clicker-area { flex: 1; display: flex; align-items: center; justify-content: center; min-height: 200px; }
-        .coin-btn {
-            width: 200px; height: 200px; border-radius: 50%;
-            background: radial-gradient(circle, #ffb700 0%, #ff8000 100%);
-            border: 10px solid #1a1a1c; box-shadow: 0 0 50px rgba(255, 157, 0, 0.3);
+        /* Кликер */
+        .main-click-area {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        .coin-wrapper { position: relative; z-index: 10; }
+        .coin-main {
+            width: 220px; height: 220px; border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, #ffc800 0%, #ff8000 100%);
+            border: 8px solid #1a1a1e;
+            box-shadow: 0 0 60px var(--accent-glow), inset 0 0 20px rgba(0,0,0,0.5);
             display: flex; align-items: center; justify-content: center;
-            font-size: 80px; color: rgba(0,0,0,0.15); font-weight: 900;
-            transition: transform 0.05s; cursor: pointer;
+            cursor: pointer; transition: transform 0.05s cubic-bezier(0.1, 0.5, 0.5, 1);
+            user-select: none;
         }
-        .coin-btn:active { transform: scale(0.92); }
-        .coin-btn.blocked { filter: grayscale(1); opacity: 0.5; pointer-events: none; }
+        .coin-main:active { transform: scale(0.94); }
+        .coin-main span { font-size: 90px; font-weight: 900; color: rgba(255,255,255,0.2); pointer-events: none; }
 
-        .actions-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; flex-shrink: 0; }
-        .action-btn { background: #18181b; border: 1px solid #27272a; border-radius: 18px; padding: 15px 10px; text-align: center; cursor: pointer; }
-        .action-btn i { display: block; font-style: normal; font-size: 18px; margin-bottom: 3px; }
-        .action-btn b { font-size: 12px; display: block; }
-        .action-btn span { font-size: 9px; color: var(--accent); font-weight: 800; text-transform: uppercase; }
-
-        .upgrade-btn { grid-column: span 2; background: #18181b; border: 1px solid var(--accent); border-radius: 18px; padding: 12px; text-align: center; }
-
-        .list-wrapper { flex: 1; overflow-y: auto; margin-top: 10px; padding-right: 5px; }
-        .list-item { 
-            background: #18181b; padding: 12px 15px; border-radius: 14px; margin-bottom: 8px;
-            display: flex; justify-content: space-between; align-items: center; border: 1px solid #27272a;
+        /* Таймер блокировки */
+        .lock-overlay {
+            position: absolute;
+            background: rgba(0,0,0,0.85);
+            inset: -10px;
+            border-radius: 50%;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 20;
+            backdrop-filter: blur(4px);
+            border: 2px solid var(--error);
         }
+        .lock-overlay.active { display: flex; }
+        .lock-timer { font-size: 40px; font-weight: 900; color: var(--error); }
+        .lock-text { font-size: 10px; color: var(--text-dim); text-transform: uppercase; margin-top: 5px; }
 
-        .nav-bar {
+        /* Кнопки действий */
+        .bottom-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: auto; }
+        .btn-act { 
+            background: var(--surface); border: 1px solid #27272a; border-radius: 18px; 
+            padding: 16px; text-align: center; position: relative; overflow: hidden;
+        }
+        .btn-act b { display: block; font-size: 13px; margin-bottom: 2px; }
+        .btn-act span { font-size: 9px; color: var(--accent); font-weight: 800; }
+        .btn-full { grid-column: span 2; border-color: var(--accent); background: rgba(255,157,0,0.05); }
+
+        /* Навигация */
+        .tab-bar {
             position: fixed; bottom: 0; width: 100%; height: calc(70px + var(--safe-bottom));
-            background: #0a0a0b; border-top: 1px solid #1c1c1e; display: flex; 
+            background: #080808; border-top: 1px solid #1c1c1e; display: flex; 
             padding-bottom: var(--safe-bottom); z-index: 1000;
         }
-        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-dim); background: none; border: none; }
-        .nav-item.active { color: var(--accent); }
-        .nav-item i { font-size: 20px; }
-        .nav-item span { font-size: 9px; font-weight: 800; margin-top: 4px; text-transform: uppercase; }
+        .tab-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-dim); }
+        .tab-item.active { color: var(--accent); }
+        .tab-item i { font-size: 22px; margin-bottom: 4px; font-style: normal; }
+        .tab-item span { font-size: 10px; font-weight: 700; }
 
-        #tos-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 20px; visibility: hidden; opacity: 0; transition: 0.3s; }
-        #tos-overlay.show { visibility: visible; opacity: 1; }
+        /* Списки (Топ, История) */
+        .scroll-list { flex: 1; overflow-y: auto; padding-bottom: 20px; }
+        .list-card {
+            background: var(--surface); padding: 16px; border-radius: 16px; margin-bottom: 10px;
+            display: flex; justify-content: space-between; align-items: center;
+            border: 1px solid #27272a;
+        }
+        .list-card.top-me { border-color: var(--accent); background: rgba(255,157,0,0.05); }
         
-        .tos-modal { background: #1c1c1e; width: 100%; max-width: 320px; border-radius: 24px; padding: 25px; text-align: center; border: 1px solid #2c2c2e; }
-        .tos-btn-main { background: linear-gradient(135deg, #ff9d00, #e68a00); color: #000; padding: 18px; border-radius: 15px; font-weight: 800; width: 100%; border: none; margin-bottom: 12px; font-size: 14px; cursor: pointer; }
-        .tos-btn-agree { background: #fff; color: #000; padding: 15px; border-radius: 12px; width: 100%; border: none; font-weight: 700; cursor: pointer; }
+        /* Модалки */
+        #modal-overlay { 
+            position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 5000; 
+            display: none; align-items: center; justify-content: center; padding: 30px; 
+        }
+        .modal-content { background: #1c1c1e; border-radius: 28px; padding: 30px; width: 100%; text-align: center; border: 1px solid #2c2c2e; }
 
-        #full-tos { position: fixed; inset: 0; background: #000; z-index: 10000; padding: calc(var(--safe-top) + 20px) 25px 40px; overflow-y: auto; display: none; }
-
-        .float-text { position: absolute; color: var(--accent); font-weight: 900; pointer-events: none; animation: floatUp 0.7s forwards; z-index: 2000; }
-        @keyframes floatUp { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-100px); } }
+        .float-val { position: absolute; color: var(--accent); font-weight: 900; animation: floatUp 0.8s forwards; pointer-events: none; }
+        @keyframes floatUp { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-120px); } }
     </style>
 </head>
 <body>
 
-    <div id="tos-overlay">
-        <div class="tos-modal">
-            <div style="font-size: 45px; margin-bottom: 20px;">📜</div>
-            <h2 style="margin-bottom: 15px; font-size: 18px;">Правила Сервиса</h2>
-            <button class="tos-btn-main" onclick="UI.showFullTos()">Читать Соглашение</button>
-            <button class="tos-btn-agree" onclick="Core.accept()">Я СОГЛАСЕН</button>
+    <div id="modal-overlay">
+        <div class="modal-content">
+            <div style="font-size: 50px; margin-bottom: 15px;">🚫</div>
+            <h2 style="color: var(--error); margin-bottom: 10px;">Бот обнаружен!</h2>
+            <p style="color: var(--text-dim); font-size: 14px; line-height: 1.5; margin-bottom: 20px;">
+                Использование автокликеров запрещено правилами Locus Gold.<br><br>
+                Чтобы фармить быстрее честно: используйте <b>Магазин</b> или <b>Рекламные бонусы</b>.
+            </p>
+            <button class="btn-act btn-full" style="background: var(--accent); color: #000;" onclick="AntiCheat.close()">ПОНЯТНО</button>
         </div>
     </div>
 
-    <div id="full-tos">
-        <h2 style="color:var(--accent); text-align:center; margin-bottom:20px;">LOCUS GOLD: TERMS</h2>
-        <p style="color:#ccc; font-size:14px; line-height:1.6;">1. Валюта Gold — виртуальная.<br>2. Вывод от 750 G.<br>3. Автокликеры запрещены.</p>
-        <button class="tos-btn-main" style="margin-top: 20px;" onclick="UI.hideFullTos()">ПРИНЯТЬ</button>
-    </div>
-
-    <div class="app-container active" id="view-mining">
-        <div class="header-stats">
-            <div class="rank-badge" id="u-rank">BRONZE</div>
-            <div class="gold-display"><span id="u-gold">0.000</span> G</div>
-            <div class="stats-grid">
-                <div class="stat-box"><small>Сила клика</small><b id="u-pwr">0.001</b></div>
-                <div class="stat-box"><small>Друзья</small><b id="u-refs">0</b></div>
+    <div class="app-container active" id="screen-mining">
+        <div class="balance-card">
+            <div class="gold-label">Ваш баланс</div>
+            <div class="gold-value" id="val-gold">0.000</div>
+            <div class="stats-row">
+                <div class="stat-item"><span>Сила клика</span><b id="val-pwr">0.001</b></div>
+                <div class="stat-item"><span>Ранг</span><b id="val-rank">BRONZE</b></div>
             </div>
         </div>
-        <div class="clicker-area"><div class="coin-btn" id="coin">G</div></div>
-        <div class="actions-grid">
-            <div class="action-btn" onclick="Core.ad('gold')"><i>🎁</i><b>БОНУС +5.0 G</b><span>ADSGRAM</span></div>
-            <div class="action-btn" onclick="Core.ad('pwr')"><i>⚡</i><b>СИЛА +0.005</b><span>РЕКЛАМА</span></div>
-            <div class="action-btn upgrade-btn" onclick="Core.upgrade()">
-                🚀 <b>УЛУЧШИТЬ КЛИК ЗА 1.000 G</b>
+
+        <div class="main-click-area">
+            <div class="coin-wrapper">
+                <div class="lock-overlay" id="click-lock">
+                    <div class="lock-timer" id="lock-count">5</div>
+                    <div class="lock-text">Блокировка</div>
+                </div>
+                <div class="coin-main" id="target-coin"><span>G</span></div>
             </div>
         </div>
-    </div>
 
-    <div class="app-container" id="view-leaderboard">
-        <h2 style="text-align:center; margin-bottom:15px;">Топ-50 Игроков</h2>
-        <div class="list-wrapper" id="leader-list"></div>
-    </div>
-
-    <div class="app-container" id="view-friends">
-        <h2 style="text-align:center; margin-bottom:15px;">Рефералы</h2>
-        <div class="stat-box" style="margin-bottom:20px">
-            <button class="tos-btn-main" onclick="Core.invite()">ПРИГЛАСИТЬ ДРУЗЕЙ</button>
+        <div class="bottom-actions">
+            <div class="btn-act" onclick="Game.watchAd('gold')"><i>🎁</i><b>Бонус +5.0 G</b><span>РЕКЛАМА</span></div>
+            <div class="btn-act" onclick="Game.watchAd('pwr')"><i>⚡</i><b>Сила +0.005</b><span>РЕКЛАМА</span></div>
+            <div class="btn-act btn-full" onclick="Game.upgrade()">🚀 <b>Улучшить за 1.000 G</b><span>МАГАЗИН</span></div>
         </div>
-        <div class="list-wrapper" id="friend-list"></div>
     </div>
 
-    <div class="app-container" id="view-wallet">
-        <h2 style="text-align:center; margin-bottom:15px;">Вывод</h2>
-        <div class="stat-box" style="margin-bottom:20px">
-            <button id="wd-btn" class="tos-btn-main" style="opacity:0.5" disabled>ВЫВЕСТИ GOLD</button>
+    <div class="app-container" id="screen-top">
+        <h2 style="text-align: center; margin-bottom: 5px;">Топ-50 Игроков</h2>
+        <p style="text-align: center; font-size: 11px; color: var(--text-dim); margin-bottom: 20px;">Серверное обновление каждые 5 минут</p>
+        <div class="scroll-list" id="list-top"></div>
+    </div>
+
+    <div class="app-container" id="screen-wallet">
+        <h2 style="text-align: center; margin-bottom: 20px;">Вывод Gold</h2>
+        <div class="stat-item" style="margin-bottom: 20px; padding: 20px;">
+            <p style="color: var(--text-dim); font-size: 13px; margin-bottom: 10px;">Минимальная сумма: <b>750.000 G</b></p>
+            <button id="btn-withdraw" class="btn-act btn-full" style="opacity: 0.5;" disabled>ОФОРМИТЬ ВЫВОД</button>
         </div>
-        <div class="list-wrapper" id="history-list"></div>
+        <h3 style="font-size: 12px; color: var(--accent); text-transform: uppercase; margin-bottom: 10px;">История транзакций</h3>
+        <div class="scroll-list" id="list-history"></div>
     </div>
 
-    <nav class="nav-bar">
-        <button class="nav-item active" onclick="UI.nav('mining', this)"><i>⛏️</i><span>Майнинг</span></button>
-        <button class="nav-item" onclick="UI.nav('leaderboard', this)"><i>🏆</i><span>Топ</span></button>
-        <button class="nav-item" onclick="UI.nav('friends', this)"><i>👥</i><span>Друзья</span></button>
-        <button class="nav-item" onclick="UI.nav('wallet', this)"><i>🏦</i><span>Вывод</span></button>
+    <nav class="tab-bar">
+        <div class="tab-item active" onclick="UI.switchTab('mining', this)"><i>⛏️</i><span>Добыча</span></div>
+        <div class="tab-item" onclick="UI.switchTab('top', this)"><i>🏆</i><span>Топ-50</span></div>
+        <div class="tab-item" onclick="UI.switchTab('wallet', this)"><i>🏦</i><span>Кошелек</span></div>
     </nav>
 
     <script>
-    const Core = {
-        db: null, tg: window.Telegram.WebApp, uid: null,
-        gold: 0, pwr: 0.001, journal: 0, adId: "19895",
-        // Античит переменные
-        lastTapTime: 0,
-        tapIntervals: [],
-        warningShown: false,
+    /** * МОДУЛЬ АНТИЧИТА (AntiCheat Core)
+     */
+    const AntiCheat = {
+        history: [],
+        isLocked: false,
+        lockTime: 5,
+        
+        check(interval) {
+            if (this.isLocked) return false;
+
+            this.history.push(interval);
+            if (this.history.length > 15) this.history.shift();
+
+            if (this.history.length === 15) {
+                // 1. Проверка на CPS (более 18 кликов/сек)
+                const avg = this.history.reduce((a, b) => a + b) / 15;
+                if (avg < 55) return this.trigger();
+
+                // 2. Проверка на "роботизированную" стабильность (Entropy Check)
+                const variance = Math.max(...this.history) - Math.min(...this.history);
+                if (variance < 4) return this.trigger(); 
+            }
+            return true;
+        },
+
+        trigger() {
+            this.isLocked = true;
+            document.getElementById('modal-overlay').style.display = 'flex';
+            document.getElementById('click-lock').classList.add('active');
+            
+            let timeLeft = this.lockTime;
+            const timerDisplay = document.getElementById('lock-count');
+            
+            const countdown = setInterval(() => {
+                timeLeft--;
+                timerDisplay.innerText = timeLeft;
+                if (timeLeft <= 0) {
+                    clearInterval(countdown);
+                    this.unlock();
+                }
+            }, 1000);
+            
+            return false;
+        },
+
+        unlock() {
+            this.isLocked = false;
+            this.history = [];
+            document.getElementById('click-lock').classList.remove('active');
+            document.getElementById('lock-count').innerText = "5";
+        },
+
+        close() {
+            document.getElementById('modal-overlay').style.display = 'none';
+        }
+    };
+
+    /**
+     * ЯДРО ИГРЫ (Game Core)
+     */
+    const Game = {
+        db: null,
+        user: { id: null, gold: 0, pwr: 0.001, name: "Игрок" },
+        lastTap: 0,
+        unsynced: 0,
 
         async init() {
-            this.tg.expand();
-            this.uid = this.tg.initDataUnsafe?.user?.id?.toString() || "DEV_USER";
-            
-            if (!firebase.apps.length) {
-                firebase.initializeApp({
-                    apiKey: "AIzaSyCoa29KS-sin6hoRz0ZbE4f3ki0tZLwkKI",
-                    projectId: "gold-clicker-5d882",
-                    appId: "1:83489312782:web:ee5b7bdc390e53e7dd6c5f"
-                });
-            }
+            Telegram.WebApp.expand();
+            this.user.id = Telegram.WebApp.initDataUnsafe?.user?.id?.toString() || "LOCAL_DEBUG";
+            this.user.name = Telegram.WebApp.initDataUnsafe?.user?.first_name || "Игрок";
+
+            firebase.initializeApp({
+                apiKey: "AIzaSyCoa29KS-sin6hoRz0ZbE4f3ki0tZLwkKI",
+                projectId: "gold-clicker-5d882",
+                appId: "1:83489312782:web:ee5b7bdc390e53e7dd6c5f"
+            });
             this.db = firebase.firestore();
 
-            const doc = await this.db.collection('players').doc(this.uid).get();
-            if(!doc.exists || !doc.data().acceptedTos) {
-                document.getElementById('tos-overlay').classList.add('show');
-            } else {
+            const doc = await this.db.collection('players').doc(this.user.id).get();
+            if (doc.exists) {
                 const data = doc.data();
-                this.gold = data.gold || 0;
-                this.pwr = data.pwr || 0.001;
-                this.render();
+                this.user.gold = data.gold || 0;
+                this.user.pwr = data.pwr || 0.001;
+            } else {
+                await this.db.collection('players').doc(this.user.id).set({
+                    name: this.user.name, gold: 0, pwr: 0.001, created: new Date()
+                });
             }
 
-            document.getElementById('coin').onclick = (e) => this.tap(e);
-            setInterval(() => this.sync(), 5000);
-        },
-
-        async accept() {
-            document.getElementById('tos-overlay').classList.remove('show');
-            await this.db.collection('players').doc(this.uid).set({
-                gold: 0, pwr: 0.001, acceptedTos: true,
-                name: this.tg.initDataUnsafe?.user?.first_name || "Игрок"
-            }, {merge: true});
             this.render();
+            document.getElementById('target-coin').addEventListener('pointerdown', (e) => this.handleTap(e));
+            setInterval(() => this.sync(), 8000);
         },
 
-        tap(e) {
+        handleTap(e) {
             const now = Date.now();
-            const interval = now - this.lastTapTime;
-
-            // Логика обнаружения интервалов
-            if (this.lastTapTime > 0) {
-                this.tapIntervals.push(interval);
-                if (this.tapIntervals.length > 10) this.tapIntervals.shift();
-
-                // 1. Проверка на слишком быстрый клик (менее 60мс = более 16 кликов/сек)
-                // 2. Проверка на стабильность (если разница между интервалами менее 2мс - это бот)
-                const isTooFast = interval < 60;
-                const isTooStable = this.tapIntervals.length === 10 && 
-                                    Math.max(...this.tapIntervals) - Math.min(...this.tapIntervals) < 3;
-
-                if (isTooFast || isTooStable) {
-                    if (!this.warningShown) {
-                        this.warningShown = true;
-                        document.getElementById('coin').classList.add('blocked');
-                        this.tg.showPopup({
-                            title: "Защита от кликера!",
-                            message: "Использование автокликеров запрещено! Вы можете улучшить силу клика в магазине или увеличить баланс через просмотр рекламы.",
-                            buttons: [{type: 'ok'}]
-                        }, () => {
-                            this.warningShown = false;
-                            document.getElementById('coin').classList.remove('blocked');
-                            this.tapIntervals = [];
-                        });
-                    }
-                    return;
-                }
+            if (this.lastTap > 0) {
+                const interval = now - this.lastTap;
+                if (!AntiCheat.check(interval)) return;
             }
-            this.lastTapTime = now;
+            this.lastTap = now;
 
-            this.gold += this.pwr;
-            this.journal += this.pwr;
+            this.user.gold += this.user.pwr;
+            this.unsynced += this.user.pwr;
+            
             this.render();
-            UI.spawnText(e.clientX, e.clientY, `+${this.pwr.toFixed(3)}`);
-            if(this.tg.HapticFeedback) this.tg.HapticFeedback.impactOccurred('light');
-        },
-
-        async sync() {
-            if(this.journal <= 0) return;
-            const toAdd = this.journal;
-            this.journal = 0;
-            await this.db.collection('players').doc(this.uid).update({
-                gold: firebase.firestore.FieldValue.increment(toAdd),
-                pwr: this.pwr
-            });
-        },
-
-        ad(type) {
-            const ad = window.Adsgram.init({ blockId: this.adId });
-            ad.show().then(() => {
-                if(type === 'gold') this.gold += 5; else this.pwr += 0.005;
-                this.sync(); this.render();
-            }).catch(() => this.tg.showAlert("Реклама не готова"));
-        },
-
-        upgrade() {
-            if(this.gold < 1) return this.tg.showAlert("Нужно 1.000 G");
-            this.gold -= 1; this.pwr += 0.005;
-            this.sync(); this.render();
+            UI.animateTap(e);
+            if (Telegram.WebApp.HapticFeedback) Telegram.WebApp.HapticFeedback.impactOccurred('light');
         },
 
         render() {
-            document.getElementById('u-gold').innerText = this.gold.toFixed(3);
-            document.getElementById('u-pwr').innerText = this.pwr.toFixed(3);
-            const btn = document.getElementById('wd-btn');
-            if(this.gold >= 750) { btn.disabled = false; btn.style.opacity = "1"; btn.onclick = () => this.withdraw(); }
+            document.getElementById('val-gold').innerText = this.user.gold.toFixed(3);
+            document.getElementById('val-pwr').innerText = this.user.pwr.toFixed(3);
+            
+            // Расчет ранга
+            let r = "BRONZE";
+            if(this.user.gold > 100) r = "SILVER";
+            if(this.user.gold > 500) r = "GOLD";
+            if(this.user.gold > 1000) r = "ELITE";
+            document.getElementById('val-rank').innerText = r;
+
+            // Кнопка вывода
+            const wBtn = document.getElementById('btn-withdraw');
+            if (this.user.gold >= 750) {
+                wBtn.disabled = false;
+                wBtn.style.opacity = "1";
+                wBtn.onclick = () => this.withdraw();
+            }
+        },
+
+        async sync() {
+            if (this.unsynced <= 0) return;
+            const delta = this.unsynced;
+            this.unsynced = 0;
+            await this.db.collection('players').doc(this.user.id).update({
+                gold: firebase.firestore.FieldValue.increment(delta),
+                pwr: this.user.pwr,
+                lastSeen: new Date()
+            });
+        },
+
+        async upgrade() {
+            if (this.user.gold < 1) return Telegram.WebApp.showAlert("Недостаточно средств! Минимум 1.000 G.");
+            this.user.gold -= 1;
+            this.user.pwr += 0.005;
+            this.render();
+            await this.db.collection('players').doc(this.user.id).update({
+                gold: firebase.firestore.FieldValue.increment(-1),
+                pwr: firebase.firestore.FieldValue.increment(0.005)
+            });
+        },
+
+        watchAd(type) {
+            const ad = Adsgram.init({ blockId: "19895" });
+            ad.show().then(() => {
+                if (type === 'gold') this.user.gold += 5;
+                else this.user.pwr += 0.005;
+                this.sync();
+                this.render();
+            }).catch(() => Telegram.WebApp.showAlert("Реклама еще не готова..."));
         },
 
         async withdraw() {
-            const sid = prompt("ID Standoff 2:");
-            if(!sid || sid.length < 8) return;
-            await this.db.collection('withdrawals').add({ uid: this.uid, sid, amount: Math.floor(this.gold), status: 'Ожидание', date: new Date() });
-            this.gold = 0;
-            await this.db.collection('players').doc(this.uid).update({ gold: 0 });
+            const sid = prompt("Введите ID Standoff 2:");
+            if (!sid || sid.length < 7) return Telegram.WebApp.showAlert("Неверный ID!");
+            
+            const amount = Math.floor(this.user.gold);
+            await this.db.collection('withdrawals').add({
+                uid: this.user.id,
+                sid: sid,
+                amount: amount,
+                status: "Ожидание",
+                date: new Date()
+            });
+
+            this.user.gold = 0;
+            await this.db.collection('players').doc(this.user.id).update({ gold: 0 });
             this.render();
-            this.tg.showAlert("Заявка создана!");
-        },
-
-        invite() {
-            const link = `https://t.me/Locus_Gold_bot/app?startapp=${this.uid}`;
-            this.tg.openTelegramLink(`https://t.me/share/url?url=${link}&text=Бесплатная+голда!`);
+            Telegram.WebApp.showAlert(`Заявка на ${amount} G создана!`);
         }
     };
 
+    /**
+     * ИНТЕРФЕЙС (UI Controller)
+     */
     const UI = {
-        nav(id, el) {
-            document.querySelectorAll('.app-container').forEach(v => v.classList.remove('active'));
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            document.getElementById('view-' + id).classList.add('active');
-            el.classList.add('active');
-            if(id === 'leaderboard') this.loadLeaders();
-            if(id === 'friends') this.loadFriends();
-            if(id === 'wallet') this.loadHistory();
-        },
-        async loadLeaders() {
-            const list = document.getElementById('leader-list');
-            list.innerHTML = "Загрузка...";
-            // Лимит 50 игроков
-            const snap = await Core.db.collection('players').orderBy('gold', 'desc').limit(50).get();
-            list.innerHTML = "";
-            let i = 1;
-            snap.forEach(doc => {
-                const d = doc.data();
-                list.innerHTML += `<div class="list-item"><b>${i++}. ${d.name || 'Игрок'}</b><span>${Math.floor(d.gold)} G</span></div>`;
-            });
-        },
-        async loadFriends() {
-            const list = document.getElementById('friend-list');
-            const snap = await Core.db.collection('players').doc(Core.uid).collection('referrals').get();
-            list.innerHTML = snap.empty ? "Пусто" : "";
-            document.getElementById('u-refs').innerText = snap.size;
-            snap.forEach(doc => {
-                list.innerHTML += `<div class="list-item"><span>${doc.data().name}</span><b>+100 G</b></div>`;
-            });
-        },
-        async loadHistory() {
-            const list = document.getElementById('history-list');
-            const snap = await Core.db.collection('withdrawals').where('uid', '==', Core.uid).get();
-            list.innerHTML = snap.empty ? "Нет выплат" : "";
-            snap.forEach(doc => {
-                const d = doc.data();
-                list.innerHTML += `<div class="list-item"><span>ID: ${d.sid}</span><small>${d.status}</small></div>`;
-            });
-        },
-        showFullTos() { document.getElementById('full-tos').style.display = 'block'; },
-        hideFullTos() { document.getElementById('full-tos').style.display = 'none'; },
-        spawnText(x, y, txt) {
-            const el = document.createElement('div');
-            el.className = 'float-text'; el.innerText = txt;
-            el.style.left = x + 'px'; el.style.top = y + 'px';
-            document.body.appendChild(el);
-            setTimeout(() => el.remove(), 700);
-        }
-    };
-
-    window.onload = () => Core.init();
-    </script>
-</body>
-</html>
+        switchTab(screen, el) {
+            document.querySelectorAll('.app-container').forEach(c => c.classList.remove('active'));
+            document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+            
+            document.getElementById('
