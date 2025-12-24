@@ -3,47 +3,50 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Gold Clicker</title>
+    <title>Locus Gold Clicker</title>
+    
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
     <style>
         body { 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            font-family: 'Arial', sans-serif; 
             text-align: center; 
-            background: #0f0f0f; 
+            background: #121212; 
             color: white; 
             margin: 0; 
-            overflow: hidden; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            height: 100vh; 
             user-select: none;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
+            -webkit-tap-highlight-color: transparent;
         }
-        #gold-display { font-size: 56px; font-weight: bold; color: #ffca28; text-shadow: 0 0 20px rgba(255,202,40,0.5); }
-        .label { font-size: 18px; color: #888; margin-bottom: 10px; }
+        .label { font-size: 14px; color: #aaa; letter-spacing: 2px; margin-bottom: 5px; }
+        #gold-display { font-size: 64px; font-weight: bold; color: #ffca28; margin-bottom: 20px; }
         #click-btn { 
-            width: 220px; height: 220px; border-radius: 50%; border: none; 
-            background: radial-gradient(circle, #ffeb3b 0%, #fbc02d 100%);
-            box-shadow: 0 0 40px rgba(251, 192, 45, 0.4); 
-            font-size: 100px; cursor: pointer; transition: transform 0.05s;
+            width: 240px; height: 240px; border-radius: 50%; border: none; 
+            background: radial-gradient(circle, #ffe082 0%, #ffca28 100%);
+            box-shadow: 0 0 30px rgba(255, 202, 40, 0.3); 
+            font-size: 110px; cursor: pointer; transition: transform 0.05s;
             display: flex; align-items: center; justify-content: center;
-            margin-top: 20px;
         }
-        #click-btn:active { transform: scale(0.92); }
+        #click-btn:active { transform: scale(0.90); }
+        #status { margin-top: 20px; font-size: 12px; color: #555; }
     </style>
 </head>
 <body>
 
-    <div class="label">ВАШЕ ЗОЛОТО</div>
-    <div id="gold-display">0</div>
+    <div class="label">БАЛАНС</div>
+    <div id="gold-display">...</div>
     <button id="click-btn">📀</button>
+    <div id="status">Синхронизация с облаком...</div>
 
     <script>
-        // --- ВАША КОНФИГУРАЦИЯ FIREBASE ---
+        // 1. Твоя конфигурация Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyCoa29KS-sin6hoRz0ZbE4f3ki0tZLwkKI",
             authDomain: "gold-clicker-5d882.firebaseapp.com",
@@ -56,50 +59,68 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        // --- ЛОГИКА TELEGRAM ---
+        // 2. Инициализация Telegram
         const tg = window.Telegram.WebApp;
         tg.expand();
         
-        // Получаем ID пользователя
-        const userId = tg.initDataUnsafe?.user?.id ? tg.initDataUnsafe.user.id.toString() : "test_user_123";
+        const userId = tg.initDataUnsafe?.user?.id ? tg.initDataUnsafe.user.id.toString() : "test_user_5223115893";
         const playerRef = db.collection('players').doc(userId);
 
         let gold = 0;
         const display = document.getElementById('gold-display');
+        const status = document.getElementById('status');
 
-        // --- ЗАГРУЗКА ДАННЫХ ПРИ СТАРТЕ ---
+        // 3. Функция загрузки (теперь надежная)
         async function loadData() {
             try {
                 const doc = await playerRef.get();
                 if (doc.exists) {
                     gold = doc.data().gold || 0;
+                    console.log("Загружено золота:", gold);
                 } else {
-                    // Создаем нового игрока, если его нет
+                    console.log("Новый игрок, создаем профиль");
                     await playerRef.set({ 
                         gold: 0, 
                         username: tg.initDataUnsafe?.user?.username || "Unknown" 
                     });
+                    gold = 0;
                 }
                 display.innerText = gold;
+                status.innerText = "Данные синхронизированы";
             } catch (e) {
                 console.error("Ошибка загрузки:", e);
+                status.innerText = "Ошибка сети! Проверьте соединение.";
             }
         }
 
-        // --- ОБРАБОТКА КЛИКА ---
+        // 4. Функция сохранения
+        async function saveData() {
+            try {
+                // Используем set с merge: true для максимальной надежности
+                await playerRef.set({ gold: gold }, { merge: true });
+                status.innerText = "Сохранено";
+            } catch (e) {
+                console.error("Ошибка сохранения:", e);
+                status.innerText = "Ошибка сохранения!";
+            }
+        }
+
+        // 5. Обработка клика
         document.getElementById('click-btn').addEventListener('click', () => {
             gold++;
             display.innerText = gold;
+            status.innerText = "Сохранение...";
             
-            // Виброотклик Telegram
-            tg.HapticFeedback.impactOccurred('medium');
+            // Виброотклик
+            if (tg.HapticFeedback) {
+                tg.HapticFeedback.impactOccurred('medium');
+            }
 
-            // Сохранение в Firebase (раз в 1 клик для теста, позже можно оптимизировать)
-            playerRef.update({ gold: gold }).catch(err => {
-                console.error("Ошибка сохранения:", err);
-            });
+            // Отправляем данные в Firebase
+            saveData();
         });
 
+        // Запуск
         loadData();
     </script>
 </body>
