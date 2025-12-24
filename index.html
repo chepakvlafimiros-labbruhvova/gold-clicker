@@ -3,295 +3,236 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Path to Neon: Syndicate</title>
-    
+    <title>Locus Gold: Syndicate</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://sad.adsgram.ai/js/sad.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-
     <style>
         :root {
-            --gold: #ffcc00;
             --neon: #00f2ff;
             --danger: #ff3b30;
+            --warning: #ffcc00;
             --bg: #0a0a0c;
-            --surface: #16161a;
+            --card: #16161a;
             --border: #2c2c34;
-            --text-dim: #8e8e93;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
         body { background: var(--bg); color: #fff; height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
 
-        /* HUD - ВЕРХНЯЯ ПАНЕЛЬ СТАТУСА */
-        .hud {
-            padding: 15px 20px;
-            background: var(--surface);
-            border-bottom: 1px solid var(--border);
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-        }
+        /* HUD */
+        .hud { padding: 15px 20px; background: var(--card); border-bottom: 1px solid var(--border); display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .stat-group { display: flex; flex-direction: column; gap: 5px; }
+        .stat-info { display: flex; justify-content: space-between; font-size: 10px; text-transform: uppercase; font-weight: bold; color: #8e8e93; }
+        .stat-info span.val { color: #fff; }
 
-        .stat-item { font-size: 12px; }
-        .stat-item i { color: var(--neon); margin-right: 5px; }
-        .stat-val { font-weight: 800; display: block; }
+        .bar { width: 100%; height: 6px; background: #000; border-radius: 3px; overflow: hidden; }
+        .bar-f { height: 100%; transition: width 0.3s; }
+        .hp-f { background: var(--danger); }
+        .en-f { background: var(--neon); }
+        .hg-f { background: var(--warning); }
 
-        /* PROGRESS BARS */
-        .bar-container { width: 100%; height: 6px; background: #000; border-radius: 3px; margin-top: 5px; overflow: hidden; }
-        .bar-fill { height: 100%; transition: width 0.3s; }
-        .hp-fill { background: var(--danger); }
-        .en-fill { background: var(--neon); }
+        .cash-display { grid-column: span 2; text-align: center; padding-top: 10px; border-top: 1px solid #222; font-size: 28px; font-weight: 900; color: var(--neon); }
 
-        /* MAIN CONTENT */
+        /* MAIN AREA */
         .viewport { flex: 1; overflow-y: auto; padding: 20px; }
         .screen { display: none; }
         .screen.active { display: block; }
 
-        /* CARDS & ACTIONS */
-        .card {
-            background: var(--surface);
-            border-radius: 16px;
-            padding: 15px;
-            margin-bottom: 15px;
-            border: 1px solid var(--border);
-        }
+        .card { background: var(--card); border-radius: 20px; padding: 20px; margin-bottom: 15px; border: 1px solid var(--border); position: relative; }
+        .card h3 { font-size: 18px; margin-bottom: 8px; }
+        .card p { font-size: 13px; color: #8e8e93; margin-bottom: 15px; }
 
-        .action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        
-        .btn {
-            background: #23232a;
-            border: 1px solid var(--border);
-            padding: 12px;
-            border-radius: 12px;
-            color: #fff;
-            text-align: center;
-            cursor: pointer;
-            transition: 0.2s;
-        }
+        .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .btn { background: #1c1c22; border: 1px solid var(--border); padding: 15px 10px; border-radius: 14px; color: #fff; text-align: center; cursor: pointer; display: flex; flex-direction: column; gap: 4px; }
+        .btn:active { transform: scale(0.96); background: #25252d; }
+        .btn b { font-size: 14px; }
+        .btn span { font-size: 9px; color: var(--neon); font-weight: bold; }
+        .btn.disabled { opacity: 0.4; pointer-events: none; }
 
-        .btn:active { transform: scale(0.95); background: #2c2c34; }
-        .btn.primary { border-color: var(--neon); color: var(--neon); }
-        .btn small { display: block; font-size: 9px; opacity: 0.6; margin-top: 4px; }
+        /* NOTIFICATIONS */
+        #toast-container { position: fixed; top: 100px; left: 50%; transform: translateX(-50%); z-index: 1000; pointer-events: none; width: 80%; }
+        .toast { background: rgba(0, 242, 255, 0.1); border: 1px solid var(--neon); color: #fff; padding: 10px 15px; border-radius: 10px; font-size: 12px; text-align: center; margin-bottom: 5px; animation: fIn 0.3s ease, fOut 0.3s ease 2s forwards; backdrop-filter: blur(5px); }
 
-        /* NAVIGATION */
-        .nav {
-            background: var(--surface);
-            border-top: 1px solid var(--border);
-            display: flex;
-            padding-bottom: env(safe-area-inset-bottom);
-        }
+        @keyframes fIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fOut { to { opacity: 0; transform: translateY(-10px); } }
 
-        .nav-item {
-            flex: 1; padding: 15px 5px; text-align: center;
-            color: var(--text-dim); font-size: 10px; text-transform: uppercase;
-        }
-
+        /* NAV */
+        .nav { background: var(--card); border-top: 1px solid var(--border); display: flex; padding-bottom: env(safe-area-inset-bottom); }
+        .nav-item { flex: 1; padding: 12px 5px; text-align: center; color: #8e8e93; font-size: 9px; text-transform: uppercase; font-weight: 800; }
         .nav-item.active { color: var(--neon); }
-        .nav-item i { font-size: 18px; margin-bottom: 5px; display: block; }
-
-        /* LOGS */
-        #game-logs {
-            height: 100px; background: #000; padding: 10px;
-            font-family: monospace; font-size: 10px; color: #0f0;
-            overflow-y: auto; border-top: 1px solid var(--border);
-        }
+        .nav-item i { font-size: 18px; margin-bottom: 4px; display: block; }
     </style>
 </head>
 <body>
 
+    <div id="toast-container"></div>
+
     <div class="hud">
-        <div class="stat-item">
-            <i class="fas fa-wallet"></i><small>CASH</small>
-            <span class="stat-val" id="val-cash">$0</span>
+        <div class="stat-group">
+            <div class="stat-info">Здоровье <span class="val" id="hp-txt">100</span></div>
+            <div class="bar"><div id="hp-bar" class="bar-f hp-f" style="width: 100%"></div></div>
         </div>
-        <div class="stat-item">
-            <i class="fas fa-heart"></i><small>HEALTH</small>
-            <div class="bar-container"><div id="hp-bar" class="bar-fill hp-fill" style="width: 100%"></div></div>
+        <div class="stat-group">
+            <div class="stat-info">Голод <span class="val" id="hg-txt">100</span></div>
+            <div class="bar"><div id="hg-bar" class="bar-f hg-f" style="width: 100%"></div></div>
         </div>
-        <div class="stat-item">
-            <i class="fas fa-bolt"></i><small>ENERGY</small>
-            <div class="bar-container"><div id="en-bar" class="bar-fill en-fill" style="width: 100%"></div></div>
+        <div class="stat-group" style="grid-column: span 2;">
+            <div class="stat-info">Энергия <span class="val" id="en-txt">100</span></div>
+            <div class="bar"><div id="en-bar" class="bar-f en-f" style="width: 100%"></div></div>
         </div>
+        <div class="cash-display" id="cash-txt">$0</div>
     </div>
 
     <div class="viewport">
         <div id="scr-street" class="screen active">
             <div class="card">
-                <h3>Улицы Готэм-Сити</h3>
-                <p style="color: var(--text-dim); font-size: 13px; margin: 10px 0;">Вы начинаете с низов. Соберите бутылки или попробуйте найти еду.</p>
-                <div class="action-grid">
-                    <div class="btn" onclick="Game.doAction('search_trash')">
-                        <b>Поиск в мусоре</b>
-                        <small>-5 Energy | +$1-3</small>
+                <h3>Трущобы Готэма</h3>
+                <p>Выживание здесь стоит дорого. Мусор — ваш единственный доход.</p>
+                <div class="btn-grid">
+                    <div class="btn" onclick="Game.action('scavenge')">
+                        <b>Мусорный бак</b>
+                        <span>-8 EN | +$1-4</span>
                     </div>
-                    <div class="btn" onclick="Game.doAction('beg')">
-                        <b>Попрошайничать</b>
-                        <small>-10 Energy | +$0-10</small>
+                    <div class="btn" onclick="Game.action('beg')">
+                        <b>Просить мелочь</b>
+                        <span>-12 EN | +$0-10</span>
                     </div>
                 </div>
             </div>
-            
-            <div class="card" id="sleep-card">
-                <h3>Ночлег</h3>
-                <div class="btn primary" onclick="Game.doAction('sleep')">
-                    <b>Спать на коробке</b>
-                    <small>Восстановить Энергию</small>
+
+            <div class="card">
+                <h3>Магазин "24/7"</h3>
+                <div class="btn-grid">
+                    <div class="btn" onclick="Game.action('buy_bread')">
+                        <b>Хлеб ($5)</b>
+                        <span>+20 Голод</span>
+                    </div>
+                    <div class="btn" onclick="Game.action('buy_meds')">
+                        <b>Бинты ($20)</b>
+                        <span>+30 Здоровье</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" style="border-color: var(--warning);">
+                <h3>Ночлег в подворотне</h3>
+                <p>Бесплатно, но грязно. Риск простудиться.</p>
+                <div class="btn" style="width: 100%; border-color: var(--warning);" onclick="Game.action('sleep')">
+                    <b>Уснуть на картоне</b>
+                    <span>+60 EN | -15 HG | -5 HP</span>
                 </div>
             </div>
         </div>
 
         <div id="scr-work" class="screen">
-            <div class="card">
-                <h3>Центр Занятости</h3>
-                <div id="job-list">
-                    </div>
-            </div>
-        </div>
-
-        <div id="scr-biz" class="screen">
-            <div class="card">
-                <h3>Мои Предприятия</h3>
-                <div id="biz-list">
-                    <p style="text-align:center; color:var(--text-dim)">У вас пока нет бизнеса. Накопите $5,000 для первой кофейни.</p>
-                </div>
-            </div>
+            <h2 style="text-align:center; padding: 20px;">Работы закрыты</h2>
+            <p style="text-align:center; color:#555;">Купите чистую одежду, чтобы начать работать.</p>
         </div>
     </div>
 
-    <div id="game-logs"></div>
-
     <nav class="nav">
-        <div class="nav-item active" onclick="UI.nav('street', this)"><i class="fas fa-home"></i>Улица</div>
+        <div class="nav-item active" onclick="UI.nav('street', this)"><i class="fas fa-street-view"></i>Улица</div>
         <div class="nav-item" onclick="UI.nav('work', this)"><i class="fas fa-briefcase"></i>Работа</div>
-        <div class="nav-item" onclick="UI.nav('biz', this)"><i class="fas fa-city"></i>Бизнес</div>
-        <div class="nav-item" onclick="Game.showAd()"><i class="fas fa-ad" style="color: var(--gold)"></i>Бонус</div>
+        <div class="nav-item" onclick="Game.showAd()"><i class="fas fa-play-circle" style="color:var(--warning)"></i>Бонус</div>
     </nav>
 
     <script>
-        /**
-         * GLOBAL GAME ENGINE: PATH TO NEON
-         * Modules: Character, Economy, World, Events
-         */
-
         const Game = {
-            player: {
-                cash: 0,
-                hp: 100,
-                energy: 100,
-                intellect: 1,
-                karma: 0,
-                lvl: 1,
-                exp: 0,
-                inventory: []
-            },
-
-            // Система работ (от бомжа до CEO)
-            jobs: [
-                { id: 'cleaner', name: 'Уборщик', pay: 15, req: 0, en: 20 },
-                { id: 'courier', name: 'Курьер', pay: 45, req: 2, en: 30 },
-                { id: 'coder', name: 'Junior Dev', pay: 150, req: 10, en: 40 }
-            ],
+            state: { cash: 0, hp: 100, energy: 100, hunger: 100 },
 
             init() {
-                this.tg = window.Telegram.WebApp;
-                this.tg.expand();
-                this.load();
+                const save = localStorage.getItem('syndicate_v2');
+                if(save) this.state = JSON.parse(save);
                 this.updateUI();
-                this.startTick();
-                this.log("Система инициализирована. Добро пожаловать в Неон-Сити.");
+                setInterval(() => this.tick(), 10000); // Каждые 10 сек пассивный голод
             },
 
-            // Главная фишка: Динамическое выполнение действий
-            doAction(type) {
-                if(this.player.energy < 10 && type !== 'sleep') {
-                    return this.log("Слишком устал... Нужен отдых.");
+            tick() {
+                this.state.hunger = Math.max(0, this.state.hunger - 1);
+                if(this.state.hunger <= 0) {
+                    this.state.hp = Math.max(0, this.state.hp - 2);
+                    this.toast("Вы умираете от голода!", true);
                 }
+                this.updateUI();
+            },
 
+            action(type) {
                 switch(type) {
-                    case 'search_trash':
-                        let found = Math.floor(Math.random() * 4);
-                        this.player.cash += found;
-                        this.player.energy -= 5;
-                        this.player.exp += 1;
-                        this.log(`Найдено в мусоре: $${found}`);
+                    case 'scavenge':
+                        if(this.state.energy < 8) return this.toast("Нет сил...");
+                        this.state.energy -= 8;
+                        let found = Math.floor(Math.random() * 4) + 1;
+                        if(Math.random() > 0.8) {
+                            this.state.hp -= 10;
+                            this.toast("Порезались об стекло! -10 HP", true);
+                        }
+                        this.state.cash += found;
+                        this.toast(`Найдено: $${found}`);
                         break;
-                    case 'beg':
-                        let beg = Math.random() > 0.5 ? Math.floor(Math.random() * 11) : 0;
-                        this.player.cash += beg;
-                        this.player.energy -= 10;
-                        this.log(beg > 0 ? `Прохожий дал вам $${beg}` : "Вас проигнорировали.");
-                        break;
+
                     case 'sleep':
-                        this.player.energy = 100;
-                        this.player.hp = Math.min(100, this.player.hp + 10);
-                        this.log("Вы поспали. Энергия восстановлена.");
+                        this.state.energy = Math.min(100, this.state.energy + 60);
+                        this.state.hunger = Math.max(0, this.state.hunger - 15);
+                        this.state.hp = Math.max(0, this.state.hp - 5);
+                        this.toast("Вы поспали, но проголодались и замерзли.");
+                        break;
+
+                    case 'buy_bread':
+                        if(this.state.cash < 5) return this.toast("Нет денег!");
+                        this.state.cash -= 5;
+                        this.state.hunger = Math.min(100, this.state.hunger + 20);
+                        this.toast("Хлеб съеден.");
+                        break;
+
+                    case 'buy_meds':
+                        if(this.state.cash < 20) return this.toast("Нет денег!");
+                        this.state.cash -= 20;
+                        this.state.hp = Math.min(100, this.state.hp + 30);
+                        this.toast("Раны обработаны.");
                         break;
                 }
+                this.save();
                 this.updateUI();
-            },
-
-            startTick() {
-                // Пассивное выгорание и восстановление
-                setInterval(() => {
-                    if(this.player.hp <= 0) this.gameOver();
-                    this.updateUI();
-                }, 5000);
             },
 
             updateUI() {
-                document.getElementById('val-cash').innerText = `$${Math.floor(this.player.cash)}`;
-                document.getElementById('hp-bar').style.width = this.player.hp + '%';
-                document.getElementById('en-bar').style.width = this.player.energy + '%';
-                
-                // Рендер работ в зависимости от уровня
-                const jobList = document.getElementById('job-list');
-                jobList.innerHTML = '';
-                this.jobs.forEach(j => {
-                    if(this.player.lvl >= j.req) {
-                        jobList.innerHTML += `
-                            <div class="btn" style="margin-bottom:10px" onclick="Game.work('${j.id}')">
-                                <b>${j.name}</b>
-                                <small>Зарплата: $${j.pay} | Энергия: -${j.en}</small>
-                            </div>
-                        `;
-                    }
-                });
-            },
+                document.getElementById('cash-txt').innerText = `$${this.state.cash}`;
+                document.getElementById('hp-bar').style.width = this.state.hp + '%';
+                document.getElementById('en-bar').style.width = this.state.energy + '%';
+                document.getElementById('hg-bar').style.width = this.state.hunger + '%';
+                document.getElementById('hp-txt').innerText = this.state.hp;
+                document.getElementById('en-txt').innerText = Math.floor(this.state.energy);
+                document.getElementById('hg-txt').innerText = this.state.hunger;
 
-            work(id) {
-                const job = this.jobs.find(j => j.id === id);
-                if(this.player.energy >= job.en) {
-                    this.player.cash += job.pay;
-                    this.player.energy -= job.en;
-                    this.player.exp += 5;
-                    this.log(`Вы отработали смену: +$${job.pay}`);
-                    this.updateUI();
-                } else {
-                    this.log("Недостаточно энергии для работы.");
+                if(this.state.hp <= 0) {
+                    alert("Вы погибли в трущобах...");
+                    this.state = { cash: 0, hp: 100, energy: 100, hunger: 100 };
+                    this.save();
+                    location.reload();
                 }
             },
 
+            toast(msg, critical = false) {
+                const c = document.getElementById('toast-container');
+                const t = document.createElement('div');
+                t.className = 'toast';
+                if(critical) t.style.borderColor = 'var(--danger)';
+                t.innerText = msg;
+                c.appendChild(t);
+                setTimeout(() => t.remove(), 2300);
+            },
+
+            save() { localStorage.setItem('syndicate_v2', JSON.stringify(this.state)); },
+
             showAd() {
-                // Реклама дает "Набор выживания"
+                if(typeof Adsgram === 'undefined') return this.toast("Реклама недоступна");
                 const ad = Adsgram.init({ blockId: "19895" });
                 ad.show().then(() => {
-                    this.player.cash += 100;
-                    this.player.energy = 100;
-                    this.log("Спонсорская помощь: +$100 и Энергия");
+                    this.state.cash += 50;
                     this.updateUI();
+                    this.toast("Спонсор прислал вам $50!");
                 });
-            },
-
-            log(msg) {
-                const l = document.getElementById('game-logs');
-                l.innerHTML = `> ${msg}<br>` + l.innerHTML;
-            },
-
-            save() { localStorage.setItem('neon_save', JSON.stringify(this.player)); },
-            load() {
-                const s = localStorage.getItem('neon_save');
-                if(s) this.player = JSON.parse(s);
             }
         };
 
