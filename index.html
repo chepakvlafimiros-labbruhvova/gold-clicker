@@ -3,551 +3,530 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Locus Gold Official</title>
+    <title>Locus Gold - Ultimate Edition</title>
     
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
     <style>
-        /* ГЛОБАЛЬНЫЕ СТИЛИ: Исключаем любые баги верстки */
+        /* 1. БАЗОВЫЙ СБРОС И ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ */
         :root {
             --gold: #ffca28;
-            --gold-dark: #b8860b;
-            --bg: #000000;
-            --card-bg: #111111;
-            --text-main: #ffffff;
-            --text-dim: #888888;
+            --gold-glow: rgba(255, 202, 40, 0.4);
+            --bg-dark: #050505;
+            --surface: #121212;
+            --accent-green: #2ecc71;
+            --accent-blue: #3498db;
+            --accent-orange: #e67e22;
+            --text-gray: #aaaaaa;
         }
 
         * {
             margin: 0; padding: 0; box-sizing: border-box;
             -webkit-tap-highlight-color: transparent;
-            user-select: none;
-            -webkit-user-select: none;
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            user-select: none; -webkit-user-select: none;
+            outline: none;
         }
 
         body {
-            background-color: var(--bg);
-            color: var(--text-main);
-            height: 100vh;
-            width: 100vw;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
+            background-color: var(--bg-dark);
+            color: #ffffff;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            height: 100vh; width: 100vw;
+            overflow: hidden; display: flex; flex-direction: column;
         }
 
-        /* КОНТЕЙНЕРЫ СТРАНИЦ */
-        .app-container {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            overflow-y: auto;
-            padding-bottom: 90px;
+        /* 2. ВЕРХНЯЯ ПАНЕЛЬ (СЧЕТ) */
+        .header {
+            padding: 25px 20px;
+            display: flex; flex-direction: column; align-items: center;
+            background: linear-gradient(180deg, rgba(255,202,40,0.05) 0%, rgba(0,0,0,0) 100%);
+        }
+
+        .score-card {
+            width: 100%; max-width: 340px;
+            background: var(--surface);
+            border: 1px solid #222;
+            border-radius: 24px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+        }
+
+        .score-label {
+            font-size: 12px; font-weight: 700; color: var(--text-gray);
+            letter-spacing: 1.5px; margin-bottom: 10px;
+        }
+
+        .score-value {
+            font-size: 52px; font-weight: 900; color: var(--gold);
+            line-height: 1; text-shadow: 0 0 15px var(--gold-glow);
+        }
+
+        /* 3. КОНТЕНТНАЯ ОБЛАСТЬ (СТРАНИЦЫ) */
+        .content {
+            flex: 1; position: relative; overflow-y: auto; padding-bottom: 100px;
         }
 
         .page {
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            width: 100%;
-            animation: fadeIn 0.3s ease;
+            position: absolute; width: 100%; min-height: 100%;
+            display: none; flex-direction: column; align-items: center;
+            padding: 0 20px; opacity: 0; transform: translateY(10px);
+            transition: all 0.3s ease;
         }
 
         .page.active {
-            display: flex;
+            display: flex; opacity: 1; transform: translateY(0);
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+        /* 4. МОНЕТА И КЛИКЕР */
+        .coin-box {
+            flex: 1; display: flex; align-items: center; justify-content: center;
+            min-height: 350px;
         }
 
-        /* СТИЛЬ СЧЕТА (КАК НА СКРИНШОТЕ) */
-        .header-score {
-            width: 90%;
-            background: linear-gradient(145deg, #1a1a1a, #0a0a0a);
-            border: 1px solid #333;
-            border-radius: 25px;
-            margin: 20px 0;
-            padding: 30px 0;
-            text-align: center;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
-            flex-shrink: 0;
-        }
-
-        .score-title {
-            font-size: 14px;
-            color: var(--text-dim);
-            letter-spacing: 2px;
-            margin-bottom: 8px;
-            text-transform: uppercase;
-        }
-
-        #balance {
-            font-size: 64px;
-            font-weight: 900;
-            color: var(--gold);
-            text-shadow: 0 0 20px rgba(255, 202, 40, 0.3);
-            line-height: 1;
-        }
-
-        /* МОНЕТА (ЦЕНТРАЛЬНЫЙ ЭЛЕМЕНТ) */
-        .coin-wrapper {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 100%;
-        }
-
-        .main-coin {
-            width: 260px;
-            height: 260px;
-            background: radial-gradient(circle, var(--gold) 0%, var(--gold-dark) 100%);
-            border-radius: 50%;
-            border: 10px solid #222;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 110px;
-            font-weight: bold;
-            color: #000;
-            cursor: pointer;
+        .coin-btn {
+            width: 240px; height: 240px;
+            background: radial-gradient(circle, #ffca28 0%, #d4a017 100%);
+            border-radius: 50%; border: 8px solid #1a1a1a;
+            box-shadow: 0 0 50px rgba(212, 160, 23, 0.3), inset 0 0 20px rgba(255,255,255,0.4);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 100px; font-weight: 900; color: #3d2b00;
+            cursor: pointer; transition: transform 0.05s;
             position: relative;
-            box-shadow: 0 0 60px rgba(184, 134, 11, 0.4);
-            transition: transform 0.05s cubic-bezier(0.1, 0.7, 1.0, 0.1);
         }
 
-        .main-coin:active {
-            transform: scale(0.92);
+        .coin-btn:active { transform: scale(0.94); }
+
+        /* 5. КНОПКИ ДЕЙСТВИЙ */
+        .action-list { width: 100%; max-width: 400px; display: flex; flex-direction: column; gap: 12px; margin-top: 20px; }
+
+        .btn {
+            width: 100%; padding: 18px; border-radius: 16px; border: none;
+            font-size: 16px; font-weight: 700; color: #fff;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+            cursor: pointer; position: relative; overflow: hidden;
         }
 
-        .main-coin::after {
-            content: '';
-            position: absolute;
-            width: 100%; height: 100%;
-            border-radius: 50%;
-            border: 4px solid rgba(255,255,255,0.2);
+        .btn-green { background: var(--accent-green); box-shadow: 0 4px 15px rgba(46, 204, 113, 0.2); }
+        .btn-blue { background: var(--accent-blue); box-shadow: 0 4px 15px rgba(52, 152, 219, 0.2); }
+        .btn-disabled { background: #222; color: #555; cursor: not-allowed; }
+        .btn-orange { background: var(--accent-orange); }
+
+        /* 6. СПИСКИ И ИНФО-БОКСЫ */
+        .info-section { width: 100%; max-width: 400px; margin-top: 30px; }
+        .section-title { font-size: 15px; color: var(--gold); margin-bottom: 12px; font-weight: 700; padding-left: 5px; }
+
+        .list-container {
+            background: var(--surface); border-radius: 20px; border: 1px solid #222;
+            width: 100%; overflow: hidden;
         }
 
-        /* КНОПКИ И ДЕЙСТВИЯ */
-        .btn-group {
-            width: 90%;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            margin-top: 20px;
-        }
-
-        .action-btn {
-            width: 100%;
-            padding: 20px;
-            border-radius: 18px;
-            border: none;
-            font-size: 16px;
-            font-weight: bold;
-            color: #fff;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            cursor: pointer;
-            transition: opacity 0.2s;
-        }
-
-        .btn-invite { background: #27ae60; }
-        .btn-ad { background: #2980b9; }
-        .btn-withdraw { background: #444; color: #888; pointer-events: none; }
-        .btn-withdraw.ready { background: #e67e22; color: #fff; pointer-events: auto; }
-
-        /* СПИСКИ (РЕФЕРАЛЫ / ИСТОРИЯ) */
-        .data-list {
-            width: 90%;
-            background: var(--card-bg);
-            border-radius: 20px;
-            padding: 15px;
-            margin-top: 15px;
-            border: 1px solid #222;
-        }
-
-        .list-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 12px 5px;
-            border-bottom: 1px solid #222;
+        .list-item {
+            padding: 15px 20px; border-bottom: 1px solid #222;
+            display: flex; justify-content: space-between; align-items: center;
             font-size: 14px;
         }
 
-        .list-row:last-child { border-bottom: none; }
+        .list-item:last-child { border-bottom: none; }
 
-        /* ТАБ-БАР (НАВИГАЦИЯ) */
-        .nav-bar {
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-            height: 80px;
-            background: #0a0a0a;
-            border-top: 1px solid #222;
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            z-index: 100;
+        /* 7. ТАБ-БАР (НИЖНЯЯ НАВИГАЦИЯ) */
+        .tab-bar {
+            position: fixed; bottom: 0; width: 100%; height: 85px;
+            background: #0a0a0a; border-top: 1px solid #1a1a1a;
+            display: flex; justify-content: space-around; align-items: center;
+            padding-bottom: env(safe-area-inset-bottom); z-index: 1000;
         }
 
-        .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 5px;
-            color: #555;
-            text-decoration: none;
-            font-size: 11px;
-            font-weight: bold;
-            flex: 1;
+        .tab {
+            display: flex; flex-direction: column; align-items: center; gap: 6px;
+            color: #444; text-decoration: none; flex: 1; transition: 0.2s;
         }
 
-        .nav-item.active {
-            color: var(--gold);
+        .tab.active { color: var(--gold); }
+        .tab-icon { font-size: 22px; }
+        .tab-label { font-size: 10px; font-weight: 800; letter-spacing: 0.5px; }
+
+        /* 8. АНИМАЦИЯ ПОЯВЛЕНИЯ КЛИКА (+1) */
+        .floating-text {
+            position: absolute; color: var(--gold); font-weight: 900;
+            font-size: 28px; pointer-events: none; animation: floatUp 0.8s ease-out forwards;
+            z-index: 500;
         }
 
-        .nav-icon {
-            font-size: 20px;
+        @keyframes floatUp {
+            0% { transform: translateY(0) opacity: 1; }
+            100% { transform: translateY(-100px) opacity: 0; }
         }
 
-        /* АДМИН-МЕТКА */
-        #admin-badge {
-            position: absolute;
-            top: 10px; right: 10px;
-            background: red; color: white;
-            font-size: 10px; padding: 3px 8px;
-            border-radius: 10px; display: none;
+        /* Статус сохранения */
+        #sync-status {
+            position: fixed; top: 10px; left: 10px; font-size: 10px;
+            color: #333; z-index: 9999;
         }
     </style>
 </head>
 <body>
 
-    <div id="admin-badge">ADMIN MODE</div>
+    <div id="sync-status">Cloud Synced</div>
 
-    <div class="header-score">
-        <div class="score-title">Ваше золото</div>
-        <div id="balance">0</div>
-    </div>
+    <header class="header">
+        <div class="score-card">
+            <div class="score-label">БАЛАНС GOLD</div>
+            <div id="balance" class="score-value">0</div>
+        </div>
+    </header>
 
-    <div class="app-container">
-        <div id="main" class="page active">
-            <div class="coin-wrapper">
-                <div class="main-coin" id="coin">G</div>
+    <main class="content">
+        <div id="page-main" class="page active">
+            <div class="coin-box">
+                <div id="coin-trigger" class="coin-btn">G</div>
             </div>
-            <div style="margin-bottom: 20px; color: #444; font-size: 12px;">v 2.0 Stable Build</div>
+            <div style="color: #333; font-size: 11px; margin-bottom: 10px;">ID: <span id="display-id">...</span></div>
         </div>
 
-        <div id="bonus" class="page">
-            <div class="btn-group">
-                <button class="action-btn btn-invite" onclick="copyRefLink()">🔗 Пригласить друга</button>
-                <button class="action-btn btn-ad" onclick="handleAdClick()">📺 Смотреть рекламу (+10 G)</button>
+        <div id="page-bonuses" class="page">
+            <div class="action-list">
+                <button id="ad-btn" class="btn btn-blue" onclick="App.watchAd()">
+                    <span>📺</span> СМОТРЕТЬ РЕКЛАМУ (+10 G)
+                </button>
+                <button class="btn btn-green" onclick="App.copyInviteLink()">
+                    <span>🔗</span> ПРИГЛАСИТЬ ДРУГА
+                </button>
             </div>
-            <h4 style="margin: 25px 0 10px 5%; width: 90%; color: var(--gold);">Ваши рефералы</h4>
-            <div id="ref-container" class="data-list">
-                <div style="text-align: center; color: #555;">Загрузка списка...</div>
+            
+            <div class="info-section">
+                <div class="section-title">Ваша реферальная сеть</div>
+                <div id="ref-list" class="list-container">
+                    <div style="padding: 20px; text-align: center; color: #444;">Список пуст</div>
+                </div>
             </div>
         </div>
 
-        <div id="withdraw" class="page">
-            <div class="btn-group">
-                <button id="withdraw-btn" class="action-btn btn-withdraw" onclick="initWithdraw()">💸 Вывести (Мин. 750)</button>
+        <div id="page-withdraw" class="page">
+            <div class="action-list">
+                <button id="withdraw-btn" class="btn btn-disabled" onclick="App.requestWithdraw()">
+                    🏦 ВЫВЕСТИ GOLD (МИН. 750)
+                </button>
             </div>
-            <h4 style="margin: 25px 0 10px 5%; width: 90%; color: var(--gold);">История выплат</h4>
-            <div id="history-container" class="data-list">
-                <div style="text-align: center; color: #555;">Транзакций не найдено</div>
-            </div>
-        </div>
-    </div>
 
-    <nav class="nav-bar">
-        <div class="nav-item active" onclick="showPage('main', this)">
-            <span class="nav-icon">💰</span><span>ГЛАВНАЯ</span>
+            <div class="info-section">
+                <div class="section-title">История транзакций</div>
+                <div id="history-list" class="list-container">
+                    <div style="padding: 20px; text-align: center; color: #444;">История пуста</div>
+                </div>
+            </div>
         </div>
-        <div class="nav-item" onclick="showPage('bonus', this)">
-            <span class="nav-icon">🎁</span><span>БОНУСЫ</span>
+    </main>
+
+    <nav class="tab-bar">
+        <div class="tab active" onclick="App.switchTab('main', this)">
+            <span class="tab-icon">🪙</span><span class="tab-label">ГЛАВНАЯ</span>
         </div>
-        <div class="nav-item" onclick="showPage('withdraw', this)">
-            <span class="nav-icon">🏦</span><span>ВЫВОД</span>
+        <div class="tab" onclick="App.switchTab('bonuses', this)">
+            <span class="tab-icon">🎁</span><span class="tab-label">БОНУСЫ</span>
+        </div>
+        <div class="tab" onclick="App.switchTab('withdraw', this)">
+            <span class="tab-icon">💳</span><span class="tab-label">ВЫВОД</span>
         </div>
     </nav>
 
     <script>
         /**
-         * СИСТЕМА УПРАВЛЕНИЯ ДАННЫМИ (DATABASE ENGINE)
+         * МОДУЛЬ КОНФИГУРАЦИИ
          */
-        const firebaseConfig = {
-            apiKey: "AIzaSyCoa29KS-sin6hoRz0ZbE4f3ki0tZLwkKI",
-            authDomain: "gold-clicker-5d882.firebaseapp.com",
-            projectId: "gold-clicker-5d882",
-            storageBucket: "gold-clicker-5d882.firebasestorage.app",
-            messagingSenderId: "83489312782",
-            appId: "1:83489312782:web:ee5b7bdc390e53e7dd6c5f"
+        const CONFIG = {
+            firebase: {
+                apiKey: "AIzaSyCoa29KS-sin6hoRz0ZbE4f3ki0tZLwkKI",
+                authDomain: "gold-clicker-5d882.firebaseapp.com",
+                projectId: "gold-clicker-5d882",
+                storageBucket: "gold-clicker-5d882.firebasestorage.app",
+                messagingSenderId: "83489312782",
+                appId: "1:83489312782:web:ee5b7bdc390e53e7dd6c5f"
+            },
+            minWithdraw: 750,
+            saveInterval: 3000, // Сохранять раз в 3 сек
+            clickValue: 1
         };
 
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
-        const tg = window.Telegram.WebApp;
-
-        // Идентификация игрока
-        const USER_ID = tg.initDataUnsafe?.user?.id ? tg.initDataUnsafe.user.id.toString() : "5223115893";
-        const USER_NAME = tg.initDataUnsafe?.user?.first_name || "Игрок";
-        
-        // Глобальные переменные состояния
-        let state = {
-            gold: 0,
-            clickPower: 1,
-            lastSave: Date.now(),
-            isSaving: false
-        };
-
-        const playerRef = db.collection('players').doc(USER_ID);
-
         /**
-         * ИНИЦИАЛИЗАЦИЯ ПРИЛОЖЕНИЯ
+         * ГЛАВНОЕ ЯДРО ПРИЛОЖЕНИЯ
          */
-        async function startApp() {
-            tg.expand();
-            tg.ready();
+        const App = {
+            user: {
+                id: null,
+                gold: 0,
+                pendingGold: 0, // Золото, накопленное локально и еще не отправленное
+                isAdLoading: false
+            },
             
-            // Если ты админ - включаем метку
-            if (USER_ID === "5223115893") {
-                document.getElementById('admin-badge').style.display = 'block';
-            }
+            db: null,
+            tg: window.Telegram.WebApp,
 
-            try {
-                const doc = await playerRef.get();
-                if (doc.exists) {
-                    const data = doc.data();
-                    state.gold = Number(data.gold) || 0;
-                    state.clickPower = data.clickPower || 1;
-                } else {
-                    // Создаем нового игрока
-                    await playerRef.set({
-                        gold: 0,
-                        username: USER_NAME,
-                        clickPower: 1,
-                        joinedAt: firebase.firestore.FieldValue.serverTimestamp()
-                    });
-                }
+            async init() {
+                this.tg.expand();
+                this.tg.ready();
                 
-                renderUI();
-                loadHistory();
-                checkReferrals();
-                
-            } catch (error) {
-                console.error("Critical Error on Load:", error);
-                tg.showAlert("Ошибка подключения к базе. Проверьте интернет.");
-            }
-        }
+                // Инициализация Firebase
+                if (!firebase.apps.length) firebase.initializeApp(CONFIG.firebase);
+                this.db = firebase.firestore();
 
-        /**
-         * ЛОГИКА КЛИКА С ПРОВЕРКОЙ СОХРАНЕНИЯ
-         */
-        document.getElementById('coin').addEventListener('click', (e) => {
-            e.preventDefault();
-            
-            // Визуальный и тактильный отклик
-            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
-            
-            state.gold += state.clickPower;
-            renderUI();
+                // Определение пользователя
+                this.user.id = this.tg.initDataUnsafe?.user?.id?.toString() || "TEST_USER_5223115893";
+                document.getElementById('display-id').innerText = this.user.id;
 
-            // Умное сохранение: не чаще чем раз в 2 секунды, 
-            // чтобы не спамить в Firestore и не ловить ошибки записи
-            triggerSmartSave();
-        });
+                await this.loadUserData();
+                this.startSyncLoop();
+                this.bindEvents();
+                this.render();
+            },
 
-        function renderUI() {
-            const goldDisplay = document.getElementById('balance');
-            const withdrawBtn = document.getElementById('withdraw-btn');
-            
-            goldDisplay.innerText = Math.floor(state.gold).toLocaleString();
-
-            // Проверка условий вывода
-            if (state.gold >= 750) {
-                withdrawBtn.classList.add('ready');
-                withdrawBtn.innerText = "💸 Вывести GOLD";
-            } else {
-                withdrawBtn.classList.remove('ready');
-                withdrawBtn.innerText = `💸 Еще ${(750 - state.gold).toFixed(0)} G до вывода`;
-            }
-        }
-
-        /**
-         * УМНОЕ СОХРАНЕНИЕ ПРОГРЕССА (БЕЗ БАГОВ)
-         */
-        let saveTimeout;
-        function triggerSmartSave() {
-            clearTimeout(saveTimeout);
-            saveTimeout = setTimeout(async () => {
-                if (state.isSaving) return;
-                
-                state.isSaving = true;
+            /**
+             * ЗАГРУЗКА ДАННЫХ С ПРОВЕРКОЙ НА ОШИБКИ
+             */
+            async loadUserData() {
                 try {
-                    await playerRef.update({
-                        gold: state.gold,
-                        lastActive: firebase.firestore.FieldValue.serverTimestamp()
+                    const doc = await this.db.collection('players').doc(this.user.id).get();
+                    if (doc.exists) {
+                        const data = doc.data();
+                        this.user.gold = Number(data.gold) || 0;
+                    } else {
+                        await this.db.collection('players').doc(this.user.id).set({
+                            gold: 0,
+                            username: this.tg.initDataUnsafe?.user?.username || "Unknown",
+                            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                        });
+                        this.user.gold = 0;
+                    }
+                } catch (err) {
+                    console.error("Load Error:", err);
+                    // Если база недоступна, пытаемся взять из кэша браузера
+                    this.user.gold = Number(localStorage.getItem('cached_gold')) || 0;
+                }
+            },
+
+            /**
+             * СОБЫТИЯ (КЛИКИ И ТАПЫ)
+             */
+            bindEvents() {
+                const trigger = document.getElementById('coin-trigger');
+                
+                trigger.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    this.handleGoldClick(e.touches[0].clientX, e.touches[0].clientY);
+                });
+
+                // Обработка закрытия приложения (последний шанс сохранить)
+                window.addEventListener('beforeunload', () => this.forceSync());
+            },
+
+            handleGoldClick(x, y) {
+                // 1. Локальное обновление для мгновенного отклика
+                this.user.gold += CONFIG.clickValue;
+                this.user.pendingGold += CONFIG.clickValue;
+                
+                // 2. Визуальные эффекты
+                this.createFloatingText(x, y);
+                this.render();
+                
+                // 3. Тактильный отклик
+                if (this.tg.HapticFeedback) this.tg.HapticFeedback.impactOccurred('light');
+                
+                // 4. Сохраняем в локальное хранилище на всякий случай
+                localStorage.setItem('cached_gold', this.user.gold);
+            },
+
+            /**
+             * СИСТЕМА ФОНОВОЙ СИНХРОНИЗАЦИИ (БЕЗ ЛАГОВ)
+             */
+            startSyncLoop() {
+                setInterval(() => this.forceSync(), CONFIG.saveInterval);
+            },
+
+            async forceSync() {
+                if (this.user.pendingGold === 0) return;
+
+                const amountToSync = this.user.pendingGold;
+                const statusEl = document.getElementById('sync-status');
+                
+                statusEl.innerText = "Syncing...";
+                statusEl.style.color = "#ffca28";
+
+                try {
+                    // Используем increment, чтобы не затереть данные, если они изменились в базе (например, пришел реферал)
+                    await this.db.collection('players').doc(this.user.id).update({
+                        gold: firebase.firestore.FieldValue.increment(amountToSync),
+                        lastUpdate: firebase.firestore.FieldValue.serverTimestamp()
                     });
-                    console.log("Progress Saved Successfully");
+
+                    // Только после успешного ответа базы сбрасываем локальный счетчик накоплений
+                    this.user.pendingGold -= amountToSync;
+                    
+                    statusEl.innerText = "Cloud Synced";
+                    statusEl.style.color = "#2ecc71";
+                    console.log("Synced:", amountToSync);
+                } catch (err) {
+                    console.error("Sync Error:", err);
+                    statusEl.innerText = "Sync Failed - Retrying";
+                    statusEl.style.color = "#e74c3c";
+                }
+            },
+
+            /**
+             * ЛОГИКА РЕКЛАМЫ (ИСПРАВЛЕННАЯ)
+             */
+            async watchAd() {
+                if (this.user.isAdLoading) return;
+                
+                const btn = document.getElementById('ad-btn');
+                this.user.isAdLoading = true;
+                btn.classList.add('btn-disabled');
+                btn.innerText = "ЗАГРУЗКА РЕКЛАМЫ...";
+
+                // Тайм-аут на случай, если реклама зависнет
+                const safetyTimeout = setTimeout(() => {
+                    this.user.isAdLoading = false;
+                    this.render();
+                }, 10000);
+
+                try {
+                    // Симуляция просмотра (сюда вставляется код Adsgram)
+                    await new Promise(res => setTimeout(res, 2000));
+                    
+                    // Начисление бонуса через Pending
+                    this.user.gold += 10;
+                    this.user.pendingGold += 10;
+                    
+                    this.tg.showAlert("Вы получили +10 GOLD!");
+                    this.forceSync();
                 } catch (e) {
-                    console.error("Save Error:", e);
+                    this.tg.showAlert("Реклама не загрузилась.");
                 } finally {
-                    state.isSaving = false;
+                    clearTimeout(safetyTimeout);
+                    this.user.isAdLoading = false;
+                    this.render();
                 }
-            }, 1500);
-        }
+            },
 
-        /**
-         * НАВИГАЦИЯ
-         */
-        function showPage(pageId, el) {
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-            
-            document.getElementById(pageId).classList.add('active');
-            el.classList.add('active');
-        }
+            /**
+             * ВЫВОД СРЕДСТВ
+             */
+            async requestWithdraw() {
+                if (this.user.gold < CONFIG.minWithdraw) return;
 
-        /**
-         * РЕФЕРАЛЬНАЯ СИСТЕМА
-         */
-        function copyRefLink() {
-            // Формируем ссылку на основе твоего BotFather short_name
-            const link = `https://t.me/Locus_Gold_bot/Locus_Gold?startapp=${USER_ID}`;
-            
-            const tempInput = document.createElement("input");
-            document.body.appendChild(tempInput);
-            tempInput.value = link;
-            tempInput.select();
-            document.execCommand("copy");
-            document.body.removeChild(tempInput);
-            
-            tg.showAlert("Твоя ссылка скопирована! Отправь её другу.");
-        }
+                const wallet = prompt("Введите номер карты или крипто-кошелька:");
+                if (!wallet || wallet.length < 4) return;
 
-        async function checkReferrals() {
-            const container = document.getElementById('ref-container');
-            try {
-                // Ищем в базе игроков, которых пригласил этот ID
-                // (Для этого при регистрации должна была стоять метка invitedBy)
-                container.innerHTML = `<div style="text-align:center; font-size:12px; color:#444;">У вас пока нет приглашенных друзей</div>`;
-            } catch (e) {
-                container.innerText = "Ошибка загрузки.";
-            }
-        }
-
-        /**
-         * СИСТЕМА ВЫВОДА
-         */
-        async function initWithdraw() {
-            if (state.gold < 750) return;
-
-            const wallet = prompt("Введите номер кошелька или карты для выплаты:");
-            
-            if (wallet && wallet.length > 5) {
                 try {
-                    const txData = {
-                        userId: USER_ID,
-                        username: USER_NAME,
-                        amount: Math.floor(state.gold),
+                    const tx = {
+                        amount: Math.floor(this.user.gold),
                         wallet: wallet,
                         status: 'pending',
-                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                        date: new Date().toLocaleString()
                     };
 
-                    // 1. Создаем заявку в общей базе
-                    await db.collection('withdrawals').add(txData);
-                    
-                    // 2. Добавляем в личную историю
-                    await playerRef.collection('history').add(txData);
-
-                    // 3. Обнуляем баланс
-                    state.gold = 0;
-                    await playerRef.update({ gold: 0 });
-                    
-                    renderUI();
-                    loadHistory();
-                    tg.showPopup({
-                        title: "Успех!",
-                        message: "Заявка на вывод принята. Обработка занимает до 24 часов.",
-                        buttons: [{type: "ok"}]
+                    // Сохраняем заявку
+                    await this.db.collection('withdrawals').add({
+                        ...tx,
+                        userId: this.user.id
                     });
 
+                    // Сохраняем в личную историю
+                    await this.db.collection('players').doc(this.user.id).collection('history').add(tx);
+
+                    // Сбрасываем баланс
+                    this.user.gold = 0;
+                    this.user.pendingGold = 0;
+                    await this.db.collection('players').doc(this.user.id).update({ gold: 0 });
+
+                    this.tg.showAlert("Заявка успешно создана!");
+                    this.render();
+                    this.loadHistory();
                 } catch (e) {
-                    tg.showAlert("Ошибка при создании транзакции. Попробуйте снова.");
+                    this.tg.showAlert("Ошибка при создании заявки.");
                 }
-            } else {
-                tg.showAlert("Некорректный номер кошелька.");
-            }
-        }
+            },
 
-        async function loadHistory() {
-            const container = document.getElementById('history-container');
-            try {
-                const snapshot = await playerRef.collection('history').orderBy('createdAt', 'desc').limit(5).get();
+            /**
+             * ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
+             */
+            render() {
+                const balEl = document.getElementById('balance');
+                const wBtn = document.getElementById('withdraw-btn');
+                const adBtn = document.getElementById('ad-btn');
+
+                // Плавное обновление баланса
+                balEl.innerText = Math.floor(this.user.gold).toLocaleString();
+
+                // Кнопка вывода
+                if (this.user.gold >= CONFIG.minWithdraw) {
+                    wBtn.className = "btn btn-orange";
+                    wBtn.innerText = "🏦 ВЫВЕСТИ GOLD";
+                } else {
+                    wBtn.className = "btn btn-disabled";
+                    wBtn.innerText = `🏦 МИН. ВЫВОД (ЕЩЕ ${Math.ceil(CONFIG.minWithdraw - this.user.gold)})`;
+                }
+
+                // Кнопка рекламы (если не грузится)
+                if (!this.user.isAdLoading) {
+                    adBtn.className = "btn btn-blue";
+                    adBtn.innerHTML = "<span>📺</span> СМОТРЕТЬ РЕКЛАМУ (+10 G)";
+                }
+            },
+
+            createFloatingText(x, y) {
+                const el = document.createElement('div');
+                el.className = 'floating-text';
+                el.innerText = `+${CONFIG.clickValue}`;
+                el.style.left = `${x - 15}px`;
+                el.style.top = `${y - 30}px`;
+                document.body.appendChild(el);
+                setTimeout(() => el.remove(), 800);
+            },
+
+            switchTab(tabId, el) {
+                document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
                 
-                if (snapshot.empty) {
-                    container.innerHTML = `<div style="text-align:center; color:#555;">Транзакций не найдено</div>`;
-                    return;
-                }
+                document.getElementById(`page-${tabId}`).classList.add('active');
+                el.classList.add('active');
 
-                let html = "";
-                snapshot.forEach(doc => {
-                    const data = doc.data();
-                    const date = data.createdAt ? data.createdAt.toDate().toLocaleDateString() : "Недавно";
-                    html += `
-                        <div class="list-row">
-                            <span>${date}</span>
-                            <span>${data.amount} G</span>
-                            <span style="color: ${data.status === 'pending' ? '#f1c40f' : '#2ecc71'}">
-                                ${data.status === 'pending' ? 'В обработке' : 'Выплачено'}
-                            </span>
-                        </div>
-                    `;
-                });
-                container.innerHTML = html;
-            } catch (e) {
-                console.error("History error", e);
-            }
-        }
+                if (tabId === 'withdraw') this.loadHistory();
+            },
 
-        /**
-         * ОБРАБОТКА РЕКЛАМЫ (ЗАГЛУШКА ДО ВКЛЮЧЕНИЯ ADSGRAM)
-         */
-        function handleAdClick() {
-            tg.showConfirm("Посмотреть рекламу и получить +10 золота?", (confirm) => {
-                if (confirm) {
-                    // Здесь будет вызов Adsgram в будущем
-                    // Сейчас просто симуляция
-                    tg.showPopup({
-                        message: "Рекламные блоки настраиваются платформой. Бонус начислен!",
-                        buttons: [{type: "ok"}]
+            copyInviteLink() {
+                const link = `https://t.me/Locus_Gold_bot/Locus_Gold?startapp=${this.user.id}`;
+                const el = document.createElement('textarea');
+                el.value = link;
+                document.body.appendChild(el);
+                el.select();
+                document.execCommand('copy');
+                document.body.removeChild(el);
+                this.tg.showAlert("Ссылка скопирована! Отправь другу и получи бонус.");
+            },
+
+            async loadHistory() {
+                const cont = document.getElementById('history-list');
+                try {
+                    const snap = await this.db.collection('players').doc(this.user.id).collection('history').get();
+                    if (snap.empty) return;
+                    
+                    cont.innerHTML = "";
+                    snap.forEach(doc => {
+                        const d = doc.data();
+                        cont.innerHTML += `
+                            <div class="list-item">
+                                <div><div style="font-weight:bold">${d.amount} G</div><div style="font-size:10px;color:#444">${d.date}</div></div>
+                                <div style="color:var(--accent-orange)">${d.status.toUpperCase()}</div>
+                            </div>`;
                     });
-                    state.gold += 10;
-                    renderUI();
-                    triggerSmartSave();
-                }
-            });
-        }
-
-        // Запуск при загрузке окна
-        window.onload = startApp;
-
-        /**
-         * ЗАЩИТА ОТ ЗАКРЫТИЯ (СОХРАНЕНИЕ ПЕРЕД ВЫХОДОМ)
-         */
-        window.addEventListener('blur', () => {
-            if (!state.isSaving) {
-                playerRef.update({ gold: state.gold });
+                } catch (e) {}
             }
-        });
+        };
 
+        // Запуск
+        App.init();
     </script>
 </body>
 </html>
