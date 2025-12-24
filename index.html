@@ -20,11 +20,10 @@
             --safe-bottom: env(safe-area-inset-bottom);
         }
 
-        /* Глобальные настройки */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
         body { background: var(--bg); color: #fff; height: 100vh; overflow: hidden; position: fixed; width: 100%; display: flex; flex-direction: column; }
 
-        /* Контейнер приложения из твоего старого кода */
+        /* Контейнер приложения */
         .app-container {
             position: absolute; inset: 0; display: none; flex-direction: column;
             padding: calc(var(--safe-top) + 20px) 20px calc(var(--safe-bottom) + 80px);
@@ -64,15 +63,12 @@
 
         .upgrade-btn { grid-column: span 2; background: #18181b; border: 1px solid var(--accent); border-radius: 18px; padding: 12px; text-align: center; }
 
-        /* Списки (Лидерборд, Друзья, История) */
+        /* Списки */
         .list-wrapper { flex: 1; overflow-y: auto; margin-top: 10px; padding-right: 5px; }
         .list-item { 
             background: #18181b; padding: 12px 15px; border-radius: 14px; margin-bottom: 8px;
             display: flex; justify-content: space-between; align-items: center; border: 1px solid #27272a;
         }
-        .list-item .info { display: flex; align-items: center; gap: 12px; }
-        .list-item .rank-num { font-weight: 900; color: var(--accent); width: 25px; }
-        .list-item .val { font-weight: 700; color: #fff; }
 
         /* Навигация */
         .nav-bar {
@@ -85,13 +81,21 @@
         .nav-item i { font-size: 20px; }
         .nav-item span { font-size: 9px; font-weight: 800; margin-top: 4px; text-transform: uppercase; }
 
-        /* Соглашение */
-        #tos-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 9999; display: none; align-items: center; justify-content: center; padding: 20px; }
-        .tos-modal { background: #1c1c1e; width: 100%; max-width: 320px; border-radius: 24px; padding: 25px; text-align: center; border: 1px solid #2c2c2e; }
-        .tos-btn-main { background: linear-gradient(135deg, #ff9d00, #e68a00); color: #000; padding: 18px; border-radius: 15px; font-weight: 800; width: 100%; border: none; margin-bottom: 12px; font-size: 14px; }
-        .tos-btn-agree { background: #fff; color: #000; padding: 15px; border-radius: 12px; width: 100%; border: none; font-weight: 700; }
+        /* ДИЗАЙН СОГЛАШЕНИЯ (СОХРАНЕН) */
+        #tos-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 9999; display: none; align-items: center; justify(content): center; padding: 20px; display: flex; visibility: hidden; opacity: 0; transition: 0.3s; }
+        #tos-overlay.show { visibility: visible; opacity: 1; }
+        
+        .tos-modal { background: #1c1c1e; width: 100%; max-width: 320px; border-radius: 24px; padding: 25px; text-align: center; border: 1px solid #2c2c2e; box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
+        .tos-btn-main { background: linear-gradient(135deg, #ff9d00, #e68a00); color: #000; padding: 18px; border-radius: 15px; font-weight: 800; width: 100%; border: none; margin-bottom: 12px; font-size: 14px; cursor: pointer; }
+        .tos-btn-agree { background: #fff; color: #000; padding: 15px; border-radius: 12px; width: 100%; border: none; font-weight: 700; cursor: pointer; }
 
-        /* Анимация клика */
+        /* ПОЛНЫЙ ТЕКСТ ТОС (БОЛЬШОЙ И ИНФОРМАТИВНЫЙ) */
+        #full-tos { position: fixed; inset: 0; background: #000; z-index: 10000; padding: calc(var(--safe-top) + 20px) 25px 40px; overflow-y: auto; display: none; }
+        .tos-header { color: var(--accent); font-size: 24px; font-weight: 900; margin-bottom: 20px; text-align: center; }
+        .tos-section { margin-bottom: 20px; }
+        .tos-section h3 { color: #fff; font-size: 16px; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .tos-section p { color: #bbb; font-size: 13px; line-height: 1.6; text-align: justify; }
+
         .float-text { position: absolute; color: var(--accent); font-weight: 900; pointer-events: none; animation: floatUp 0.7s forwards; z-index: 2000; }
         @keyframes floatUp { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-100px); } }
     </style>
@@ -100,21 +104,42 @@
 
     <div id="tos-overlay">
         <div class="tos-modal">
-            <div style="font-size: 40px; margin-bottom: 15px;">📜</div>
-            <button class="tos-btn-main" onclick="UI.showFullTos()">Пользовательское соглашение</button>
-            <button class="tos-btn-agree" onclick="Core.accept()">СОГЛАСЕН</button>
+            <div style="font-size: 45px; margin-bottom: 20px;">📜</div>
+            <h2 style="margin-bottom: 15px; font-size: 18px;">Правила Сервиса</h2>
+            <button class="tos-btn-main" onclick="UI.showFullTos()">Читать Соглашение</button>
+            <button class="tos-btn-agree" onclick="Core.accept()">Я СОГЛАСЕН</button>
         </div>
     </div>
 
-    <div id="full-tos" style="display:none; position:fixed; inset:0; background:#000; z-index:10000; padding:40px 25px; overflow-y:auto;">
-        <h2 style="color:var(--accent)">Locus Gold: User Agreement</h2>
-        <p style="margin:20px 0; line-height:1.6; color:#ccc; font-size:14px;">
-            1. Приложение является симулятором. Вся валюта (Gold) виртуальна.<br><br>
-            2. Вывод осуществляется в течение 72 часов на ID Standoff 2.<br><br>
-            3. Реферальная программа: 100 G за друга.<br><br>
-            4. Таблица лидеров обновляется каждые 5 минут.
-        </p>
-        <button class="tos-btn-main" onclick="UI.hideFullTos()">ВЕРНУТЬСЯ</button>
+    <div id="full-tos">
+        <div class="tos-header">LOCUS GOLD: TERMS OF SERVICE</div>
+        
+        <div class="tos-section">
+            <h3>1. Общие положения</h3>
+            <p>Данное приложение является игровым симулятором. Вся внутренняя валюта «Gold» (G) является исключительно виртуальной единицей вознаграждения в рамках программ лояльности и не имеет статуса реальных денег или криптовалюты.</p>
+        </div>
+
+        <div class="tos-section">
+            <h3>2. Условия вывода</h3>
+            <p>Виртуальные баллы могут быть обменяны на внутриигровые ценности при достижении минимального порога в 750 G. Пользователь обязан предоставить корректный ID игрока. Срок обработки заявки составляет от 24 до 72 часов. Администрация не несет ответственности за ошибки, допущенные пользователем при вводе данных.</p>
+        </div>
+
+        <div class="tos-section">
+            <h3>3. Рекламные системы и Данные</h3>
+            <p>Приложение использует сторонние рекламные сервисы (в т.ч. Adsgram). Просматривая рекламу, вы соглашаетесь с условиями предоставления услуг этих сервисов. Мы собираем только необходимые данные (Telegram ID) для обеспечения корректной работы баланса и синхронизации прогресса через Firebase.</p>
+        </div>
+
+        <div class="tos-section">
+            <h3>4. Запреты и блокировки</h3>
+            <p>Запрещено использование автокликеров, эмуляторов или любых скриптов для автоматизации добычи Gold. При обнаружении подозрительной активности аккаунт может быть заблокирован без выплаты накопленных баллов.</p>
+        </div>
+
+        <div class="tos-section">
+            <h3>5. Отказ от ответственности</h3>
+            <p>Приложение не связано с компанией Axlebolt Ltd или игрой Standoff 2 официально. Мы являемся сторонней платформой вознаграждений за активность в Telegram-боте.</p>
+        </div>
+
+        <button class="tos-btn-main" style="margin-top: 20px;" onclick="UI.hideFullTos()">ПРИНЯТЬ И ВЕРНУТЬСЯ</button>
     </div>
 
     <div class="app-container active" id="view-mining">
@@ -138,21 +163,20 @@
 
     <div class="app-container" id="view-leaderboard">
         <h2 style="text-align:center; margin-bottom:15px;">Таблица лидеров</h2>
-        <div class="list-wrapper" id="leader-list">
-            </div>
+        <div class="list-wrapper" id="leader-list"></div>
     </div>
 
     <div class="app-container" id="view-friends">
         <h2 style="text-align:center; margin-bottom:15px;">Рефералы</h2>
         <div class="stat-box" style="margin-bottom:20px">
-            <p style="font-size:12px; color:var(--text-dim)">Твоя награда: 100 G за друга</p>
-            <button class="tos-btn-main" style="margin-top:10px" onclick="Core.invite()">ПРИГЛАСИТЬ</button>
+            <p style="font-size:12px; color:var(--text-dim)">100 G за каждого друга</p>
+            <button class="tos-btn-main" style="margin-top:10px" onclick="Core.invite()">ПРИГЛАСИТЬ ДРУЗЕЙ</button>
         </div>
         <div class="list-wrapper" id="friend-list"></div>
     </div>
 
     <div class="app-container" id="view-wallet">
-        <h2 style="text-align:center; margin-bottom:15px;">Вывод</h2>
+        <h2 style="text-align:center; margin-bottom:15px;">Вывод средств</h2>
         <div class="stat-box" style="margin-bottom:20px">
             <p style="color:var(--text-dim); font-size:12px">Минимум: 750 G</p>
             <button id="wd-btn" class="tos-btn-main" style="margin-top:10px; opacity:0.5" disabled>ОФОРМИТЬ ВЫВОД</button>
@@ -186,7 +210,7 @@
 
             const doc = await this.db.collection('players').doc(this.uid).get();
             if(!doc.exists || !doc.data().acceptedTos) {
-                document.getElementById('tos-overlay').style.display = 'flex';
+                document.getElementById('tos-overlay').classList.add('show');
             } else {
                 const data = doc.data();
                 this.gold = data.gold || 0;
@@ -200,7 +224,7 @@
         },
 
         async accept() {
-            document.getElementById('tos-overlay').style.display = 'none';
+            document.getElementById('tos-overlay').classList.remove('show');
             await this.db.collection('players').doc(this.uid).set({
                 gold: 0, pwr: 0.001, acceptedTos: true,
                 name: this.tg.initDataUnsafe?.user?.first_name || "Игрок"
@@ -211,13 +235,13 @@
         async checkReferral() {
             const startParam = this.tg.initDataUnsafe?.start_param;
             if (startParam && startParam !== this.uid) {
-                const refDoc = await this.db.collection('players').doc(this.uid).get();
-                if (!refDoc.exists) { // Только если новый пользователь
+                const myDoc = await this.db.collection('players').doc(this.uid).get();
+                if (!myDoc.exists) { 
                     await this.db.collection('players').doc(startParam).update({
                         gold: firebase.firestore.FieldValue.increment(100)
                     });
                     await this.db.collection('players').doc(startParam).collection('referrals').add({
-                        name: this.tg.initDataUnsafe?.user?.first_name || "Новый друг",
+                        name: this.tg.initDataUnsafe?.user?.first_name || "Друг",
                         date: new Date()
                     });
                 }
@@ -255,11 +279,11 @@
                     pwr: firebase.firestore.FieldValue.increment(pwrBonus)
                 });
                 this.render();
-            }).catch(() => this.tg.showAlert("Реклама не готова"));
+            }).catch(() => this.tg.showAlert("Реклама загружается..."));
         },
 
         upgrade() {
-            if(this.gold < 1) return this.tg.showAlert("Нужно 1.000 G");
+            if(this.gold < 1) return this.tg.showAlert("Недостаточно Gold!");
             this.gold -= 1;
             this.pwr += 0.005;
             this.sync();
@@ -270,7 +294,6 @@
             document.getElementById('u-gold').innerText = this.gold.toFixed(3);
             document.getElementById('u-pwr').innerText = this.pwr.toFixed(3);
             
-            // Ранги
             let rank = "BRONZE";
             if(this.gold > 50) rank = "SILVER";
             if(this.gold > 200) rank = "GOLD";
@@ -282,31 +305,30 @@
         },
 
         async withdraw() {
-            const sid = prompt("ID Standoff 2:");
+            const sid = prompt("Введите ваш ID Standoff 2:");
             if(!sid || sid.length < 8) return;
             const amount = Math.floor(this.gold);
             await this.db.collection('withdrawals').add({ uid: this.uid, sid, amount, status: 'Ожидание', date: new Date() });
             this.gold = 0;
             await this.db.collection('players').doc(this.uid).update({ gold: 0 });
             this.render();
-            this.tg.showAlert("Принято!");
+            this.tg.showAlert("Заявка создана! Ожидайте обработки.");
         },
 
         invite() {
             const link = `https://t.me/Locus_Gold_bot/app?startapp=${this.uid}`;
-            const text = encodeURIComponent("Забирай бесплатную голду в Locus Gold!");
-            this.tg.openTelegramLink(`https://t.me/share/url?url=${link}&text=${text}`);
+            this.tg.openTelegramLink(`https://t.me/share/url?url=${link}&text=Забирай+бесплатную+голду!`);
         },
 
         async loadLeaders() {
             const list = document.getElementById('leader-list');
-            list.innerHTML = "Загрузка...";
+            list.innerHTML = "<center>Загрузка...</center>";
             const snap = await this.db.collection('players').orderBy('gold', 'desc').limit(50).get();
             list.innerHTML = "";
             let i = 1;
             snap.forEach(doc => {
                 const d = doc.data();
-                list.innerHTML += `<div class="list-item"><div class="info"><span class="rank-num">${i++}</span><span>${d.name || 'Игрок'}</span></div><span class="val">${Math.floor(d.gold)} G</span></div>`;
+                list.innerHTML += `<div class="list-item"><b>${i++}. ${d.name || 'Игрок'}</b><span>${Math.floor(d.gold)} G</span></div>`;
             });
         }
     };
@@ -324,7 +346,7 @@
         async loadFriends() {
             const list = document.getElementById('friend-list');
             const snap = await Core.db.collection('players').doc(Core.uid).collection('referrals').get();
-            list.innerHTML = snap.empty ? "<center>Нет друзей</center>" : "";
+            list.innerHTML = snap.empty ? "<center>Список пуст</center>" : "";
             document.getElementById('u-refs').innerText = snap.size;
             snap.forEach(doc => {
                 list.innerHTML += `<div class="list-item"><span>${doc.data().name}</span><span style="color:var(--accent)">+100 G</span></div>`;
@@ -333,10 +355,10 @@
         async loadHistory() {
             const list = document.getElementById('history-list');
             const snap = await Core.db.collection('withdrawals').where('uid', '==', Core.uid).get();
-            list.innerHTML = snap.empty ? "<center>Истории нет</center>" : "";
+            list.innerHTML = snap.empty ? "<center>Нет операций</center>" : "";
             snap.forEach(doc => {
                 const d = doc.data();
-                list.innerHTML += `<div class="list-item"><span>${d.amount} G (ID: ${d.sid})</span><small>${d.status}</small></div>`;
+                list.innerHTML += `<div class="list-item"><span>ID: ${d.sid} (${d.amount} G)</span><small>${d.status}</small></div>`;
             });
         },
         showFullTos() { document.getElementById('full-tos').style.display = 'block'; },
