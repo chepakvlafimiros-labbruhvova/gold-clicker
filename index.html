@@ -30,68 +30,63 @@
         }
         .app-container.active { display: flex; }
 
-        /* Баланс */
         .header-stats { text-align: center; margin-bottom: 20px; }
-        .gold-display { font-size: 48px; font-weight: 900; color: var(--accent); }
-        .rank-badge { font-size: 11px; text-transform: uppercase; background: #222; padding: 4px 12px; border-radius: 20px; color: var(--accent); font-weight: 800; display: inline-block; margin-bottom: 5px; }
+        .gold-display { font-size: 52px; font-weight: 900; color: var(--accent); }
+        .rank-badge { font-size: 12px; text-transform: uppercase; background: #222; padding: 5px 15px; border-radius: 20px; color: var(--accent); font-weight: 800; display: inline-block; margin-bottom: 5px; }
 
         .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
-        .stat-box { background: var(--surface); border-radius: 16px; padding: 12px; text-align: center; border: 1px solid #27272a; }
-        .stat-box small { display: block; color: var(--text-dim); font-size: 10px; text-transform: uppercase; }
+        .stat-box { background: var(--surface); border-radius: 16px; padding: 15px; text-align: center; border: 1px solid #27272a; }
+        .stat-box small { display: block; color: var(--text-dim); font-size: 11px; text-transform: uppercase; }
+        .stat-box b { font-size: 18px; }
 
-        /* Зона клика */
         .clicker-area { flex: 1; display: flex; align-items: center; justify-content: center; position: relative; }
         .coin-btn {
-            width: 210px; height: 210px; border-radius: 50%;
+            width: 220px; height: 220px; border-radius: 50%;
             background: radial-gradient(circle, #ffb700 0%, #ff8000 100%);
-            border: 10px solid #1a1a1c; box-shadow: 0 0 40px rgba(255, 157, 0, 0.2);
+            border: 10px solid #1a1a1c; box-shadow: 0 0 50px rgba(255, 157, 0, 0.25);
             display: flex; align-items: center; justify-content: center;
-            font-size: 80px; font-weight: 900; color: rgba(0,0,0,0.1);
+            font-size: 90px; font-weight: 900; color: rgba(0,0,0,0.1);
             transition: transform 0.05s; cursor: pointer; user-select: none;
         }
-        .coin-btn:active { transform: scale(0.95); }
+        .coin-btn:active { transform: scale(0.92); }
 
-        /* Таймер лока */
-        .lock-ui { position: absolute; background: rgba(0,0,0,0.9); inset: 0; z-index: 100; display: none; flex-direction: column; align-items: center; justify-content: center; border-radius: 50%; }
+        .lock-ui { position: absolute; background: rgba(0,0,0,0.95); inset: 0; z-index: 100; display: none; flex-direction: column; align-items: center; justify-content: center; border-radius: 50%; border: 4px solid var(--error); }
         .lock-ui.show { display: flex; }
-        .lock-timer { font-size: 42px; font-weight: 900; color: var(--error); }
+        .lock-timer { font-size: 48px; font-weight: 900; color: var(--error); }
 
-        /* Кнопки */
-        .actions-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
-        .action-btn { background: var(--surface); border: 1px solid #27272a; border-radius: 18px; padding: 15px 5px; text-align: center; cursor: pointer; }
-        .action-btn:active { background: #1c1c1e; }
-        .action-btn b { display: block; font-size: 12px; }
-        .action-btn span { font-size: 9px; color: var(--accent); font-weight: 800; }
+        .actions-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 10px; }
+        .action-btn { background: var(--surface); border: 1px solid #27272a; border-radius: 20px; padding: 18px 10px; text-align: center; cursor: pointer; }
+        .action-btn:active { background: #1c1c1e; transform: scale(0.98); }
+        .action-btn b { display: block; font-size: 15px; font-weight: 800; } /* Увеличенный шрифт */
+        .action-btn span { font-size: 10px; color: var(--accent); font-weight: 800; text-transform: uppercase; }
 
-        /* Списки */
         .list-wrapper { flex: 1; overflow-y: auto; margin-top: 10px; }
-        .list-item { background: var(--surface); padding: 14px; border-radius: 14px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #27272a; }
+        .list-item { background: var(--surface); padding: 16px; border-radius: 16px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #27272a; }
 
-        /* Навигация */
         .nav-bar {
-            position: fixed; bottom: 0; width: 100%; height: calc(70px + var(--safe-bottom));
+            position: fixed; bottom: 0; width: 100%; height: calc(75px + var(--safe-bottom));
             background: #0a0a0b; border-top: 1px solid #1c1c1e; display: flex; padding-bottom: var(--safe-bottom);
         }
-        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-dim); background: none; border: none; cursor: pointer; }
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-dim); background: none; border: none; }
         .nav-item.active { color: var(--accent); }
-        .nav-item i { font-size: 20px; font-style: normal; }
-        .nav-item span { font-size: 9px; font-weight: 800; margin-top: 4px; }
+        .nav-item i { font-size: 24px; font-style: normal; }
+        .nav-item span { font-size: 11px; font-weight: 800; margin-top: 5px; }
 
-        /* Модалка */
         #cheat-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 9999; display: none; align-items: center; justify-content: center; padding: 30px; }
-        .modal-box { background: #1c1c1e; padding: 30px; border-radius: 24px; text-align: center; border: 1px solid var(--error); width: 100%; }
+        .modal-box { background: #1c1c1e; padding: 35px; border-radius: 28px; text-align: center; border: 1px solid var(--error); width: 100%; box-shadow: 0 0 30px rgba(255,0,0,0.2); }
 
-        .float-txt { position: absolute; color: var(--accent); font-weight: 900; pointer-events: none; animation: floatUp 0.7s forwards; }
-        @keyframes floatUp { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-100px); } }
+        .float-txt { position: absolute; color: var(--accent); font-weight: 900; pointer-events: none; animation: floatUp 0.7s forwards; font-size: 20px; }
+        @keyframes floatUp { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-120px); } }
     </style>
 </head>
 <body>
 
     <div id="cheat-modal">
         <div class="modal-box">
-            <h2 style="color:var(--error); margin-bottom:10px;">АВТОКЛИКЕР!</h2>
-            <p style="font-size:13px; color:var(--text-dim); margin-bottom:20px;">Запрещено использовать кликеры. Попробуйте честные улучшения или рекламу!</p>
-            <button class="action-btn" style="width:100%;" onclick="Core.closeCheat()">Я ПОНЯЛ</button>
+            <div style="font-size: 50px; margin-bottom: 10px;">🛡️</div>
+            <h2 style="color:var(--error); margin-bottom:10px; font-size: 22px;">СТОП-КЛИКЕР!</h2>
+            <p style="font-size:14px; color:var(--text-dim); margin-bottom:25px; line-height: 1.4;">Использование сторонних программ запрещено.<br>Улучшайте силу клика или получайте бонусы за рекламу!</p>
+            <button class="action-btn" style="width:100%; border-color: var(--accent); background: #222;" onclick="Core.closeCheat()"><b>ХОРОШО, Я ПОНЯЛ</b></button>
         </div>
     </div>
 
@@ -105,43 +100,52 @@
             </div>
         </div>
         <div class="clicker-area">
-            <div id="click-lock" class="lock-ui"><div class="lock-timer" id="lock-sec">5</div></div>
+            <div id="click-lock" class="lock-ui">
+                <div class="lock-timer" id="lock-sec">5</div>
+                <p style="font-size: 10px; color: var(--error); font-weight: 800; margin-top: 5px;">БЛОКИРОВКА</p>
+            </div>
             <div class="coin-btn" id="coin-btn">G</div>
         </div>
         <div class="actions-grid">
-            <div class="action-btn" onclick="Core.ad('gold')"><i>🎁</i><b>Бонус +5.0 G</b><span>ADSGRAM</span></div>
-            <div class="action-btn" onclick="Core.ad('pwr')"><i>⚡</i><b>Сила +0.005</b><span>ADSGRAM</span></div>
-            <div class="action-btn" style="grid-column: span 2;" onclick="Core.upgrade()">
-                🚀 <b>Улучшить за 1.000 G</b><br><span style="font-size:8px">+0.005 к силе</span>
+            <div class="action-btn" onclick="Core.ad('gold')"><i>🎁</i><b>БОНУС +5.0 G</b><span>ADSGRAM</span></div>
+            <div class="action-btn" onclick="Core.ad('pwr')"><i>⚡</i><b>СИЛА +0.005</b><span>ADSGRAM</span></div>
+            <div class="action-btn" style="grid-column: span 2; border-color: var(--accent);" onclick="Core.upgrade()">
+                <b>УЛУЧШИТЬ КЛИК ЗА 1.000 G</b><br><span>МАГАЗИН</span>
             </div>
         </div>
     </div>
 
     <div class="app-container" id="view-top">
-        <h2 style="text-align:center; margin-bottom:15px;">Топ-50 Игроков</h2>
+        <h2 style="text-align:center; margin-bottom:15px; font-size: 24px;">ТОП-50 ИГРОКОВ</h2>
         <div class="list-wrapper" id="top-list"></div>
     </div>
 
     <div class="app-container" id="view-friends">
-        <h2 style="text-align:center; margin-bottom:15px;">Реферальная система</h2>
-        <div class="stat-box" style="margin-bottom:15px">
-            <p style="font-size:12px">Дарим <b>100.0 G</b> за каждого друга!</p>
-            <button class="action-btn" style="width:100%; margin-top:10px; border-color:var(--accent)" onclick="Core.invite()">ПРИГЛАСИТЬ</button>
+        <h2 style="text-align:center; margin-bottom:15px; font-size: 24px;">РЕФЕРАЛЫ</h2>
+        <div class="stat-box" style="margin-bottom:15px; background: #1a1a1c;">
+            <p style="font-size:14px; margin-bottom: 5px;">Приглашай друзей и получай</p>
+            <b style="color: var(--accent); font-size: 22px;">+100.0 G</b>
+            <button class="action-btn" style="width:100%; margin-top:15px; border-color:var(--accent); background: var(--accent); color: #000;" onclick="Core.invite()">
+                <b>ПРИГЛАСИТЬ ДРУЗЕЙ</b>
+            </button>
         </div>
         <div class="list-wrapper" id="friend-list"></div>
     </div>
 
     <div class="app-container" id="view-wallet">
-        <h2 style="text-align:center; margin-bottom:15px;">Вывод средств</h2>
+        <h2 style="text-align:center; margin-bottom:15px; font-size: 24px;">КОШЕЛЕК</h2>
         <div class="stat-box" style="margin-bottom:15px">
-            <p style="font-size:12px; color:var(--text-dim)">Минимальная сумма: 750.0 G</p>
-            <button id="wd-btn" class="action-btn" style="width:100%; margin-top:10px; opacity:0.5" disabled>ОФОРМИТЬ ВЫВОД</button>
+            <p style="font-size:13px; color:var(--text-dim); margin-bottom: 10px;">Доступно для вывода (Мин. 750 G)</p>
+            <button id="wd-btn" class="action-btn" style="width:100%; opacity:0.5; border-color: #444;" disabled>
+                <b>ВЫВЕСТИ GOLD НА ID</b>
+            </button>
         </div>
+        <h3 style="font-size: 14px; margin-left: 5px; margin-bottom: 10px; color: var(--text-dim);">ИСТОРИЯ ВЫПЛАТ</h3>
         <div class="list-wrapper" id="history-list"></div>
     </div>
 
     <nav class="nav-bar">
-        <div class="nav-item active" onclick="UI.nav('mining', this)"><i>⛏️</i><span>Майнинг</span></div>
+        <div class="nav-item active" onclick="UI.nav('mining', this)"><i>⛏️</i><span>Добыча</span></div>
         <div class="nav-item" onclick="UI.nav('top', this)"><i>🏆</i><span>Топ-50</span></div>
         <div class="nav-item" onclick="UI.nav('friends', this)"><i>👥</i><span>Друзья</span></div>
         <div class="nav-item" onclick="UI.nav('wallet', this)"><i>🏦</i><span>Вывод</span></div>
@@ -155,7 +159,7 @@
 
         async init() {
             this.tg.expand();
-            this.uid = this.tg.initDataUnsafe?.user?.id?.toString() || "DEV_TEST";
+            this.uid = this.tg.initDataUnsafe?.user?.id?.toString() || "DEV_USER";
             
             if (!firebase.apps.length) {
                 firebase.initializeApp({
@@ -166,7 +170,6 @@
             }
             this.db = firebase.firestore();
 
-            // Загрузка данных
             const doc = await this.db.collection('players').doc(this.uid).get();
             if(doc.exists) {
                 const d = doc.data();
@@ -180,27 +183,8 @@
             }
 
             this.render();
-            this.checkReferral();
-            
-            // Кнопка монеты
             document.getElementById('coin-btn').addEventListener('pointerdown', (e) => this.tap(e));
-            setInterval(() => this.sync(), 7000);
-        },
-
-        async checkReferral() {
-            const sp = this.tg.initDataUnsafe?.start_param;
-            if (sp && sp !== this.uid) {
-                const userDoc = await this.db.collection('players').doc(this.uid).get();
-                if (!userDoc.exists) {
-                    await this.db.collection('players').doc(sp).update({
-                        gold: firebase.firestore.FieldValue.increment(100)
-                    });
-                    await this.db.collection('players').doc(sp).collection('referrals').add({
-                        name: this.tg.initDataUnsafe?.user?.first_name || "Друг",
-                        date: new Date()
-                    });
-                }
-            }
+            setInterval(() => this.sync(), 8000);
         },
 
         tap(e) {
@@ -209,9 +193,7 @@
             this.lastTaps.push(now);
             this.lastTaps = this.lastTaps.filter(t => now - t < 1000);
 
-            if (this.lastTaps.length > 15) {
-                return this.triggerCheat();
-            }
+            if (this.lastTaps.length > 15) return this.triggerCheat();
 
             this.gold += this.pwr;
             this.journal += this.pwr;
@@ -233,7 +215,6 @@
                     this.isLocked = false;
                     document.getElementById('click-lock').classList.remove('show');
                     document.getElementById('lock-sec').innerText = "5";
-                    this.lastTaps = [];
                 }
             }, 1000);
         },
@@ -255,7 +236,7 @@
             ad.show().then(() => {
                 if(type === 'gold') this.gold += 5; else this.pwr += 0.005;
                 this.sync(); this.render();
-            }).catch(() => this.tg.showAlert("Реклама загружается..."));
+            }).catch(() => this.tg.showAlert("Реклама не готова"));
         },
 
         upgrade() {
@@ -267,15 +248,10 @@
         render() {
             document.getElementById('u-gold').innerText = this.gold.toFixed(3);
             document.getElementById('u-pwr').innerText = this.pwr.toFixed(3);
-            let r = "BRONZE";
-            if(this.gold > 100) r = "SILVER";
-            if(this.gold > 500) r = "GOLD";
-            if(this.gold > 1000) r = "ELITE";
-            document.getElementById('u-rank').innerText = r;
-
             const btn = document.getElementById('wd-btn');
             if(this.gold >= 750) { 
                 btn.disabled = false; btn.style.opacity = "1"; 
+                btn.style.borderColor = "var(--accent)";
                 btn.onclick = () => this.withdraw(); 
             }
         },
@@ -289,7 +265,7 @@
             this.gold = 0;
             await this.db.collection('players').doc(this.uid).update({ gold: 0 });
             this.render();
-            this.tg.showAlert("Заявка создана!");
+            this.tg.showAlert("Заявка на вывод создана!");
         },
 
         invite() {
@@ -310,19 +286,19 @@
         },
         async loadTop() {
             const list = document.getElementById('top-list');
-            list.innerHTML = "<center>Загрузка лидеров...</center>";
+            list.innerHTML = "<center>Загрузка...</center>";
             const snap = await Core.db.collection('players').orderBy('gold', 'desc').limit(50).get();
             list.innerHTML = "";
             let i = 1;
             snap.forEach(doc => {
                 const d = doc.data();
-                list.innerHTML += `<div class="list-item"><b>${i++}. ${d.name || 'Игрок'}</b><span>${Math.floor(d.gold)} G</span></div>`;
+                list.innerHTML += `<div class="list-item"><b>${i++}. ${d.name || 'Игрок'}</b><span style="color:var(--accent); font-weight:800;">${Math.floor(d.gold)} G</span></div>`;
             });
         },
         async loadFriends() {
             const list = document.getElementById('friend-list');
             const snap = await Core.db.collection('players').doc(Core.uid).collection('referrals').get();
-            list.innerHTML = snap.empty ? "<center>Друзей пока нет</center>" : "";
+            list.innerHTML = snap.empty ? "<center>У вас пока нет рефералов</center>" : "";
             document.getElementById('u-refs').innerText = snap.size;
             snap.forEach(doc => {
                 list.innerHTML += `<div class="list-item"><span>${doc.data().name}</span><b style="color:var(--accent)">+100 G</b></div>`;
@@ -331,10 +307,10 @@
         async loadHistory() {
             const list = document.getElementById('history-list');
             const snap = await Core.db.collection('withdrawals').where('uid', '==', Core.uid).get();
-            list.innerHTML = snap.empty ? "<center>Нет выплат</center>" : "";
+            list.innerHTML = snap.empty ? "<center>Пусто</center>" : "";
             snap.forEach(doc => {
                 const d = doc.data();
-                list.innerHTML += `<div class="list-item"><span>${d.amount} G (ID: ${d.sid})</span><small>${d.status}</small></div>`;
+                list.innerHTML += `<div class="list-item"><span>${d.amount} G (ID: ${d.sid})</span><small style="color:var(--accent)">${d.status}</small></div>`;
             });
         },
         spawnText(x, y, txt) {
