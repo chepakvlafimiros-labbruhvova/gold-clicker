@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Locus Gold | Standoff 2 Elite</title>
+    <title>Locus Gold | Standoff 2</title>
     
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -12,321 +12,211 @@
     <style>
         :root {
             --accent: #ff9d00;
-            --accent-dark: #cc7e00;
-            --bg: #0a0a0b;
-            --surface: #151517;
-            --surface-light: #1c1c1f;
+            --bg: #0d0d0e;
+            --surface: #1a1a1c;
+            --surface-light: #252528;
             --text: #ffffff;
             --text-dim: #8e8e93;
-            --success: #34c759;
+            --success: #32d74b;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: sans-serif; }
 
-        body {
-            background-color: var(--bg);
-            color: var(--text);
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            height: 100vh; overflow: hidden; display: flex; flex-direction: column;
-        }
+        body { background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
 
-        /* ГОРЯЧИЙ ДИЗАЙН БАЛАНСА */
-        .header {
-            padding: 45px 20px 25px;
-            background: linear-gradient(180deg, #1a1a1c 0%, var(--bg) 100%);
-            text-align: center; border-bottom: 1px solid #222;
-        }
+        /* HEADER */
+        .header { padding: 50px 20px 20px; text-align: center; background: linear-gradient(180deg, rgba(255,157,0,0.1) 0%, var(--bg) 100%); }
+        .balance-label { font-size: 12px; color: var(--accent); font-weight: 800; letter-spacing: 1px; margin-bottom: 5px; }
+        .balance-value { font-size: 52px; font-weight: 900; text-shadow: 0 0 20px rgba(255,157,0,0.3); }
 
-        .score-title { font-size: 11px; font-weight: 800; color: var(--accent); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px; }
-        .score-value { font-size: 54px; font-weight: 900; text-shadow: 0 0 25px rgba(255,157,0,0.3); }
-
-        /* ОСНОВНОЙ КОНТЕНТ */
-        .viewport { flex: 1; position: relative; }
-        .page { position: absolute; width: 100%; height: 100%; display: none; flex-direction: column; align-items: center; padding: 20px; }
+        /* PAGES */
+        .main { flex: 1; position: relative; }
+        .page { position: absolute; width: 100%; height: 100%; display: none; flex-direction: column; align-items: center; padding: 20px; overflow-y: auto; }
         .page.active { display: flex; }
 
-        /* КЛИКЕР */
-        .clicker-box { flex: 1; display: flex; align-items: center; justify-content: center; width: 100%; }
+        /* CLICKER */
+        .click-area { flex: 1; display: flex; align-items: center; justify-content: center; width: 100%; }
         .coin {
-            width: 250px; height: 250px; border-radius: 50%;
-            background: radial-gradient(circle, #fbc02d 0%, #f57f17 100%);
+            width: 240px; height: 240px; border-radius: 50%;
+            background: radial-gradient(circle, #ffb700 0%, #ff8000 100%);
             border: 8px solid var(--surface-light);
             display: flex; align-items: center; justify-content: center;
-            font-size: 110px; font-weight: 900; color: rgba(0,0,0,0.5);
-            box-shadow: 0 0 50px rgba(245, 127, 23, 0.2);
+            font-size: 90px; font-weight: 900; color: rgba(0,0,0,0.5);
+            box-shadow: 0 0 40px rgba(255,157,0,0.2);
             transition: transform 0.05s; cursor: pointer;
         }
         .coin:active { transform: scale(0.92); }
 
-        /* КНОПКИ */
-        .action-list { width: 100%; max-width: 400px; display: flex; flex-direction: column; gap: 12px; }
-        .btn {
-            width: 100%; padding: 18px; border-radius: 14px; border: none;
-            font-size: 16px; font-weight: 700; color: white; transition: 0.2s;
-        }
-        .btn-main { background: var(--accent); }
-        .btn-sec { background: var(--surface-light); }
+        /* BUTTONS */
+        .btn { width: 100%; padding: 18px; border-radius: 15px; border: none; font-size: 16px; font-weight: 700; color: white; cursor: pointer; margin-bottom: 10px; }
+        .btn-primary { background: var(--accent); color: black; }
         .btn-withdraw { background: #222; color: #555; pointer-events: none; }
         .btn-withdraw.active { background: var(--success); color: black; pointer-events: auto; }
 
-        /* МОДАЛЬНОЕ ОКНО ВВОДА ID */
-        #withdraw-modal {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.85); backdrop-filter: blur(8px);
-            z-index: 1000; display: none; align-items: center; justify-content: center;
-            padding: 20px;
-        }
-        .modal-content {
-            background: var(--surface); width: 100%; max-width: 350px;
-            padding: 30px; border-radius: 24px; border: 1px solid var(--accent);
-            text-align: center;
-        }
-        .modal-title { margin-bottom: 20px; font-size: 18px; font-weight: 800; }
-        .id-input {
-            width: 100%; background: var(--bg); border: 2px solid #333;
-            padding: 15px; border-radius: 12px; color: white; font-size: 20px;
-            text-align: center; margin-bottom: 20px; outline: none;
-        }
-        .id-input:focus { border-color: var(--accent); }
+        /* MODAL */
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
+        .modal-content { background: var(--surface); padding: 30px; border-radius: 25px; width: 100%; max-width: 350px; text-align: center; border: 1px solid var(--accent); }
+        .input-id { width: 100%; padding: 15px; background: #000; border: 2px solid var(--surface-light); border-radius: 12px; color: white; font-size: 20px; text-align: center; margin: 20px 0; outline: none; }
+        .input-id:focus { border-color: var(--accent); }
 
-        /* ИСТОРИЯ */
-        .history-box { width: 100%; margin-top: 20px; background: var(--surface); border-radius: 16px; overflow: hidden; }
-        .history-item { padding: 15px 20px; border-bottom: 1px solid #222; display: flex; justify-content: space-between; align-items: center; }
-        .status-wait { color: var(--accent); font-size: 12px; font-weight: 700; text-transform: uppercase; }
+        /* HISTORY */
+        .history-list { width: 100%; background: var(--surface); border-radius: 15px; margin-top: 15px; }
+        .history-item { padding: 15px; border-bottom: 1px solid #222; display: flex; justify-content: space-between; align-items: center; }
+        .status-wait { color: var(--accent); font-size: 11px; font-weight: 800; }
 
-        /* НАВИГАЦИЯ */
-        .nav { height: 85px; background: var(--surface); border-top: 1px solid #222; display: flex; }
-        .nav-tab { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-dim); }
-        .nav-tab.active { color: var(--accent); }
-        .nav-tab span { font-size: 10px; font-weight: 700; margin-top: 4px; }
+        /* NAV */
+        .nav { height: 80px; background: var(--surface); display: flex; border-top: 1px solid #222; }
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-dim); }
+        .nav-item.active { color: var(--accent); }
+        .nav-item span { font-size: 10px; font-weight: 700; margin-top: 4px; }
 
-        .tap-vfx { position: absolute; color: var(--accent); font-weight: 900; pointer-events: none; animation: tapUp 0.6s ease-out forwards; }
-        @keyframes tapUp { 0% { transform: translateY(0); opacity: 1; } 100% { transform: translateY(-100px); opacity: 0; } }
+        .vfx { position: absolute; color: var(--accent); font-weight: 900; font-size: 24px; pointer-events: none; animation: fly 0.6s forwards; }
+        @keyframes fly { to { transform: translateY(-100px); opacity: 0; } }
     </style>
 </head>
 <body>
 
-    <header class="header">
-        <div class="score-title">Золото Locus</div>
-        <div id="balance" class="score-value">0</div>
-    </header>
+    <div class="header">
+        <div class="balance-label">БАЛАНС G</div>
+        <div id="ui-balance" class="balance-value">0</div>
+    </div>
 
-    <div class="viewport">
+    <div class="main">
         <div id="page-main" class="page active">
-            <div class="clicker-box">
-                <div id="coin-trigger" class="coin">G</div>
-            </div>
-            <div style="font-size: 12px; color: #444;">ID ПОЛЬЗОВАТЕЛЯ: <span id="user-id-display">...</span></div>
-        </div>
-
-        <div id="page-bonus" class="page">
-            <div class="action-list">
-                <button class="btn btn-main" onclick="App.watchAd()">📺 СМОТРЕТЬ РЕКЛАМУ (+10 G)</button>
-                <button class="btn btn-sec" onclick="App.copyLink()">🔗 ПРИГЛАСИТЬ ДРУГА</button>
-            </div>
+            <div class="click-area"><div id="coin" class="coin">G</div></div>
         </div>
 
         <div id="page-withdraw" class="page">
-            <div class="action-list">
-                <button id="withdraw-init-btn" class="btn btn-withdraw" onclick="App.openModal()">🏦 ВЫВЕСТИ В STANDOFF 2</button>
-            </div>
-            <div class="history-box" id="history-container">
-                <div style="padding: 20px; text-align: center; color: #555;">История выплат пуста</div>
-            </div>
+            <button id="btn-withdraw" class="btn btn-withdraw">ЗАГРУЗКА...</button>
+            <div style="width:100%; color: var(--text-dim); font-size: 12px; margin-top: 20px;">ИСТОРИЯ ВЫВОДОВ</div>
+            <div id="history" class="history-list"></div>
         </div>
     </div>
 
-    <div id="withdraw-modal">
+    <div id="modal" class="modal">
         <div class="modal-content">
-            <div class="modal-title">ВЫВОД СРЕДСТВ</div>
-            <p style="font-size: 13px; color: #888; margin-bottom: 15px;">Введите ваш игровой ID Standoff 2 (8-9 цифр)</p>
-            <input type="number" id="id-input-field" class="id-input" placeholder="12345678">
+            <h3>ВЫВОД GOLD</h3>
+            <p style="font-size: 13px; color: var(--text-dim); margin-top: 10px;">Введите ваш ID из Standoff 2</p>
+            <input type="number" id="input-id" class="input-id" placeholder="12345678">
             <div style="display: flex; gap: 10px;">
-                <button class="btn btn-sec" style="padding: 12px;" onclick="App.closeModal()">ОТМЕНА</button>
-                <button class="btn btn-main" style="padding: 12px; flex: 1;" onclick="App.confirmWithdraw()">ПОДТВЕРДИТЬ</button>
+                <button class="btn btn-secondary" style="background:#333" onclick="closeModal()">ОТМЕНА</button>
+                <button class="btn btn-primary" onclick="confirmWithdraw()">ГОТОВО</button>
             </div>
         </div>
     </div>
 
     <nav class="nav">
-        <div class="nav-tab active" onclick="App.switchPage('main', this)">🎮<span>ИГРАТЬ</span></div>
-        <div class="nav-tab" onclick="App.switchPage('bonus', this)">💎<span>БОНУСЫ</span></div>
-        <div class="nav-tab" onclick="App.switchPage('withdraw', this)">🏦<span>ВЫВОД</span></div>
+        <div class="nav-item active" onclick="showPage('main', this)">🎮<span>ИГРАТЬ</span></div>
+        <div class="nav-item" onclick="showPage('withdraw', this)">🏦<span>ВЫВОД</span></div>
     </nav>
 
     <script>
-        const App = {
-            db: null,
-            tg: window.Telegram.WebApp,
-            uid: null,
-            
-            state: { gold: 0, journal: 0, isSyncing: false },
-            config: { min: 750, syncInterval: 2500 },
-
-            async init() {
-                this.tg.expand();
-                this.uid = this.tg.initDataUnsafe?.user?.id?.toString() || "DEV_TEST_USER";
-                document.getElementById('user-id-display').innerText = this.uid;
-
-                // Firebase
-                const config = {
-                    apiKey: "AIzaSyCoa29KS-sin6hoRz0ZbE4f3ki0tZLwkKI",
-                    authDomain: "gold-clicker-5d882.firebaseapp.com",
-                    projectId: "gold-clicker-5d882",
-                    storageBucket: "gold-clicker-5d882.firebasestorage.app",
-                    messagingSenderId: "83489312782",
-                    appId: "1:83489312782:web:ee5b7bdc390e53e7dd6c5f"
-                };
-
-                if (!firebase.apps.length) firebase.initializeApp(config);
-                this.db = firebase.firestore();
-
-                await this.loadData();
-                this.startLoops();
-                this.bindEvents();
-                this.render();
-            },
-
-            async loadData() {
-                try {
-                    const doc = await this.db.collection('players').doc(this.uid).get();
-                    if (doc.exists) {
-                        this.state.gold = doc.data().gold || 0;
-                    } else {
-                        await this.db.collection('players').doc(this.uid).set({ 
-                            gold: 0, 
-                            username: this.tg.initDataUnsafe?.user?.username || "Unknown" 
-                        });
-                    }
-                } catch (e) { console.error("Load Error:", e); }
-            },
-
-            async sync() {
-                if (this.state.journal === 0 || this.state.isSyncing) return;
-                this.state.isSyncing = true;
-                const toAdd = this.state.journal;
-
-                try {
-                    await this.db.collection('players').doc(this.uid).update({
-                        gold: firebase.firestore.FieldValue.increment(toAdd)
-                    });
-                    this.state.journal -= toAdd;
-                    const updatedDoc = await this.db.collection('players').doc(this.uid).get();
-                    this.state.gold = updatedDoc.data().gold;
-                } catch (e) { console.error("Sync Error:", e); }
-                finally { this.state.isSyncing = false; this.render(); }
-            },
-
-            startLoops() {
-                setInterval(() => this.sync(), this.config.syncInterval);
-            },
-
-            bindEvents() {
-                const coin = document.getElementById('coin-trigger');
-                coin.addEventListener('touchstart', (e) => {
-                    e.preventDefault();
-                    this.state.gold += 1;
-                    this.state.journal += 1;
-                    this.render();
-                    this.spawnVFX(e.touches[0].clientX, e.touches[0].clientY);
-                    if (this.tg.HapticFeedback) this.tg.HapticFeedback.impactOccurred('light');
-                });
-            },
-
-            render() {
-                document.getElementById('balance').innerText = Math.floor(this.state.gold).toLocaleString();
-                const btn = document.getElementById('withdraw-init-btn');
-                if (this.state.gold >= this.config.min) {
-                    btn.className = "btn btn-withdraw active";
-                    btn.innerText = "🏦 ВЫВЕСТИ В STANDOFF 2";
-                } else {
-                    btn.className = "btn btn-withdraw";
-                    btn.innerText = `НУЖНО ЕЩЕ ${Math.ceil(this.config.min - this.state.gold)} G`;
-                }
-            },
-
-            spawnVFX(x, y) {
-                const v = document.createElement('div');
-                v.className = 'tap-vfx'; v.innerText = '+1';
-                v.style.left = x + 'px'; v.style.top = y + 'px';
-                document.body.appendChild(v);
-                setTimeout(() => v.remove(), 600);
-            },
-
-            // МОДАЛКА ВЫВОДА
-            openModal() { document.getElementById('withdraw-modal').style.display = 'flex'; },
-            closeModal() { document.getElementById('withdraw-modal').style.display = 'none'; },
-
-            async confirmWithdraw() {
-                const standoffId = document.getElementById('id-input-field').value;
-                if (!standoffId || standoffId.length < 8 || standoffId.length > 9) {
-                    this.tg.showAlert("Введите корректный ID Standoff 2 (8-9 цифр)!");
-                    return;
-                }
-
-                try {
-                    const amount = Math.floor(this.state.gold);
-                    const tx = {
-                        standoffId,
-                        amount,
-                        status: 'Ожидание',
-                        date: new Date().toLocaleString(),
-                        uid: this.uid
-                    };
-
-                    // Пытаемся записать в базу
-                    await this.db.collection('withdrawals').add(tx);
-                    await this.db.collection('players').doc(this.uid).collection('history').add(tx);
-                    
-                    // Обнуляем баланс
-                    this.state.gold = 0;
-                    this.state.journal = 0;
-                    await this.db.collection('players').doc(this.uid).update({ gold: 0 });
-
-                    this.closeModal();
-                    this.render();
-                    this.loadHistory();
-                    this.tg.showAlert("Заявка успешно создана! Ожидайте одобрения.");
-                } catch (e) {
-                    console.error("Database Error Details:", e);
-                    this.tg.showAlert("Ошибка базы данных. Проверьте соединение или настройки Firebase Firestore.");
-                }
-            },
-
-            async loadHistory() {
-                const cont = document.getElementById('history-container');
-                try {
-                    const snap = await this.db.collection('players').doc(this.uid).collection('history').orderBy('date', 'desc').limit(5).get();
-                    if (snap.empty) return;
-                    cont.innerHTML = "";
-                    snap.forEach(doc => {
-                        const d = doc.data();
-                        cont.innerHTML += `
-                            <div class="history-item">
-                                <div><b>${d.amount} G</b><br><small style="color:#555">ID: ${d.standoffId}</small></div>
-                                <div class="status-wait">${d.status}</div>
-                            </div>`;
-                    });
-                } catch (e) { console.error(e); }
-            },
-
-            switchPage(id, el) {
-                document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-                document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
-                document.getElementById('page-' + id).classList.add('active');
-                el.classList.add('active');
-                if (id === 'withdraw') this.loadHistory();
-            },
-
-            copyLink() {
-                const link = `https://t.me/Locus_Gold_bot/Locus_Gold?startapp=${this.uid}`;
-                this.tg.showAlert("Ссылка скопирована!");
-            },
-
-            watchAd() { this.tg.showAlert("Реклама временно недоступна."); }
+        const config = {
+            apiKey: "AIzaSyCoa29KS-sin6hoRz0ZbE4f3ki0tZLwkKI",
+            authDomain: "gold-clicker-5d882.firebaseapp.com",
+            projectId: "gold-clicker-5d882",
+            storageBucket: "gold-clicker-5d882.firebasestorage.app",
+            messagingSenderId: "83489312782",
+            appId: "1:83489312782:web:ee5b7bdc390e53e7dd6c5f"
         };
 
-        window.onload = () => App.init();
+        firebase.initializeApp(config);
+        const db = firebase.firestore();
+        const tg = window.Telegram.WebApp;
+        const uid = tg.initDataUnsafe?.user?.id?.toString() || "DEV_MODE";
+
+        let gold = 0;
+        let journal = 0;
+
+        async function init() {
+            tg.expand();
+            const doc = await db.collection('players').doc(uid).get();
+            if (doc.exists) gold = doc.data().gold || 0;
+            else await db.collection('players').doc(uid).set({ gold: 0 });
+            updateUI();
+            
+            setInterval(sync, 3000);
+        }
+
+        function updateUI() {
+            document.getElementById('ui-balance').innerText = Math.floor(gold).toLocaleString();
+            const btn = document.getElementById('btn-withdraw');
+            if (gold >= 750) {
+                btn.className = "btn btn-withdraw active";
+                btn.innerText = "🏦 ВЫВЕСТИ В STANDOFF 2";
+                btn.onclick = () => document.getElementById('modal').style.display = 'flex';
+            } else {
+                btn.className = "btn btn-withdraw";
+                btn.innerText = `НУЖНО ЕЩЕ ${750 - Math.floor(gold)} G`;
+            }
+        }
+
+        async function sync() {
+            if (journal === 0) return;
+            const toAdd = journal;
+            try {
+                await db.collection('players').doc(uid).update({ gold: firebase.firestore.FieldValue.increment(toAdd) });
+                journal -= toAdd;
+            } catch(e) {}
+        }
+
+        document.getElementById('coin').addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            gold++; journal++;
+            updateUI();
+            const v = document.createElement('div');
+            v.className = 'vfx'; v.innerText = '+1';
+            v.style.left = e.touches[0].clientX + 'px'; v.style.top = e.touches[0].clientY + 'px';
+            document.body.appendChild(v);
+            setTimeout(() => v.remove(), 600);
+            if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+        });
+
+        function closeModal() { document.getElementById('modal').style.display = 'none'; }
+
+        async function confirmWithdraw() {
+            const sid = document.getElementById('input-id').value;
+            if (sid.length < 8 || sid.length > 9) {
+                tg.showAlert("ID Standoff 2 должен быть 8-9 цифр!");
+                return;
+            }
+
+            try {
+                const amount = Math.floor(gold);
+                const request = { standoffId: sid, amount, status: 'Ожидание', date: new Date().toLocaleString(), uid };
+                
+                await db.collection('withdrawals').add(request);
+                await db.collection('players').doc(uid).collection('history').add(request);
+                
+                gold = 0; journal = 0;
+                await db.collection('players').doc(uid).update({ gold: 0 });
+                
+                closeModal();
+                updateUI();
+                loadHistory();
+                tg.showAlert("Заявка создана! Ожидайте пополнения.");
+            } catch(e) { tg.showAlert("Ошибка базы данных. Проверьте Rules в Firebase!"); }
+        }
+
+        async function loadHistory() {
+            const container = document.getElementById('history');
+            const snap = await db.collection('players').doc(uid).collection('history').orderBy('date', 'desc').get();
+            container.innerHTML = snap.empty ? '<div style="padding:20px;text-align:center;color:#444">Пусто</div>' : '';
+            snap.forEach(doc => {
+                const d = doc.data();
+                container.innerHTML += `<div class="history-item"><div><b>${d.amount} G</b><br><small>${d.standoffId}</small></div><div class="status-wait">${d.status}</div></div>`;
+            });
+        }
+
+        function showPage(id, el) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(t => t.classList.remove('active'));
+            document.getElementById('page-'+id).classList.add('active');
+            el.classList.add('active');
+            if (id === 'withdraw') loadHistory();
+        }
+
+        window.onload = init;
     </script>
 </body>
 </html>
