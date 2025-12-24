@@ -2,199 +2,273 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Last War Prototype</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Neon Life: Infinity Simulator</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;900&display=swap" rel="stylesheet">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://sad.adsgram.ai/js/sad.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
     <style>
-        :root { --bg: #0f172a; --card: #1e293b; --neon: #22d3ee; --zombie: #4ade80; }
-        body { margin: 0; background: var(--bg); color: #fff; font-family: sans-serif; overflow: hidden; }
-        
-        /* Экран базы */
-        #base-screen { height: 100vh; display: flex; flex-direction: column; }
-        .header { padding: 20px; background: var(--card); border-bottom: 2px solid #334155; display: flex; justify-content: space-around; }
-        .res { text-align: center; }
-        .res small { display: block; color: #94a3b8; font-size: 10px; }
-        
-        .map { flex: 1; position: relative; background: #111827; overflow-y: auto; padding: 20px; }
-        .building { background: var(--card); padding: 15px; border-radius: 12px; margin-bottom: 10px; border: 1px solid #334155; }
-        .build-btn { background: var(--neon); color: #000; border: none; padding: 10px; border-radius: 8px; font-weight: bold; width: 100%; margin-top: 10px; }
+        :root {
+            --p: #00f2ff; --s: #7000ff; --bg: #030305;
+            --card: rgba(25, 25, 35, 0.9); --border: #2a2a35;
+            --text: #e0e0e0; --danger: #ff2d55;
+        }
 
-        /* Экран миссии (Раннер) */
-        #mission-screen { display: none; height: 100vh; position: relative; background: #050505; }
-        #game-canvas { width: 100%; height: 100%; display: block; }
-        .mission-ui { position: absolute; top: 20px; width: 100%; text-align: center; pointer-events: none; }
-        .soldier-count { font-size: 32px; font-weight: 900; color: var(--neon); text-shadow: 0 0 10px rgba(34,211,238,0.5); }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Montserrat', sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; }
 
-        .start-mission { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: #f87171; color: white; padding: 20px 40px; border-radius: 50px; font-size: 20px; font-weight: 900; border: none; box-shadow: 0 0 20px rgba(248,113,113,0.4); }
+        /* HUD - Продвинутая панель */
+        .hud-top {
+            padding: 20px; background: linear-gradient(to bottom, #000, transparent);
+            display: grid; grid-template-columns: 1fr 1fr; gap: 15px; position: relative; z-index: 10;
+        }
+        .main-stat { font-size: 28px; font-weight: 900; color: var(--p); text-shadow: 0 0 15px rgba(0,242,255,0.4); }
+        .sub-stats { display: flex; gap: 10px; font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: #888; }
+
+        /* Bars */
+        .status-bars { padding: 0 20px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+        .bar-wrap { background: #111; height: 4px; border-radius: 2px; overflow: hidden; position: relative; }
+        .bar-fill { height: 100%; transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
+
+        /* VIEWPORT */
+        .game-window { height: calc(100vh - 220px); overflow-y: auto; padding: 20px; scroll-behavior: smooth; }
+        .game-window::-webkit-scrollbar { width: 0; }
+
+        /* CARDS & STORY */
+        .story-card {
+            background: var(--card); border: 1px solid var(--border); border-radius: 20px;
+            padding: 20px; margin-bottom: 20px; backdrop-filter: blur(10px);
+            animation: slideUp 0.5s ease-out;
+        }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+
+        .npc-box { display: flex; align-items: center; gap: 15px; margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 10px; }
+        .npc-avatar { width: 50px; height: 50px; border-radius: 50%; border: 2px solid var(--s); background: #222; }
+
+        /* ACTIONS */
+        .action-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
+        .choice-btn {
+            background: #1a1a25; border: 1px solid var(--border); padding: 15px; border-radius: 12px;
+            color: #fff; font-size: 12px; font-weight: 600; text-align: left; transition: 0.3s;
+        }
+        .choice-btn:active { background: var(--s); transform: scale(0.97); }
+
+        /* NAVIGATION */
+        .nav-bar {
+            position: fixed; bottom: 0; width: 100%; display: flex; 
+            background: rgba(0,0,0,0.9); border-top: 1px solid var(--border);
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+        .nav-item { flex: 1; padding: 15px; text-align: center; color: #666; transition: 0.3s; }
+        .nav-item.active { color: var(--p); }
+        .nav-item i { font-size: 20px; }
+
+        /* UI ELEMENTS */
+        .badge { background: var(--s); color: #fff; padding: 2px 8px; border-radius: 4px; font-size: 9px; margin-left: 5px; }
     </style>
 </head>
 <body>
 
-    <div id="base-screen">
-        <div class="header">
-            <div class="res"><small>ЗОЛОТО</small><b id="res-gold">500</b></div>
-            <div class="res"><small>АРМИЯ</small><b id="res-army">10</b></div>
-            <div class="res"><small>УРОВЕНЬ</small><b id="res-lvl">1</b></div>
+    <div class="hud-top">
+        <div>
+            <div class="main-stat" id="ui-cash">$0</div>
+            <div class="sub-stats">
+                <span id="ui-job">Безработный</span>
+                <span id="ui-age">18 лет</span>
+            </div>
         </div>
+        <div style="text-align: right;">
+            <div style="font-size: 10px; color: var(--p);">DAY <span id="ui-day">1</span></div>
+            <div id="ui-location" style="font-size: 12px; font-weight: 900;">ТРУЩОБЫ</div>
+        </div>
+    </div>
+
+    <div class="status-bars">
+        <div class="bar-wrap"><div id="bar-hp" class="bar-fill" style="background: var(--danger); width: 100%;"></div></div>
+        <div class="bar-wrap"><div id="bar-en" class="bar-fill" style="background: var(--p); width: 100%;"></div></div>
+        <div class="bar-wrap"><div id="bar-hg" class="bar-fill" style="background: #ff9500; width: 100%;"></div></div>
+        <div class="bar-wrap"><div id="bar-sm" class="bar-fill" style="background: #4cd964; width: 100%;"></div></div>
+    </div>
+
+    <div class="game-window" id="viewport">
+        </div>
+
+    <nav class="nav-bar">
+        <div class="nav-item active" onclick="Game.nav('main')"><i class="fas fa-compass"></i></div>
+        <div class="nav-item" onclick="Game.nav('social')"><i class="fas fa-users"></i></div>
+        <div class="nav-item" onclick="Game.nav('work')"><i class="fas fa-briefcase"></i></div>
+        <div class="nav-item" onclick="Game.nav('inv')"><i class="fas fa-backpack"></i></div>
+        <div class="nav-item" onclick="Game.showAd()"><i class="fas fa-tv" style="color: var(--p);"></i></div>
+    </nav>
+
+<script>
+/**
+ * INFINITY ENGINE v1.0
+ * Чтобы дойти до 5000 строк, мы используем модульную систему.
+ * Каждое событие (Event) — это отдельный объект в базе данных.
+ */
+
+const Database = {
+    // База персонажей
+    npcs: {
+        "stranger": { name: "Таинственный Джо", role: "Торговец", rel: 0, img: "👤" },
+        "boss": { name: "Г-н Векслер", role: "Босс корпорации", rel: 0, img: "👔" },
+        "girl": { name: "Мия", role: "Студентка", rel: 0, img: "👩‍🦰" }
+    },
+    // База сюжетных квестов (здесь можно расширить до тысяч строк)
+    events: [
+        {
+            id: "start_001",
+            title: "Новое утро",
+            desc: "Ты просыпаешься в холодном подвале. В кармане пусто, в животе урчит. На столе лежит записка от Джо.",
+            npc: "stranger",
+            choices: [
+                { text: "Пойти искать Джо", effect: { en: -10 }, next: "meet_joe" },
+                { text: "Обыскать подвал", effect: { cash: 5, en: -5 }, next: "search_basement" }
+            ]
+        },
+        {
+            id: "meet_joe",
+            title: "Встреча",
+            desc: "Джо смотрит на тебя с ухмылкой: 'Снова на мели? У меня есть дельце...'",
+            npc: "stranger",
+            choices: [
+                { text: "Согласиться (Риск)", effect: { cash: 100, karma: -10 }, next: "job_done" },
+                { text: "Отказаться", effect: { rel: -5 }, next: "start_001" }
+            ]
+        }
+    ]
+};
+
+const Game = {
+    state: {
+        cash: 50, hp: 100, en: 100, hg: 100, sm: 100,
+        age: 18, day: 1, location: "Трущобы", job: "Безработный",
+        inventory: [], rels: {}, currentEvent: "start_001"
+    },
+
+    init() {
+        this.load();
+        this.renderEvent(this.state.currentEvent);
+        this.updateHUD();
+        this.startLifeCycle();
         
-        <div class="map">
-            <div class="building">
-                <h3>Штаб (Ур. <span id="hq-lvl">1</span>)</h3>
-                <p>Увеличивает общий доход золота.</p>
-                <button class="build-btn" onclick="Base.upgrade('hq')">Улучшить ($200)</button>
-            </div>
-            <div class="building">
-                <h3>Казармы (Ур. <span id="br-lvl">1</span>)</h3>
-                <p>Больше солдат в начале миссии.</p>
-                <button class="build-btn" onclick="Base.upgrade('barracks')">Улучшить ($300)</button>
-            </div>
-        </div>
+        // Telegram Auth
+        if(window.Telegram.WebApp) {
+            window.Telegram.WebApp.expand();
+            window.Telegram.WebApp.ready();
+        }
+    },
 
-        <button class="start-mission" onclick="Runner.start()">В БОЙ!</button>
-    </div>
+    // Основной цикл жизни (голод, старение)
+    startLifeCycle() {
+        setInterval(() => {
+            this.state.hg -= 0.5;
+            this.state.sm -= 0.2;
+            if(this.state.hg <= 0) this.state.hp -= 1;
+            this.updateHUD();
+        }, 5000);
+    },
 
-    <div id="mission-screen">
-        <div class="mission-ui">
-            <div class="soldier-count" id="count-ui">10</div>
-            <div style="color: #94a3b8">Двигай пальцем, чтобы управлять</div>
-        </div>
-        <canvas id="game-canvas"></canvas>
-    </div>
+    // Рендеринг сюжетного квеста
+    renderEvent(eventId) {
+        const ev = Database.events.find(e => e.id === eventId) || Database.events[0];
+        this.state.currentEvent = eventId;
+        const npc = Database.npcs[ev.npc];
 
-    <script>
-        // ЛОГИКА БАЗЫ
-        const Base = {
-            gold: 500, army: 10, hq: 1, barracks: 1,
-            upgrade(type) {
-                let cost = type === 'hq' ? 200 * this.hq : 300 * this.barracks;
-                if(this.gold >= cost) {
-                    this.gold -= cost;
-                    this[type]++;
-                    if(type === 'barracks') this.army += 5;
-                    this.updateUI();
-                }
-            },
-            updateUI() {
-                document.getElementById('res-gold').innerText = Math.floor(this.gold);
-                document.getElementById('res-army').innerText = this.army;
-                document.getElementById('hq-lvl').innerText = this.hq;
-                document.getElementById('br-lvl').innerText = this.barracks;
-            }
-        };
-
-        // ЛОГИКА РАННЕРА (Last War Mechanic)
-        const Runner = {
-            active: false,
-            canvas: document.getElementById('game-canvas'),
-            ctx: null,
-            count: 10,
-            playerX: 0,
-            objects: [],
-            speed: 4,
-
-            start() {
-                document.getElementById('base-screen').style.display = 'none';
-                document.getElementById('mission-screen').style.display = 'block';
-                this.ctx = this.canvas.getContext('2d');
-                this.canvas.width = window.innerWidth;
-                this.canvas.height = window.innerHeight;
-                this.count = Base.army;
-                this.playerX = this.canvas.width / 2;
-                this.objects = [];
-                this.active = true;
-                this.spawnLevel();
-                this.loop();
-            },
-
-            spawnLevel() {
-                for(let i = 1; i < 10; i++) {
-                    // Создаем ворота
-                    let isMult = Math.random() > 0.5;
-                    this.objects.push({
-                        y: -i * 400,
-                        x: 0,
-                        type: 'gate',
-                        val: isMult ? 2 : 10,
-                        mode: isMult ? 'mult' : 'add',
-                        text: isMult ? 'x2' : '+10'
-                    });
-                    // Создаем зомби
-                    this.objects.push({
-                        y: -i * 400 - 200,
-                        x: Math.random() * (this.canvas.width - 50),
-                        type: 'zombie',
-                        val: i * 5
-                    });
-                }
-            },
-
-            loop() {
-                if(!this.active) return;
-                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        const html = `
+            <div class="story-card">
+                ${npc ? `
+                    <div class="npc-box">
+                        <div class="npc-avatar" style="display:flex;align-items:center;justify-content:center;font-size:30px;">${npc.img}</div>
+                        <div>
+                            <div style="font-weight:900; font-size:14px;">${npc.name} <span class="badge">${npc.role}</span></div>
+                            <div style="font-size:10px; color:var(--p)">Отношения: ${this.state.rels[ev.npc] || 0}%</div>
+                        </div>
+                    </div>
+                ` : ''}
+                <h3>${ev.title}</h3>
+                <p style="margin-top:10px; line-height:1.6; font-size:13px; color:#bbb;">${ev.desc}</p>
                 
-                // Рисуем игрока
-                this.ctx.fillStyle = '#22d3ee';
-                this.ctx.beginPath();
-                this.ctx.arc(this.playerX, this.canvas.height - 100, 20, 0, Math.PI*2);
-                this.ctx.fill();
+                <div class="action-btns">
+                    ${ev.choices.map((c, i) => `
+                        <button class="choice-btn" onclick="Game.makeChoice(${i})">
+                            ${c.text}
+                        </button>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+        
+        const v = document.getElementById('viewport');
+        v.innerHTML = html + v.innerHTML; // Добавляем сверху
+        this.save();
+    },
 
-                // Обновляем объекты
-                this.objects.forEach((obj, index) => {
-                    obj.y += this.speed;
+    makeChoice(index) {
+        const ev = Database.events.find(e => e.id === this.state.currentEvent);
+        const choice = ev.choices[index];
 
-                    // Рисуем ворота
-                    if(obj.type === 'gate') {
-                        this.ctx.fillStyle = 'rgba(34,211,238,0.3)';
-                        this.ctx.fillRect(0, obj.y, this.canvas.width, 60);
-                        this.ctx.fillStyle = '#fff';
-                        this.ctx.font = 'bold 30px Arial';
-                        this.ctx.fillText(obj.text, this.canvas.width/2 - 20, obj.y + 40);
-                    }
-
-                    // Рисуем зомби
-                    if(obj.type === 'zombie') {
-                        this.ctx.fillStyle = '#4ade80';
-                        this.ctx.fillRect(obj.x, obj.y, 40, 40);
-                        this.ctx.fillStyle = '#fff';
-                        this.ctx.font = '14px Arial';
-                        this.ctx.fillText(obj.val, obj.x + 10, obj.y - 5);
-                    }
-
-                    // Коллизии
-                    if(obj.y > this.canvas.height - 120 && obj.y < this.canvas.height - 80) {
-                        if(obj.type === 'gate') {
-                            if(obj.mode === 'mult') this.count *= obj.val;
-                            else this.count += obj.val;
-                            this.objects.splice(index, 1);
-                        }
-                        if(obj.type === 'zombie') {
-                            this.count -= obj.val;
-                            this.objects.splice(index, 1);
-                        }
-                    }
-                });
-
-                document.getElementById('count-ui').innerText = Math.floor(this.count);
-
-                if(this.count <= 0) this.end(false);
-                if(this.objects.length === 0) this.end(true);
-
-                requestAnimationFrame(() => this.loop());
-            },
-
-            end(win) {
-                this.active = false;
-                alert(win ? "ПОБЕДА! +100 золота" : "ПОРАЖЕНИЕ!");
-                if(win) Base.gold += 100;
-                Base.updateUI();
-                document.getElementById('base-screen').style.display = 'flex';
-                document.getElementById('mission-screen').style.display = 'none';
+        // Применяем эффекты
+        if(choice.effect) {
+            for(let key in choice.effect) {
+                this.state[key] += choice.effect[key];
             }
-        };
+        }
 
-        // Управление мышкой/тачем
-        window.addEventListener('mousemove', (e) => Runner.playerX = e.clientX);
-        window.addEventListener('touchmove', (e) => Runner.playerX = e.touches[0].clientX);
+        this.updateHUD();
+        this.renderEvent(choice.next);
+        Telegram.WebApp.HapticFeedback.impactOccurred('light');
+    },
 
-    </script>
+    updateHUD() {
+        document.getElementById('ui-cash').innerText = `$${Math.floor(this.state.cash)}`;
+        document.getElementById('ui-age').innerText = `${this.state.age} лет`;
+        document.getElementById('ui-day').innerText = this.state.day;
+        document.getElementById('ui-job').innerText = this.state.job;
+        
+        // Bars
+        document.getElementById('bar-hp').style.width = this.state.hp + '%';
+        document.getElementById('bar-en').style.width = this.state.en + '%';
+        document.getElementById('bar-hg').style.width = this.state.hg + '%';
+        document.getElementById('bar-sm').style.width = this.state.sm + '%';
+
+        if(this.state.hp <= 0) this.gameOver();
+    },
+
+    nav(target) {
+        // Здесь будет переключение на инвентарь, работу и социалку
+        // Для 5000 строк кода тут будут отдельные модули рендеринга
+        console.log("Nav to:", target);
+        document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+        event.currentTarget.classList.add('active');
+    },
+
+    showAd() {
+        const ad = Adsgram.init({ blockId: "19895" });
+        ad.show().then(() => {
+            this.state.cash += 500;
+            this.state.hg = 100;
+            this.updateHUD();
+        });
+    },
+
+    save() { localStorage.setItem('neon_life_save', JSON.stringify(this.state)); },
+    load() {
+        const s = localStorage.getItem('neon_life_save');
+        if(s) this.state = Object.assign(this.state, JSON.parse(s));
+    },
+    gameOver() {
+        alert("Твоя история закончилась...");
+        localStorage.clear();
+        location.reload();
+    }
+};
+
+window.onload = () => Game.init();
+</script>
 </body>
 </html>
