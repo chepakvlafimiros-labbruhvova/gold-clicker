@@ -23,25 +23,21 @@
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
         body { background: var(--bg); color: #fff; height: 100vh; overflow: hidden; position: fixed; width: 100%; display: flex; flex-direction: column; }
 
-        /* Контейнер приложения */
         .app-container {
             position: absolute; inset: 0; display: none; flex-direction: column;
             padding: calc(var(--safe-top) + 20px) 20px calc(var(--safe-bottom) + 80px);
         }
         .app-container.active { display: flex; }
 
-        /* Хедер */
         .header-stats { text-align: center; margin-bottom: 20px; flex-shrink: 0; }
         .gold-display { font-size: 48px; font-weight: 900; color: var(--accent); text-shadow: 0 0 20px rgba(255,157,0,0.3); }
         .rank-badge { font-size: 12px; text-transform: uppercase; background: #222; padding: 4px 12px; border-radius: 20px; color: var(--accent); font-weight: 800; }
 
-        /* Сетка статистики */
         .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px; }
         .stat-box { background: #18181b; border-radius: 16px; padding: 12px; text-align: center; border: 1px solid #27272a; }
         .stat-box small { display: block; color: var(--text-dim); font-size: 10px; text-transform: uppercase; margin-bottom: 3px; font-weight: 700; }
         .stat-box b { font-size: 16px; }
 
-        /* Зона кликера */
         .clicker-area { flex: 1; display: flex; align-items: center; justify-content: center; min-height: 200px; }
         .coin-btn {
             width: 200px; height: 200px; border-radius: 50%;
@@ -53,7 +49,6 @@
         }
         .coin-btn:active { transform: scale(0.92); }
 
-        /* Сетка кнопок действий */
         .actions-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; flex-shrink: 0; }
         .action-btn { background: #18181b; border: 1px solid #27272a; border-radius: 18px; padding: 15px 10px; text-align: center; cursor: pointer; }
         .action-btn:active { background: #222; }
@@ -63,14 +58,12 @@
 
         .upgrade-btn { grid-column: span 2; background: #18181b; border: 1px solid var(--accent); border-radius: 18px; padding: 12px; text-align: center; }
 
-        /* Списки */
         .list-wrapper { flex: 1; overflow-y: auto; margin-top: 10px; padding-right: 5px; }
         .list-item { 
             background: #18181b; padding: 12px 15px; border-radius: 14px; margin-bottom: 8px;
             display: flex; justify-content: space-between; align-items: center; border: 1px solid #27272a;
         }
 
-        /* Навигация */
         .nav-bar {
             position: fixed; bottom: 0; width: 100%; height: calc(70px + var(--safe-bottom));
             background: #0a0a0b; border-top: 1px solid #1c1c1e; display: flex; 
@@ -81,15 +74,13 @@
         .nav-item i { font-size: 20px; }
         .nav-item span { font-size: 9px; font-weight: 800; margin-top: 4px; text-transform: uppercase; }
 
-        /* ДИЗАЙН СОГЛАШЕНИЯ (СОХРАНЕН) */
-        #tos-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 9999; display: none; align-items: center; justify(content): center; padding: 20px; display: flex; visibility: hidden; opacity: 0; transition: 0.3s; }
+        #tos-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 20px; visibility: hidden; opacity: 0; transition: 0.3s; }
         #tos-overlay.show { visibility: visible; opacity: 1; }
         
         .tos-modal { background: #1c1c1e; width: 100%; max-width: 320px; border-radius: 24px; padding: 25px; text-align: center; border: 1px solid #2c2c2e; box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
         .tos-btn-main { background: linear-gradient(135deg, #ff9d00, #e68a00); color: #000; padding: 18px; border-radius: 15px; font-weight: 800; width: 100%; border: none; margin-bottom: 12px; font-size: 14px; cursor: pointer; }
         .tos-btn-agree { background: #fff; color: #000; padding: 15px; border-radius: 12px; width: 100%; border: none; font-weight: 700; cursor: pointer; }
 
-        /* ПОЛНЫЙ ТЕКСТ ТОС (БОЛЬШОЙ И ИНФОРМАТИВНЫЙ) */
         #full-tos { position: fixed; inset: 0; background: #000; z-index: 10000; padding: calc(var(--safe-top) + 20px) 25px 40px; overflow-y: auto; display: none; }
         .tos-header { color: var(--accent); font-size: 24px; font-weight: 900; margin-bottom: 20px; text-align: center; }
         .tos-section { margin-bottom: 20px; }
@@ -113,32 +104,18 @@
 
     <div id="full-tos">
         <div class="tos-header">LOCUS GOLD: TERMS OF SERVICE</div>
-        
         <div class="tos-section">
             <h3>1. Общие положения</h3>
-            <p>Данное приложение является игровым симулятором. Вся внутренняя валюта «Gold» (G) является исключительно виртуальной единицей вознаграждения в рамках программ лояльности и не имеет статуса реальных денег или криптовалюты.</p>
+            <p>Данное приложение является симулятором. Валюта Gold — виртуальная единица вознаграждения.</p>
         </div>
-
         <div class="tos-section">
             <h3>2. Условия вывода</h3>
-            <p>Виртуальные баллы могут быть обменяны на внутриигровые ценности при достижении минимального порога в 750 G. Пользователь обязан предоставить корректный ID игрока. Срок обработки заявки составляет от 24 до 72 часов. Администрация не несет ответственности за ошибки, допущенные пользователем при вводе данных.</p>
+            <p>Вывод доступен от 750 G на ID Standoff 2. Срок обработки: до 72 часов.</p>
         </div>
-
         <div class="tos-section">
-            <h3>3. Рекламные системы и Данные</h3>
-            <p>Приложение использует сторонние рекламные сервисы (в т.ч. Adsgram). Просматривая рекламу, вы соглашаетесь с условиями предоставления услуг этих сервисов. Мы собираем только необходимые данные (Telegram ID) для обеспечения корректной работы баланса и синхронизации прогресса через Firebase.</p>
+            <h3>3. Реклама</h3>
+            <p>Мы используем Adsgram. Просмотр рекламы подтверждает ваше согласие с правилами сервиса.</p>
         </div>
-
-        <div class="tos-section">
-            <h3>4. Запреты и блокировки</h3>
-            <p>Запрещено использование автокликеров, эмуляторов или любых скриптов для автоматизации добычи Gold. При обнаружении подозрительной активности аккаунт может быть заблокирован без выплаты накопленных баллов.</p>
-        </div>
-
-        <div class="tos-section">
-            <h3>5. Отказ от ответственности</h3>
-            <p>Приложение не связано с компанией Axlebolt Ltd или игрой Standoff 2 официально. Мы являемся сторонней платформой вознаграждений за активность в Telegram-боте.</p>
-        </div>
-
         <button class="tos-btn-main" style="margin-top: 20px;" onclick="UI.hideFullTos()">ПРИНЯТЬ И ВЕРНУТЬСЯ</button>
     </div>
 
@@ -201,11 +178,13 @@
             this.tg.expand();
             this.uid = this.tg.initDataUnsafe?.user?.id?.toString() || "WEB_TEST";
             
-            firebase.initializeApp({
-                apiKey: "AIzaSyCoa29KS-sin6hoRz0ZbE4f3ki0tZLwkKI",
-                projectId: "gold-clicker-5d882",
-                appId: "1:83489312782:web:ee5b7bdc390e53e7dd6c5f"
-            });
+            if (!firebase.apps.length) {
+                firebase.initializeApp({
+                    apiKey: "AIzaSyCoa29KS-sin6hoRz0ZbE4f3ki0tZLwkKI",
+                    projectId: "gold-clicker-5d882",
+                    appId: "1:83489312782:web:ee5b7bdc390e53e7dd6c5f"
+                });
+            }
             this.db = firebase.firestore();
 
             const doc = await this.db.collection('players').doc(this.uid).get();
@@ -279,7 +258,7 @@
                     pwr: firebase.firestore.FieldValue.increment(pwrBonus)
                 });
                 this.render();
-            }).catch(() => this.tg.showAlert("Реклама загружается..."));
+            }).catch(() => this.tg.showAlert("Реклама подготавливается..."));
         },
 
         upgrade() {
@@ -339,40 +318,4 @@
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
             document.getElementById('view-' + id).classList.add('active');
             el.classList.add('active');
-            if(id === 'leaderboard') Core.loadLeaders();
-            if(id === 'friends') this.loadFriends();
-            if(id === 'wallet') this.loadHistory();
-        },
-        async loadFriends() {
-            const list = document.getElementById('friend-list');
-            const snap = await Core.db.collection('players').doc(Core.uid).collection('referrals').get();
-            list.innerHTML = snap.empty ? "<center>Список пуст</center>" : "";
-            document.getElementById('u-refs').innerText = snap.size;
-            snap.forEach(doc => {
-                list.innerHTML += `<div class="list-item"><span>${doc.data().name}</span><span style="color:var(--accent)">+100 G</span></div>`;
-            });
-        },
-        async loadHistory() {
-            const list = document.getElementById('history-list');
-            const snap = await Core.db.collection('withdrawals').where('uid', '==', Core.uid).get();
-            list.innerHTML = snap.empty ? "<center>Нет операций</center>" : "";
-            snap.forEach(doc => {
-                const d = doc.data();
-                list.innerHTML += `<div class="list-item"><span>ID: ${d.sid} (${d.amount} G)</span><small>${d.status}</small></div>`;
-            });
-        },
-        showFullTos() { document.getElementById('full-tos').style.display = 'block'; },
-        hideFullTos() { document.getElementById('full-tos').style.display = 'none'; },
-        spawnText(x, y, txt) {
-            const el = document.createElement('div');
-            el.className = 'float-text'; el.innerText = txt;
-            el.style.left = x + 'px'; el.style.top = y + 'px';
-            document.body.appendChild(el);
-            setTimeout(() => el.remove(), 700);
-        }
-    };
-
-    window.onload = () => Core.init();
-    </script>
-</body>
-</html>
+            if(id === 'leaderboard') Core.loadLeaders
