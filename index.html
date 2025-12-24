@@ -66,7 +66,7 @@
         /* LISTS */
         .list-item { background: var(--surface); padding: 18px; border-radius: 20px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #1c1c1e; }
         .list-item b { font-size: 16px; color: var(--accent); }
-        .list-item span { font-size: 12px; font-weight: 600; text-transform: uppercase; }
+        .list-item span { font-size: 12px; font-weight: 600; }
 
         .f-pop { position: absolute; color: var(--accent); font-weight: 900; pointer-events: none; animation: fPop 0.6s forwards; font-size: 28px; z-index: 1000; }
         @keyframes fPop { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-100px); } }
@@ -79,16 +79,11 @@
             <div class="gold-count" id="gold-val">0.000</div>
             <div class="gold-label">GOLD BALANCE</div>
         </div>
-        
         <div class="stats-grid">
             <div class="stat-card"><span>КЛИК</span><b id="pwr-val">0.001</b></div>
             <div class="stat-card"><span>ДРУЗЬЯ</span><b id="ref-val">0</b></div>
         </div>
-
-        <div class="click-area">
-            <div class="coin" id="coin-btn"><span>G</span></div>
-        </div>
-
+        <div class="click-area"><div class="coin" id="coin-btn"><span>G</span></div></div>
         <div class="action-btns">
             <div class="btn-act" onclick="Game.showAd('gold')"><b>БОНУС</b><small>РЕКЛАМА (+5.0 G)</small></div>
             <div class="btn-act" onclick="Game.showAd('pwr')"><b>СИЛА</b><small>РЕКЛАМА (+0.005)</small></div>
@@ -100,16 +95,15 @@
     </div>
 
     <div class="screen" id="scr-wallet">
-        <h2 style="text-align:center; margin-bottom:20px; letter-spacing: 1px;">ВЫВОД СРЕДСТВ</h2>
+        <h2 style="text-align:center; margin-bottom:20px;">ВЫВОД СРЕДСТВ</h2>
         <div class="stat-card" style="margin-bottom:25px; padding: 25px;">
-            <span style="font-size: 12px; margin-bottom: 10px;">МИНИМУМ: 750 G</span>
-            <button class="btn-act" id="wd-btn" style="width:100%; background:var(--accent); color:#000; border:none; font-weight:900;" onclick="Game.withdraw()">ВЫВЕСТИ</button>
+            <span>МИНИМУМ: 750 G</span>
+            <button class="btn-act" id="wd-btn" style="width:100%; background:var(--accent); color:#000; border:none; margin-top:15px;" onclick="Game.withdraw()">ВЫВЕСТИ</button>
         </div>
-        <h3 style="font-size: 12px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 15px;">История выплат</h3>
         <div id="history-list"></div>
     </div>
 
-    <div class="screen" id="scr-top"><h2 style="text-align:center; margin-bottom:20px;">ТОП-50</h2><div id="top-list"></div></div>
+    <div class="screen" id="scr-top"><h2 style="text-align:center; margin-bottom:20px;">ТОП ЛИДЕРОВ</h2><div id="top-list"></div></div>
     <div class="screen" id="scr-ref"><h2 style="text-align:center; margin-bottom:20px;">ДРУЗЬЯ</h2><button class="btn-act btn-upg" style="width:100%;" onclick="Game.invite()"><b>ПРИГЛАСИТЬ</b></button><div id="ref-list" style="margin-top:20px;"></div></div>
 
     <nav class="nav">
@@ -126,9 +120,8 @@
         
         async init() {
             this.tg.expand();
-            this.uid = this.tg.initDataUnsafe?.user?.id?.toString() || "DEV_TEST";
+            this.uid = this.tg.initDataUnsafe?.user?.id?.toString() || "DEV_USER";
             
-            // Загрузка локального кэша для мгновенного старта
             const cache = localStorage.getItem('locus_cache_' + this.uid);
             if(cache) this.data = JSON.parse(cache);
 
@@ -142,7 +135,7 @@
             const doc = await this.db.collection('players').doc(this.uid).get();
             if(doc.exists) {
                 const cloud = doc.data();
-                if(cloud.gold > this.data.gold) this.data = cloud; 
+                if(cloud.gold > this.data.gold) this.data = cloud;
             } else {
                 this.data.name = this.tg.initDataUnsafe?.user?.first_name || "User";
                 this.saveCloud();
@@ -174,85 +167,64 @@
             if(this.data.gold < p) return this.tg.showAlert("Недостаточно Gold!");
             this.data.gold -= p;
             this.data.pwr += 0.005;
-            this.data.upg = (this.data.upg || 0) + 1;
+            this.data.upg++;
             this.render();
             this.saveCloud();
         },
 
         async saveCloud() {
-            try {
-                await this.db.collection('players').doc(this.uid).set(this.data, {merge: true});
-            } catch(e) { console.error("Cloud Error"); }
+            await this.db.collection('players').doc(this.uid).set(this.data, {merge: true});
         },
 
         render() {
             document.getElementById('gold-val').innerText = this.data.gold.toFixed(3);
             document.getElementById('pwr-val').innerText = this.data.pwr.toFixed(3);
             document.getElementById('upg-txt').innerText = `УЛУЧШИТЬ ЗА ${this.getPrice()} G`;
-            
-            const btn = document.getElementById('wd-btn');
-            btn.style.opacity = this.data.gold >= 750 ? "1" : "0.3";
+            document.getElementById('wd-btn').style.opacity = this.data.gold >= 750 ? "1" : "0.3";
         },
 
         async withdraw() {
-            if(this.data.gold < 750) return this.tg.showAlert("Нужно минимум 750 G");
-            const sid = prompt("Ваш Standoff 2 ID:");
-            if(!sid || sid.length < 5) return;
-
+            if(this.data.gold < 750) return;
+            const sid = prompt("ID Standoff 2:");
+            if(!sid) return;
             const amt = Math.floor(this.data.gold);
-            const order = {
-                uid: this.uid,
-                sid: sid,
-                amount: amt,
-                status: 'Ожидание',
-                date: new Date().toLocaleDateString()
-            };
-
-            await this.db.collection('withdrawals').add(order);
+            await this.db.collection('withdrawals').add({
+                uid: this.uid, sid, amount: amt, status: 'Ожидание', date: new Date().toLocaleDateString()
+            });
             this.data.gold -= amt;
-            this.render();
-            this.saveCloud();
-            this.loadHistory();
-            this.tg.showAlert("Заявка отправлена!");
+            this.render(); this.saveCloud(); this.loadHistory();
         },
 
         async loadHistory() {
             const list = document.getElementById('history-list');
-            list.innerHTML = "<center>Загрузка...</center>";
-            // Поиск по UID текущего пользователя
+            list.innerHTML = "Загрузка...";
             const snap = await this.db.collection('withdrawals').where('uid', '==', this.uid).get();
-            list.innerHTML = snap.empty ? "<center>Истории пока нет</center>" : "";
-            
+            list.innerHTML = snap.empty ? "<center>Нет выплат</center>" : "";
             snap.forEach(doc => {
                 const d = doc.data();
-                let s = d.status || 'Ожидание';
-                let color = s === 'Выплачено' ? '#4cd964' : '#ff9d00';
-                
-                list.innerHTML += `
-                    <div class="list-item">
-                        <div><b>${d.amount} G</b><br><small style="color:gray">${d.date || ''}</small></div>
-                        <span style="color:${color}">${s}</span>
-                    </div>`;
+                const s = d.status || 'Ожидание';
+                list.innerHTML += `<div class="list-item"><b>${d.amount} G</b><span style="color:${s==='Выплачено'?'#4cd964':'#ff9d00'}">${s}</span></div>`;
             });
         },
 
         async loadTop() {
             const list = document.getElementById('top-list');
-            list.innerHTML = "";
+            list.innerHTML = "<center>Загрузка...</center>";
             const snap = await this.db.collection('players').orderBy('gold', 'desc').limit(50).get();
+            list.innerHTML = "";
             let rank = 1;
             snap.forEach(doc => {
                 const d = doc.data();
-                list.innerHTML += `<div class="list-item"><span>${rank++}. ${d.name}</span><b>${Math.floor(d.gold)} G</b></div>`;
+                list.innerHTML += `<div class="list-item"><span>${rank++}. ${d.name || 'Игрок'}</span><b>${Math.floor(d.gold)} G</b></div>`;
             });
         },
 
         showAd(type) {
-            const Ad = Adsgram.init({ blockId: "19895" });
-            Ad.show().then(() => {
+            const ad = Adsgram.init({ blockId: "19895" });
+            ad.show().then(() => {
                 if(type === 'gold') this.data.gold += 5; else this.data.pwr += 0.005;
                 this.render(); this.saveCloud();
-            }).catch(() => this.tg.showAlert("Реклама не готова"));
+            });
         },
 
         spawn(x, y) {
@@ -265,7 +237,7 @@
 
         invite() {
             const link = `https://t.me/Locus_Gold_bot/app?startapp=${this.uid}`;
-            this.tg.openTelegramLink(`https://t.me/share/url?url=${link}&text=Забирай Gold бесплатно!`);
+            this.tg.openTelegramLink(`https://t.me/share/url?url=${link}&text=Голда бесплатно!`);
         }
     };
 
