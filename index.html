@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Nebula: Golden Prestige V2</title>
+    <title>Nebula Golden Firebase PRO</title>
     
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -22,33 +22,31 @@
         
         .app { position: relative; z-index: 10; display: flex; flex-direction: column; height: 100%; padding: 20px 20px calc(85px + var(--safe)); }
         .header { text-align: center; margin-bottom: 10px; }
-        .bal-main { font-size: 48px; font-weight: 900; color: #fff; text-shadow: 0 0 20px rgba(0,212,255,0.3); }
+        .bal-main { font-size: 48px; font-weight: 900; color: #fff; }
         .gold-row { display: flex; justify-content: center; align-items: center; gap: 8px; color: var(--gold); font-weight: 800; font-size: 22px; }
         
-        /* Кристалл */
+        /* Кристалл и Зона клика */
         .mine-zone { flex: 1; display: flex; align-items: center; justify-content: center; position: relative; }
         .crystal { 
-            width: 220px; height: 220px; background: radial-gradient(circle at 30% 30%, var(--p-color), #0033ff);
+            width: 200px; height: 200px; background: radial-gradient(circle at 30% 30%, var(--p-color), #0033ff);
             clip-path: polygon(50% 0%, 95% 25%, 95% 75%, 50% 100%, 5% 75%, 5% 25%);
             display: flex; align-items: center; justify-content: center; transition: transform 0.05s;
-            box-shadow: 0 0 50px rgba(0,212,255,0.2);
         }
-        .crystal span { font-size: 80px; }
+        .crystal span { font-size: 70px; }
 
-        /* ОФФЕР ТАЙМЕР */
-        #offer-overlay {
+        /* Всплывающее предложение (ТОЛЬКО НА ГЛАВНОЙ) */
+        #offer-card {
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            width: 85%; background: #111; border: 2px solid var(--gold);
-            border-radius: 25px; padding: 20px; z-index: 3000; text-align: center;
-            display: none; box-shadow: 0 0 40px rgba(0,0,0,0.8);
+            width: 280px; background: #111; border: 2px solid var(--gold);
+            border-radius: 20px; padding: 20px; z-index: 2000; text-align: center;
+            display: none; box-shadow: 0 0 50px rgba(0,0,0,0.9);
         }
 
         .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
         .card { background: var(--card); border: 1px solid var(--brd); padding: 12px; border-radius: 15px; text-align: center; }
         .card b { display: block; font-size: 18px; color: var(--p-color); }
-        .card small { font-size: 10px; opacity: 0.6; text-transform: uppercase; }
 
-        .btn-boost { width: 100%; padding: 18px; border-radius: 20px; border: none; background: linear-gradient(135deg, #ff9d00, #ff5e00); color: #fff; font-weight: 900; text-transform: uppercase; cursor: pointer; }
+        .btn-boost { width: 100%; padding: 16px; border-radius: 15px; border: none; background: linear-gradient(135deg, #ff9d00, #ff5e00); color: #fff; font-weight: 900; text-transform: uppercase; cursor: pointer; }
         
         .nav { position: fixed; bottom: 0; left: 0; right: 0; height: calc(75px + var(--safe)); background: #0a0a0a; border-top: 1px solid var(--brd); display: flex; padding-bottom: var(--safe); z-index: 1000; }
         .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #555; text-decoration: none; }
@@ -62,14 +60,14 @@
 <body>
     <canvas id="fx-canvas"></canvas>
 
-    <div id="offer-overlay">
-        <h2 style="color:var(--gold); margin-bottom:10px">ВЫГОДНО!</h2>
-        <p id="offer-desc" style="margin-bottom:20px; font-size:14px; line-height:1.4">Получи бонус за просмотр рекламы!</p>
-        <button class="btn-boost" onclick="Game.acceptOffer()">СМОТРЕТЬ</button>
-        <p style="margin-top:10px; font-size:10px; opacity:0.5">Исчезнет через 10 сек</p>
-    </div>
-
     <div class="app">
+        <div id="offer-card">
+            <h3 style="color:var(--gold)">БОНУС!</h3>
+            <p id="offer-txt" style="margin:10px 0; font-size:14px"></p>
+            <button class="btn-boost" onclick="Game.acceptOffer()">СМОТРЕТЬ</button>
+            <p id="offer-timer" style="margin-top:10px; font-size:12px; color:red; font-weight:bold"></p>
+        </div>
+
         <div class="header">
             <div class="bal-main" id="ui-bal">0</div>
             <div class="gold-row">💰 <span id="ui-gold">0</span></div>
@@ -80,16 +78,14 @@
         </div>
 
         <div class="stats">
-            <div class="card"><small>ЗА КЛИК</small><b id="ui-pwr">1.00</b></div>
+            <div class="card"><small>КЛИК</small><b id="ui-pwr">1.0</b></div>
             <div class="card"><small>УРОВЕНЬ</small><b id="ui-lvl">1</b></div>
         </div>
     </div>
 
     <div class="screen" id="scr-shop">
         <h2>Магазин</h2>
-        <div style="margin: 20px 0;">
-            <button class="btn-boost" style="background: linear-gradient(135deg, #00d4ff, #0055ff);" onclick="Game.showAd('boost')">🚀 АКТИВИРОВАТЬ ФОРСАЖ x3</button>
-        </div>
+        <button class="btn-boost" style="margin: 20px 0; background: #00d4ff" onclick="Game.showAd('boost')">🚀 ФОРСАЖ x3 (30 СЕК)</button>
         <div id="shop-list"></div>
     </div>
     
@@ -97,17 +93,17 @@
         <h2>Обмен на золото</h2>
         <div class="item" style="flex-direction:column; gap:15px; text-align:center; margin-top:20px">
             <p>100,000 кристаллов ➔ 1 слиток</p>
-            <p style="color:var(--gold); font-size:12px">⚠️ ПРИ ОБМЕНЕ ВСЕ УЛУЧШЕНИЯ СБРАСЫВАЮТСЯ!</p>
+            <p style="color:var(--gold); font-size:12px">⚠️ ВНИМАНИЕ: ВСЕ УЛУЧШЕНИЯ ИСЧЕЗНУТ!</p>
             <button id="m-btn" class="btn-boost" style="width:100%; display:none" onclick="Game.exchange()">ОБМЕНЯТЬ НА ЗОЛОТО</button>
-            <div id="m-lock" style="color:#ff3b30; font-weight:bold">НУЖЕН 15 УРОВЕНЬ</div>
+            <div id="m-lock" style="color:#ff3b30; font-weight:bold">НУЖЕН 15 УРОВЕНЬ И 100К💎</div>
         </div>
     </div>
 
     <div class="screen" id="scr-ref">
         <h2>Друзья</h2>
         <div class="item" style="margin-top:20px; text-align:center; flex-direction:column; gap:15px">
-            <p>Приглашай друзей и получай 20% от их добычи на свой баланс!</p>
-            <button class="btn-boost" onclick="Game.invite()">ПРИГЛАСИТЬ ДРУГА</button>
+            <p>Приглашай друзей и получай 20%!</p>
+            <button class="btn-boost" onclick="Game.invite()">ПРИГЛАСИТЬ</button>
         </div>
     </div>
 
@@ -120,19 +116,21 @@
 
     <script>
     const Game = {
-        db: null, tg: window.Telegram.WebApp, uid: null,
+        db: null, tg: window.Telegram.WebApp, uid: null, activeScreen: 'main',
         d: { bal: 0, gold: 0, pwr: 1.0, lvl: 1, xp: 0, u: [0,0,0,0], mult: 1 },
         shop: [
-            { n: "Кирка стажера", p: 150, b: 0.5 },
-            { n: "Пневмо-бур", p: 1200, b: 2.0 },
-            { n: "Лазерный резак", p: 10000, b: 10.0 },
-            { n: "ИИ-Комбайн", p: 50000, b: 50.0 }
+            { n: "Кирка", p: 200, b: 0.5 },
+            { n: "Бур", p: 1500, b: 2.0 },
+            { n: "Лазер", p: 12000, b: 10.0 },
+            { n: "Робот", p: 60000, b: 50.0 }
         ],
+        offerTimeLeft: 0, offerInterval: null,
 
         async init() {
             this.tg.expand();
-            this.uid = this.tg.initDataUnsafe?.user?.id?.toString() || "DEV_PLAYER";
+            this.uid = this.tg.initDataUnsafe?.user?.id?.toString() || "DEV_USER";
             
+            // FIREBASE INITIALIZATION
             firebase.initializeApp({
                 apiKey: "AIzaSyCoa29KS-sin6hoRz0ZbE4f3ki0tZLwkKI",
                 projectId: "gold-clicker-5d882",
@@ -140,7 +138,7 @@
             });
             this.db = firebase.firestore();
 
-            const cache = localStorage.getItem('neb_v3_cache_' + this.uid);
+            const cache = localStorage.getItem('neb_v4_cache_' + this.uid);
             if(cache) this.d = JSON.parse(cache);
 
             try {
@@ -154,42 +152,46 @@
             FX.init();
             document.getElementById('crystal').onclick = (e) => this.tap(e);
             
-            // Запуск циклов
             setInterval(() => this.saveCloud(), 15000);
-            setInterval(() => this.triggerOffer(), 40000); // Оффер каждые 40 сек
+            setInterval(() => { if(this.activeScreen === 'main') this.startOffer(); }, 40000);
+            
             this.renderLoop();
         },
 
         tap(e) {
-            const gain = this.d.pwr * this.d.mult;
-            this.d.bal += gain;
-            this.d.xp += 10;
-            FX.pop(e.clientX, e.clientY, `+${gain.toFixed(1)}`);
+            const val = this.d.pwr * this.d.mult;
+            this.d.bal += val; this.d.xp += 10;
+            FX.pop(e.clientX, e.clientY, `+${val.toFixed(1)}`);
             if(this.tg.HapticFeedback) this.tg.HapticFeedback.impactOccurred('light');
-            this.checkLvl();
+            if(this.d.xp >= this.d.lvl * 1200) { this.d.xp = 0; this.d.lvl++; }
         },
 
-        checkLvl() {
-            const req = this.d.lvl * 1200;
-            if(this.d.xp >= req) { this.d.xp = 0; this.d.lvl++; this.saveCloud(); }
-        },
-
-        triggerOffer() {
-            const bonus = Math.floor(5000 + (this.d.bal * 0.15));
-            document.getElementById('offer-desc').innerText = `Выгодное предложение!\nПолучи +${bonus.toLocaleString()} 💎 за рекламу.`;
-            const overlay = document.getElementById('offer-overlay');
-            overlay.style.display = 'block';
-            setTimeout(() => { overlay.style.display = 'none'; }, 10000); // Исчезает через 10 сек
+        startOffer() {
+            const bonus = Math.floor(5000 + (this.d.bal * 0.1));
+            document.getElementById('offer-txt').innerText = `Забери +${bonus.toLocaleString()} 💎 за рекламу!`;
+            this.offerTimeLeft = 10;
+            document.getElementById('offer-card').style.display = 'block';
+            
+            if(this.offerInterval) clearInterval(this.offerInterval);
+            this.offerInterval = setInterval(() => {
+                this.offerTimeLeft--;
+                document.getElementById('offer-timer').innerText = `ОСТАЛОСЬ: ${this.offerTimeLeft} сек`;
+                if(this.offerTimeLeft <= 0) {
+                    clearInterval(this.offerInterval);
+                    document.getElementById('offer-card').style.display = 'none';
+                }
+            }, 1000);
         },
 
         acceptOffer() {
             const ad = Adsgram.init({ blockId: "19969" });
             ad.show().then(() => {
-                const bonus = Math.floor(5000 + (this.d.bal * 0.15));
+                const bonus = Math.floor(5000 + (this.d.bal * 0.1));
                 this.d.bal += bonus;
-                document.getElementById('offer-overlay').style.display = 'none';
+                document.getElementById('offer-card').style.display = 'none';
+                clearInterval(this.offerInterval);
                 this.saveCloud();
-            }).catch(() => { this.tg.showAlert("Реклама не загружена"); });
+            });
         },
 
         showAd(type) {
@@ -198,7 +200,7 @@
                 if(type === 'boost') {
                     this.d.mult = 3;
                     setTimeout(() => { this.d.mult = 1; }, 30000);
-                    this.tg.showAlert("ФОРСАЖ x3 ВКЛЮЧЕН НА 30 СЕКУНД!");
+                    this.tg.showAlert("x3 АКТИВИРОВАН!");
                 }
                 this.saveCloud();
             });
@@ -206,13 +208,10 @@
 
         exchange() {
             if(this.d.bal >= 100000) {
-                this.d.bal -= 100000;
-                this.d.gold += 1;
-                // СБРОС (ПРЕСТИЖ)
-                this.d.u = [0,0,0,0];
-                this.d.pwr = 1.0; 
+                this.d.bal -= 100000; this.d.gold += 1;
+                this.d.u = [0,0,0,0]; this.d.pwr = 1.0; // СБРОС
                 this.saveCloud();
-                this.tg.showPopup({title: 'Обмен завершен!', message: 'Вы получили 1 слиток. Инструменты сброшены до базовых.'});
+                this.tg.showAlert("Слиток получен! Инструменты сброшены.");
                 UI.drawShop();
             }
         },
@@ -222,15 +221,12 @@
             document.getElementById('ui-gold').innerText = this.d.gold;
             document.getElementById('ui-pwr').innerText = (this.d.pwr * this.d.mult).toFixed(1);
             document.getElementById('ui-lvl').innerText = this.d.lvl;
-
             document.getElementById('m-btn').style.display = (this.d.lvl >= 15 && this.d.bal >= 100000) ? 'block' : 'none';
-            document.getElementById('m-lock').style.display = this.d.lvl >= 15 ? 'none' : 'block';
-
             requestAnimationFrame(() => this.renderLoop());
         },
 
         async saveCloud() {
-            localStorage.setItem('neb_v3_cache_' + this.uid, JSON.stringify(this.d));
+            localStorage.setItem('neb_v4_cache_' + this.uid, JSON.stringify(this.d));
             try { await this.db.collection('players').doc(this.uid).set(this.d, {merge: true}); } catch(e) {}
         },
 
@@ -238,17 +234,14 @@
             const itm = this.shop[i];
             const cost = Math.floor(itm.p * Math.pow(1.8, this.d.u[i]));
             if(this.d.bal >= cost) {
-                this.d.bal -= cost;
-                this.d.u[i]++;
-                this.d.pwr += itm.b;
-                UI.drawShop();
-                this.saveCloud();
-            } else { this.tg.showAlert("Недостаточно кристаллов!"); }
+                this.d.bal -= cost; this.d.u[i]++; this.d.pwr += itm.b;
+                UI.drawShop(); this.saveCloud();
+            }
         },
 
         invite() {
             const link = `https://t.me/Locus_Gold_bot/app?startapp=${this.uid}`;
-            this.tg.openTelegramLink(`https://t.me/share/url?url=${link}&text=Помоги мне в шахте!`);
+            this.tg.openTelegramLink(`https://t.me/share/url?url=${link}&text=Добывай золото со мной!`);
         }
     };
 
@@ -259,9 +252,9 @@
         pop(x, y, t) { this.p.push({ x, y, t, a: 1 }); },
         loop() {
             this.ctx.clearRect(0,0,this.c.width,this.c.height);
-            this.ctx.font = "bold 24px Inter";
+            this.ctx.font = "bold 24px sans-serif";
             for(let i=this.p.length-1; i>=0; i--) {
-                let p = this.p[i]; p.y -= 2.5; p.a -= 0.02;
+                let p = this.p[i]; p.y -= 2; p.a -= 0.02;
                 this.ctx.fillStyle = `rgba(0, 212, 255, ${p.a})`;
                 this.ctx.fillText(p.t, p.x, p.y);
                 if(p.a <= 0) this.p.splice(i, 1);
@@ -272,6 +265,7 @@
 
     const UI = {
         go(id, el) {
+            Game.activeScreen = id;
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             el.classList.add('active');
@@ -284,7 +278,7 @@
             document.getElementById('shop-list').innerHTML = Game.shop.map((itm, i) => {
                 const cost = Math.floor(itm.p * Math.pow(1.8, Game.d.u[i]));
                 return `<div class="item" onclick="Game.buy(${i})">
-                    <div><b>${itm.n}</b><br><small>+${itm.b} к клику</small></div>
+                    <div><b>${itm.n}</b><br><small>+${itm.b}</small></div>
                     <div style="font-weight:900">${cost.toLocaleString()} 💎</div>
                 </div>`;
             }).join('');
