@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Locus Gold Elite Pro</title>
+    <title>Locus Nebula: Crystal Miner</title>
     
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -12,297 +12,230 @@
 
     <style>
         :root {
-            --bg: #000000;
-            --surface: #111112;
-            --accent: #ff9d00;
-            --error: #ff3b30;
-            --text-dim: #8e8e93;
+            --bg-deep: #0a0a0c;
+            --glass: rgba(255, 255, 255, 0.05);
+            --accent: #00d4ff;
+            --gold: #ffcc00;
+            --text: #e0e0e0;
             --safe-bottom: env(safe-area-inset-bottom);
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', -apple-system, sans-serif; -webkit-tap-highlight-color: transparent; }
-        body { background: var(--bg); color: #fff; height: 100vh; overflow: hidden; position: fixed; width: 100%; display: flex; flex-direction: column; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background: var(--bg-deep); color: var(--text); height: 100vh; overflow: hidden; position: fixed; width: 100%; }
 
-        .screen { position: absolute; inset: 0; display: none; flex-direction: column; padding: 20px 20px calc(80px + var(--safe-bottom)); overflow-y: auto; }
-        .screen.active { display: flex; }
-
-        /* HEADER */
-        .gold-header { text-align: center; margin-top: 10px; }
-        .gold-count { font-size: 56px; font-weight: 900; color: var(--accent); letter-spacing: -2px; }
-        .gold-label { font-size: 14px; color: var(--text-dim); text-transform: uppercase; font-weight: 800; margin-top: -5px; }
-
-        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 25px 0; }
-        .stat-card { background: var(--surface); border-radius: 20px; padding: 15px; text-align: center; border: 1px solid #1c1c1e; }
-        .stat-card span { display: block; color: var(--text-dim); font-size: 10px; font-weight: 800; text-transform: uppercase; margin-bottom: 5px; }
-        .stat-card b { font-size: 18px; color: #fff; }
-
-        /* COIN */
-        .click-area { flex: 1; display: flex; align-items: center; justify-content: center; position: relative; min-height: 240px; }
-        .coin {
-            width: 230px; height: 230px; border-radius: 50%;
-            background: radial-gradient(circle at 35% 35%, #ffc400, #ff8000);
-            border: 12px solid #1a1a1c; box-shadow: 0 0 40px rgba(255, 157, 0, 0.1);
-            display: flex; align-items: center; justify-content: center;
-            transition: transform 0.05s; cursor: pointer; user-select: none;
+        /* Эффект свечения на фоне */
+        body::before {
+            content: ''; position: absolute; width: 300px; height: 300px;
+            background: radial-gradient(circle, rgba(0, 212, 255, 0.1) 0%, transparent 70%);
+            top: -50px; left: -50px; z-index: -1;
         }
-        .coin:active { transform: scale(0.93); }
-        .coin span { font-size: 90px; font-weight: 900; color: rgba(0,0,0,0.1); }
 
-        /* BUTTONS */
-        .action-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px; }
-        .btn-act { background: var(--surface); border: 1px solid #222; border-radius: 22px; padding: 18px 10px; text-align: center; cursor: pointer; transition: all 0.2s; }
-        .btn-act b { display: block; font-size: 15px; color: #fff; text-transform: uppercase; }
-        .btn-act small { color: var(--accent); font-size: 10px; font-weight: 800; text-transform: uppercase; }
-        .btn-act.locked { opacity: 0.5; pointer-events: none; filter: grayscale(1); }
-        
-        .btn-upg { grid-column: span 2; border: 1.5px solid var(--accent); background: rgba(255, 157, 0, 0.03); }
+        .app-container { height: 100%; display: flex; flex-direction: column; padding: 20px; }
 
-        /* NAVIGATION */
-        .nav { position: fixed; bottom: 0; width: 100%; height: calc(70px + var(--safe-bottom)); background: #080808; border-top: 1px solid #161618; display: flex; padding-bottom: var(--safe-bottom); z-index: 100; }
-        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-dim); text-decoration: none; }
-        .nav-item.active { color: var(--accent); }
-        .nav-item i { font-size: 22px; margin-bottom: 4px; font-style: normal; }
-        .nav-item span { font-size: 10px; font-weight: 700; text-transform: uppercase; }
+        /* Header & Progress */
+        .header-stats { text-align: center; margin-bottom: 20px; }
+        .balance-group { margin-bottom: 10px; }
+        .main-balance { font-size: 42px; font-weight: 800; color: #fff; text-shadow: 0 0 15px rgba(0,212,255,0.4); }
+        .lvl-bar { width: 100%; height: 6px; background: #222; border-radius: 3px; overflow: hidden; margin-top: 8px; }
+        .lvl-progress { height: 100%; background: var(--accent); width: 30%; transition: width 0.3s; }
 
-        /* LISTS */
-        .list-item { background: var(--surface); padding: 18px; border-radius: 20px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #1c1c1e; }
-        .list-item b { font-size: 16px; color: var(--accent); }
-        .list-item span { font-size: 12px; font-weight: 600; }
+        /* Game Core */
+        .game-world { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .crystal-container { position: relative; width: 220px; height: 220px; }
+        .crystal {
+            width: 100%; height: 100%; background: linear-gradient(135deg, #00d4ff, #0055ff);
+            clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 0 50px rgba(0, 212, 255, 0.2); transition: transform 0.1s;
+        }
+        .crystal:active { transform: scale(0.95) rotate(2deg); }
+        .crystal-icon { font-size: 80px; filter: drop-shadow(0 0 10px rgba(0,0,0,0.3)); }
 
-        .f-pop { position: absolute; color: var(--accent); font-weight: 900; pointer-events: none; animation: fPop 0.6s forwards; font-size: 28px; z-index: 1000; }
-        @keyframes fPop { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-100px); } }
+        /* Actions */
+        .action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 80px; }
+        .card {
+            background: var(--glass); border: 1px solid rgba(255,255,255,0.1);
+            padding: 15px; border-radius: 16px; text-align: center; backdrop-filter: blur(10px);
+        }
+        .card b { display: block; font-size: 14px; margin-bottom: 4px; }
+        .card span { font-size: 11px; color: #888; text-transform: uppercase; }
+
+        .btn-boost { background: linear-gradient(90deg, #ff9d00, #ff5e00); color: #000; font-weight: 700; border: none; grid-column: span 2; padding: 12px; border-radius: 12px; }
+
+        /* Navigation */
+        .navbar {
+            position: fixed; bottom: 0; left: 0; right: 0; height: calc(65px + var(--safe-bottom));
+            background: rgba(15, 15, 20, 0.95); display: flex; border-top: 1px solid #333; padding-bottom: var(--safe-bottom);
+        }
+        .nav-link { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #666; text-decoration: none; font-size: 10px; }
+        .nav-link.active { color: var(--accent); }
+        .nav-link i { font-size: 20px; margin-bottom: 4px; font-style: normal; }
+
+        /* Modals & Lists */
+        .screen { position: fixed; inset: 0; background: var(--bg-deep); z-index: 100; display: none; padding: 20px; padding-bottom: 100px; overflow-y: auto; }
+        .screen.active { display: block; }
+        .list-entry { background: var(--glass); padding: 15px; border-radius: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; }
+
+        .floating-text { position: absolute; pointer-events: none; color: var(--accent); font-weight: 900; animation: floatUp 0.8s ease-out forwards; }
+        @keyframes floatUp { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-80px); } }
     </style>
 </head>
 <body>
 
-    <div class="screen active" id="scr-main">
-        <div class="gold-header">
-            <div class="gold-count" id="gold-val">0.000</div>
-            <div class="gold-label">GOLD BALANCE</div>
+    <div class="app-container">
+        <header class="header-stats">
+            <div class="main-balance" id="val-bal">0.00</div>
+            <div id="val-name" style="font-size: 12px; color: var(--accent);">STAR MINER</div>
+            <div class="lvl-bar"><div class="lvl-progress" id="val-prog"></div></div>
+        </header>
+
+        <main class="game-world">
+            <div class="crystal-container" id="tap-zone">
+                <div class="crystal"><span class="crystal-icon">💎</span></div>
+            </div>
+        </main>
+
+        <section class="action-grid">
+            <div class="card"><span>Power</span><b id="val-pwr">1.0</b></div>
+            <div class="card"><span>Auto-DPS</span><b id="val-dps">0.0</b></div>
+            <button class="btn-boost" onclick="Engine.showRewardAd()">ACTIVATE OVERDRIVE (AD x5)</button>
+        </section>
+    </div>
+
+    <div class="screen" id="scr-upg">
+        <h2 style="margin-bottom: 20px;">Nebula Upgrades</h2>
+        <div class="list-entry" onclick="Engine.buyUpg('pwr')">
+            <div><b>Mining Tool</b><br><small>+0.5 per tap</small></div>
+            <b id="cost-pwr">100 💎</b>
         </div>
-        <div class="stats-grid">
-            <div class="stat-card"><span>КЛИК</span><b id="pwr-val">0.001</b></div>
-            <div class="stat-card"><span>ДРУЗЬЯ</span><b id="ref-val">0</b></div>
-        </div>
-        <div class="click-area"><div class="coin" id="coin-btn"><span>G</span></div></div>
-        <div class="action-btns">
-            <div class="btn-act" id="bonus-btn" onclick="Game.showAd('gold')">
-                <b id="bonus-t">БОНУС</b>
-                <small id="bonus-s">РЕКЛАМА (+5.0 G)</small>
-            </div>
-            <div class="btn-act" id="power-btn" onclick="Game.showAd('pwr')">
-                <b id="power-t">СИЛА</b>
-                <small id="power-s">РЕКЛАМА (+0.005)</small>
-            </div>
-            <div class="btn-act btn-upg" id="upg-btn" onclick="Game.upgrade()">
-                <b id="upg-txt">УЛУЧШИТЬ ЗА 1 G</b>
-                <small>УВЕЛИЧИТЬ МОЩНОСТЬ КЛИКА</small>
-            </div>
+        <div class="list-entry" onclick="Engine.buyUpg('dps')">
+            <div><b>Auto-Drone</b><br><small>+1.0 per sec</small></div>
+            <b id="cost-dps">500 💎</b>
         </div>
     </div>
 
-    <div class="screen" id="scr-wallet">
-        <h2 style="text-align:center; margin-bottom:20px;">ВЫВОД СРЕДСТВ</h2>
-        <div class="stat-card" style="margin-bottom:25px; padding: 25px;">
-            <span>МИНИМУМ: 750 G</span>
-            <button class="btn-act" id="wd-btn" style="width:100%; background:var(--accent); color:#000; border:none; margin-top:15px;" onclick="Game.withdraw()">ВЫВЕСТИ</button>
+    <div class="screen" id="scr-market">
+        <h2 style="margin-bottom: 20px;">Galaxy Market</h2>
+        <p style="color: #888; margin-bottom: 15px;">Exchange crystals for rare artifacts.</p>
+        <div class="list-entry">
+            <div><b>Common Artifact</b><br><small>Min. Level 10</small></div>
+            <button onclick="Engine.requestArtifact()" style="background:var(--accent); border:none; padding:5px 10px; border-radius:5px;">Trade</button>
         </div>
-        <div id="history-list"></div>
     </div>
 
-    <div class="screen" id="scr-top"><h2 style="text-align:center; margin-bottom:20px;">ТОП ЛИДЕРОВ</h2><div id="top-list"></div></div>
-    
-    <div class="screen" id="scr-ref">
-        <h2 style="text-align:center; margin-bottom:20px;">ДРУЗЬЯ</h2>
-        <button class="btn-act btn-upg" style="width:100%;" onclick="Game.invite()"><b>ПРИГЛАСИТЬ</b></button>
-        <div id="ref-list" style="margin-top:20px;"></div>
-    </div>
-
-    <nav class="nav">
-        <div class="nav-item active" onclick="UI.nav('main', this)"><i>⛏️</i><span>Добыча</span></div>
-        <div class="nav-item" onclick="UI.nav('top', this)"><i>🏆</i><span>Топ</span></div>
-        <div class="nav-item" onclick="UI.nav('ref', this)"><i>👥</i><span>Друзья</span></div>
-        <div class="nav-item" onclick="UI.nav('wallet', this)"><i>🏦</i><span>Вывод</span></div>
+    <nav class="navbar">
+        <div class="nav-link active" onclick="UI.go('main', this)"><i>🛸</i><span>Mine</span></div>
+        <div class="nav-link" onclick="UI.go('upg', this)"><i>🛠️</i><span>Upgrades</span></div>
+        <div class="nav-link" onclick="UI.go('market', this)"><i>🌌</i><span>Market</span></div>
     </nav>
 
     <script>
-    const Game = {
-        db: null, tg: window.Telegram.WebApp, uid: null,
-        data: { gold: 0, pwr: 0.001, upg: 0, name: 'Игрок', lastAd: 0 },
-        
-        async init() {
-            this.tg.expand();
-            this.uid = this.tg.initDataUnsafe?.user?.id?.toString() || "DEV_USER";
+        const Engine = {
+            state: { bal: 0, pwr: 1, dps: 0, xp: 0, lvl: 1, lastSave: 0 },
+            tg: window.Telegram.WebApp,
             
-            const cache = localStorage.getItem('locus_cache_' + this.uid);
-            if(cache) this.data = JSON.parse(cache);
+            init() {
+                this.tg.expand();
+                this.load();
+                this.loop();
+                document.getElementById('tap-zone').onclick = (e) => this.tap(e);
+                
+                // Инициализация Firebase (замените на свои ключи)
+                firebase.initializeApp({ /* Ключи проекта */ });
+                this.db = firebase.firestore();
+            },
 
-            firebase.initializeApp({
-                apiKey: "AIzaSyCoa29KS-sin6hoRz0ZbE4f3ki0tZLwkKI",
-                projectId: "gold-clicker-5d882",
-                appId: "1:83489312782:web:ee5b7bdc390e53e7dd6c5f"
-            });
-            this.db = firebase.firestore();
+            tap(e) {
+                this.state.bal += this.state.pwr;
+                this.state.xp += 1;
+                this.checkLvl();
+                this.spawn(e.clientX, e.clientY, `+${this.state.pwr}`);
+                this.render();
+                if(this.tg.HapticFeedback) this.tg.HapticFeedback.impactOccurred('medium');
+            },
 
-            const doc = await this.db.collection('players').doc(this.uid).get();
-            if(doc.exists) {
-                const cloud = doc.data();
-                if(cloud.gold > this.data.gold) this.data = cloud;
-            } else {
-                this.data.name = this.tg.initDataUnsafe?.user?.first_name || "User";
-                this.saveCloud();
-            }
+            loop() {
+                setInterval(() => {
+                    if(this.state.dps > 0) {
+                        this.state.bal += this.state.dps / 10;
+                        this.render();
+                    }
+                }, 100);
+            },
 
-            this.render();
-            document.getElementById('coin-btn').onclick = (e) => this.tap(e);
-            
-            setInterval(() => this.saveCloud(), 15000);
-            setInterval(() => this.updateTimers(), 1000);
-        },
-
-        tap(e) {
-            this.data.gold += this.data.pwr;
-            this.render();
-            this.spawn(e.clientX, e.clientY);
-            localStorage.setItem('locus_cache_' + this.uid, JSON.stringify(this.data));
-            if(this.tg.HapticFeedback) this.tg.HapticFeedback.impactOccurred('light');
-        },
-
-        getPrice() {
-            const u = this.data.upg || 0;
-            const p = this.data.pwr || 0.001;
-            // Сложная формула роста: база + зависимость от силы клика + экспонента
-            let basePrice = (1 + (p * 200)) * Math.pow(1.4, u);
-            // Плавное усложнение на высоких этапах
-            if (this.data.gold > 400) basePrice *= 1.2;
-            return Math.floor(basePrice) || 1;
-        },
-
-        upgrade() {
-            const p = this.getPrice();
-            if(this.data.gold < p) return this.tg.showAlert("Недостаточно Gold!");
-            this.data.gold -= p;
-            this.data.pwr += 0.005;
-            this.data.upg++;
-            this.render();
-            this.saveCloud();
-        },
-
-        async saveCloud() {
-            try {
-                await this.db.collection('players').doc(this.uid).set(this.data, {merge: true});
-            } catch(e) {}
-        },
-
-        render() {
-            document.getElementById('gold-val').innerText = this.data.gold.toFixed(3);
-            document.getElementById('pwr-val').innerText = this.data.pwr.toFixed(3);
-            document.getElementById('upg-txt').innerText = `УЛУЧШИТЬ ЗА ${this.getPrice()} G`;
-            document.getElementById('wd-btn').style.opacity = this.data.gold >= 750 ? "1" : "0.3";
-        },
-
-        updateTimers() {
-            const now = Date.now();
-            const diff = Math.ceil((this.data.lastAd + 15000 - now) / 1000);
-            const bBtn = document.getElementById('bonus-btn');
-            const pBtn = document.getElementById('power-btn');
-            const bSub = document.getElementById('bonus-s');
-
-            if (diff > 0) {
-                bBtn.classList.add('locked');
-                pBtn.classList.add('locked');
-                bSub.innerText = `ЖДАТЬ ${diff} СЕК.`;
-            } else {
-                bBtn.classList.remove('locked');
-                pBtn.classList.remove('locked');
-                bSub.innerText = "РЕКЛАМА (+5.0 G)";
-            }
-        },
-
-        showAd(type) {
-            const now = Date.now();
-            if (now - this.data.lastAd < 15000) return;
-
-            const ad = Adsgram.init({ blockId: "19895" });
-            ad.show().then(() => {
-                this.data.lastAd = Date.now();
-                if(type === 'gold') {
-                    // Гибкая система: чем ближе к цели, тем сложнее бонус
-                    let reward = 5.0;
-                    if (this.data.gold > 300) reward = 3.5;
-                    if (this.data.gold > 600) reward = 1.5;
-                    this.data.gold += reward;
-                } else {
-                    this.data.pwr += 0.005;
+            checkLvl() {
+                let next = this.state.lvl * 500;
+                if(this.state.xp >= next) {
+                    this.state.lvl++;
+                    this.tg.showAlert(`Level Up! Now you are Level ${this.state.lvl}`);
                 }
-                this.render(); this.saveCloud();
-            }).catch(() => {
-                this.tg.showAlert("Реклама еще не готова!");
-            });
-        },
+            },
 
-        async withdraw() {
-            if(this.data.gold < 750) return;
-            const sid = prompt("Введите ваш ID Standoff 2:");
-            if(!sid) return;
-            const amt = Math.floor(this.data.gold);
-            await this.db.collection('withdrawals').add({
-                uid: this.uid, sid, amount: amt, status: 'Ожидание', date: new Date().toLocaleDateString()
-            });
-            this.data.gold -= amt;
-            this.render(); this.saveCloud(); this.loadHistory();
-        },
+            buyUpg(type) {
+                let cost = type === 'pwr' ? this.state.pwr * 150 : (this.state.dps + 1) * 600;
+                if(this.state.bal >= cost) {
+                    this.state.bal -= cost;
+                    if(type === 'pwr') this.state.pwr += 0.5;
+                    else this.state.dps += 1.5;
+                    this.render();
+                } else {
+                    this.tg.showScanQrPopup({ text: "Need more crystals!" }); // Просто имитация
+                }
+            },
 
-        async loadHistory() {
-            const list = document.getElementById('history-list');
-            list.innerHTML = "<center>Загрузка...</center>";
-            const snap = await this.db.collection('withdrawals').where('uid', '==', this.uid).get();
-            list.innerHTML = snap.empty ? "<center>Нет выплат</center>" : "";
-            snap.forEach(doc => {
-                const d = doc.data();
-                const s = d.status || 'Ожидание';
-                list.innerHTML += `<div class="list-item"><b>${d.amount} G</b><span style="color:${s==='Выплачено'?'#4cd964':'#ff9d00'}">${s}</span></div>`;
-            });
-        },
+            showRewardAd() {
+                const ad = Adsgram.init({ blockId: "ваша_id" });
+                ad.show().then(() => {
+                    this.state.bal += (this.state.lvl * 50);
+                    this.render();
+                    this.tg.showAlert("Overdrive Successful! +Bonus Crystals");
+                }).catch(e => console.log(e));
+            },
 
-        async loadTop() {
-            const list = document.getElementById('top-list');
-            list.innerHTML = "<center>Загрузка...</center>";
-            const snap = await this.db.collection('players').orderBy('gold', 'desc').limit(50).get();
-            list.innerHTML = "";
-            let rank = 1;
-            snap.forEach(doc => {
-                const d = doc.data();
-                list.innerHTML += `<div class="list-item"><span>${rank++}. ${d.name || 'Игрок'}</span><b>${Math.floor(d.gold)} G</b></div>`;
-            });
-        },
+            render() {
+                document.getElementById('val-bal').innerText = Math.floor(this.state.bal).toLocaleString();
+                document.getElementById('val-pwr').innerText = this.state.pwr.toFixed(1);
+                document.getElementById('val-dps').innerText = this.state.dps.toFixed(1);
+                
+                let next = this.state.lvl * 500;
+                let perc = (this.state.xp / next) * 100;
+                document.getElementById('val-prog').style.width = perc + "%";
+            },
 
-        spawn(x, y) {
-            const el = document.createElement('div');
-            el.className = 'f-pop'; el.innerText = `+${this.data.pwr.toFixed(3)}`;
-            el.style.left = x + 'px'; el.style.top = y + 'px';
-            document.body.appendChild(el);
-            setTimeout(() => el.remove(), 600);
-        },
+            spawn(x, y, txt) {
+                const el = document.createElement('div');
+                el.className = 'floating-text';
+                el.innerText = txt;
+                el.style.left = x + 'px'; el.style.top = y + 'px';
+                document.body.appendChild(el);
+                setTimeout(() => el.remove(), 800);
+            },
 
-        invite() {
-            const link = `https://t.me/Locus_Gold_bot/app?startapp=${this.uid}`;
-            this.tg.openTelegramLink(`https://t.me/share/url?url=${link}&text=Забирай бесплатную голду в Standoff 2!`);
-        }
-    };
+            load() {
+                const cache = localStorage.getItem('nebula_save');
+                if(cache) this.state = JSON.parse(cache);
+            },
 
-    const UI = {
-        nav(id, el) {
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            document.getElementById('scr-' + id).classList.add('active');
-            el.classList.add('active');
-            if(id === 'top') Game.loadTop();
-            if(id === 'wallet') Game.loadHistory();
-        }
-    };
+            requestArtifact() {
+                if(this.state.lvl < 10) {
+                    this.tg.showAlert("Unlock Level 10 to access Galaxy Market!");
+                } else {
+                    const id = prompt("Enter Universal ID:");
+                    // Логика сохранения заявки
+                }
+            }
+        };
 
-    window.onload = () => Game.init();
+        const UI = {
+            go(id, el) {
+                document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+                document.querySelectorAll('.nav-link').forEach(n => n.classList.remove('active'));
+                if(id !== 'main') document.getElementById('scr-' + id).classList.add('active');
+                el.classList.add('active');
+            }
+        };
+
+        window.onload = () => Engine.init();
     </script>
 </body>
 </html>
