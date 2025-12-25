@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Nebula Gold Tycoon</title>
+    <title>Nebula: Golden Empire</title>
     
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
@@ -11,298 +11,287 @@
         :root {
             --p-color: #00d4ff;
             --gold: #ffcc00;
-            --bg: #0a0b10;
+            --bg: #08090c;
             --card: rgba(255, 255, 255, 0.03);
-            --brd: rgba(255, 255, 255, 0.08);
+            --brd: rgba(255, 255, 255, 0.07);
             --safe: env(safe-area-inset-bottom);
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Roboto, sans-serif; -webkit-tap-highlight-color: transparent; user-select: none; touch-action: none; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', -apple-system, sans-serif; -webkit-tap-highlight-color: transparent; user-select: none; touch-action: none; }
         body { background: var(--bg); color: #fff; height: 100vh; overflow: hidden; position: fixed; width: 100%; }
 
-        /* Слой для частиц */
-        #fx-layer { position: absolute; inset: 0; z-index: 5; pointer-events: none; }
+        #fx-canvas { position: absolute; inset: 0; z-index: 5; pointer-events: none; }
 
         .app { position: relative; z-index: 10; display: flex; flex-direction: column; height: 100%; padding: 20px 20px calc(85px + var(--safe)); }
 
-        /* Интерфейс баланса */
-        .top-bar { text-align: center; margin-bottom: 15px; }
-        .bal-main { font-size: 48px; font-weight: 900; letter-spacing: -1px; display: block; filter: drop-shadow(0 0 15px rgba(0,212,255,0.3)); }
-        .gold-status { color: var(--gold); font-weight: 700; font-size: 18px; margin-top: 4px; display: flex; align-items: center; justify-content: center; gap: 6px; }
+        /* Экономика */
+        .header { text-align: center; margin-bottom: 15px; }
+        .bal-main { font-size: 44px; font-weight: 900; background: linear-gradient(#fff, #999); -webkit-background-clip: text; -webkit-text-fill-color: transparent; display: block; }
+        .gold-row { display: flex; justify-content: center; align-items: center; gap: 8px; color: var(--gold); font-weight: 800; font-size: 19px; margin-top: 5px; }
 
-        /* Исправленная шкала уровня */
-        .lvl-box { background: var(--card); border: 1px solid var(--brd); padding: 14px; border-radius: 20px; margin-top: 10px; backdrop-filter: blur(10px); }
-        .lvl-info { display: flex; justify-content: space-between; font-size: 11px; font-weight: 800; color: var(--p-color); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }
-        .bar-bg { width: 100%; height: 8px; background: rgba(0,0,0,0.4); border-radius: 10px; overflow: hidden; position: relative; }
-        .bar-fill { position: absolute; top: 0; left: 0; height: 100%; width: 100%; background: linear-gradient(90deg, #0055ff, var(--p-color)); transform-origin: left; transform: scaleX(0); will-change: transform; }
+        /* Прогресс уровня */
+        .lvl-card { background: var(--card); border: 1px solid var(--brd); padding: 12px; border-radius: 18px; margin-top: 10px; }
+        .lvl-meta { display: flex; justify-content: space-between; font-size: 10px; font-weight: 800; color: var(--p-color); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .bar-outer { width: 100%; height: 6px; background: rgba(0,0,0,0.4); border-radius: 10px; overflow: hidden; border: 1px solid var(--brd); }
+        .bar-inner { height: 100%; width: 100%; background: var(--p-color); transform-origin: left; transform: scaleX(0); will-change: transform; transition: transform 0.3s ease-out; }
 
-        /* Центр - Кристалл */
-        .main-zone { flex: 1; display: flex; align-items: center; justify-content: center; position: relative; }
+        /* Игровой Кристалл */
+        .game-area { flex: 1; display: flex; align-items: center; justify-content: center; }
         .crystal { 
-            width: 220px; height: 220px; 
-            background: radial-gradient(circle at 30% 30%, var(--p-color), #0044aa);
+            width: 210px; height: 210px; 
+            background: radial-gradient(circle at 30% 30%, var(--p-color), #0033aa);
             clip-path: polygon(50% 0%, 95% 25%, 95% 75%, 50% 100%, 5% 75%, 5% 25%);
             display: flex; align-items: center; justify-content: center;
-            transition: transform 0.05s cubic-bezier(0, 0, 0.2, 1);
-            box-shadow: 0 0 40px rgba(0, 85, 255, 0.4);
+            transition: transform 0.05s;
         }
-        .crystal span { font-size: 80px; filter: drop-shadow(0 10px 10px rgba(0,0,0,0.3)); }
+        .crystal span { font-size: 75px; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.4)); }
 
-        /* Кнопки и статы */
-        .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px; }
-        .stat-item { background: var(--card); border: 1px solid var(--brd); padding: 12px; border-radius: 16px; text-align: center; }
-        .stat-item small { font-size: 10px; color: rgba(255,255,255,0.4); text-transform: uppercase; display: block; }
-        .stat-item b { font-size: 18px; }
+        /* Статистика */
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .stat-card { background: var(--card); border: 1px solid var(--brd); padding: 10px; border-radius: 14px; text-align: center; }
+        .stat-card b { display: block; font-size: 16px; }
+        .stat-card small { font-size: 9px; opacity: 0.4; text-transform: uppercase; }
 
-        .btn-boost { grid-column: span 2; padding: 18px; border-radius: 20px; border: none; background: linear-gradient(135deg, #ff9d00, #ff5e00); color: #fff; font-weight: 900; text-transform: uppercase; font-size: 13px; margin-top: 5px; box-shadow: 0 5px 15px rgba(255, 94, 0, 0.3); }
+        /* Кнопки */
+        .btn { border: none; font-weight: 900; text-transform: uppercase; transition: 0.2s; cursor: pointer; }
+        .btn-boost { grid-column: span 2; padding: 16px; border-radius: 16px; background: linear-gradient(135deg, #ff9d00, #ff5e00); color: #fff; font-size: 12px; margin-top: 8px; }
+        .btn-withdraw { background: var(--gold); color: #000; padding: 18px; border-radius: 16px; width: 100%; margin-top: 20px; font-size: 14px; display: none; box-shadow: 0 0 20px rgba(255,204,0,0.2); }
 
         /* Навигация */
-        .nav { position: fixed; bottom: 0; left: 0; right: 0; height: calc(75px + var(--safe)); background: rgba(10,11,16,0.95); display: flex; border-top: 1px solid var(--brd); padding-bottom: var(--safe); z-index: 1000; }
-        .nav-btn { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #444; }
-        .nav-btn.active { color: var(--p-color); }
-        .nav-btn i { font-size: 22px; font-style: normal; margin-bottom: 2px; }
+        .nav { position: fixed; bottom: 0; left: 0; right: 0; height: calc(75px + var(--safe)); background: rgba(8,9,12,0.98); display: flex; border-top: 1px solid var(--brd); padding-bottom: var(--safe); z-index: 1000; }
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #444; }
+        .nav-item.active { color: var(--p-color); }
 
-        /* Экраны */
-        .screen { position: fixed; inset: 0; background: var(--bg); z-index: 500; display: none; padding: 30px 20px 110px; overflow-y: auto; }
+        .screen { position: fixed; inset: 0; background: var(--bg); z-index: 500; display: none; padding: 30px 20px 100px; overflow-y: auto; }
         .screen.active { display: block; }
-        .shop-card { background: var(--card); padding: 18px; border-radius: 20px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--brd); }
+        
+        .list-item { background: var(--card); padding: 16px; border-radius: 18px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--brd); }
+        .ref-info { border-left: 3px solid var(--p-color); padding-left: 12px; }
     </style>
 </head>
 <body>
 
-    <canvas id="fx-layer"></canvas>
+    <canvas id="fx-canvas"></canvas>
 
     <div class="app">
-        <div class="top-bar">
+        <div class="header">
             <span class="bal-main" id="ui-bal">0</span>
-            <div class="gold-status">💰 <span id="ui-gold">0</span> <small style="font-size: 10px; opacity: 0.5">SLOTS</small></div>
-            <div class="lvl-box">
-                <div class="lvl-info"><span id="ui-lvl-name">Новичок</span><span id="ui-lvl-num">УР. 1</span></div>
-                <div class="bar-bg"><div class="bar-fill" id="ui-bar"></div></div>
+            <div class="gold-row">💰 <span id="ui-gold">0</span> <small style="font-size:10px; opacity:0.6">SLOTS</small></div>
+            <div class="lvl-card">
+                <div class="lvl-meta"><span id="ui-rank">РАБОЧИЙ</span><span id="ui-lvl">УР. 1</span></div>
+                <div class="bar-outer"><div class="bar-inner" id="ui-bar"></div></div>
             </div>
         </div>
 
-        <div class="main-zone">
-            <div class="crystal" id="crystal-node"><span>💎</span></div>
+        <div class="game-area">
+            <div class="crystal" id="crystal"><span>💎</span></div>
         </div>
 
-        <div class="stats">
-            <div class="stat-item"><small>Керн</small><b id="ui-pwr">1.0</b></div>
-            <div class="stat-item"><small>Авто</small><b id="ui-dps">0.0</b></div>
-            <button class="btn-boost" id="ui-boost" onclick="Game.runAd()">⚡ УСКОРЕНИЕ x3 (AD)</button>
+        <div class="stats-grid">
+            <div class="stat-card"><small>Керн</small><b id="ui-pwr">1.0</b></div>
+            <div class="stat-card"><small>Автомат</small><b id="ui-dps">0.0</b></div>
+            <button class="btn btn-boost" onclick="Game.runAd()">🚀 ФОРСАЖ x3 (30 сек)</button>
         </div>
     </div>
 
     <div class="screen" id="scr-shop">
-        <h2 style="margin-bottom: 20px">Инструменты</h2>
+        <h2 style="margin-bottom:20px">Инструменты</h2>
         <div id="shop-list"></div>
     </div>
 
-    <div class="screen" id="scr-market">
-        <h2 style="margin-bottom: 20px">Обмен кристаллов</h2>
-        <div class="shop-card" style="flex-direction: column; gap: 15px; text-align: center">
-            <p style="opacity: 0.6">Курс: 100,000 кристаллов = 1 слиток</p>
-            <div id="m-lock" style="color: #ff3b30; font-weight: 800">ДОСТУПНО С 15 УРОВНЯ</div>
-            <button id="m-btn" class="btn-boost" style="display: none; width: 100%" onclick="Game.exchange()">ВЫПЛАВИТЬ ЗОЛОТО</button>
+    <div class="screen" id="scr-ref">
+        <h2 style="margin-bottom:10px">Ваша Артель</h2>
+        <p style="color:#666; font-size:14px; margin-bottom:20px">За каждого приглашенного вы получаете <b style="color:var(--p-color)">+20%</b> от его пассивного дохода навсегда.</p>
+        <button class="btn btn-boost" style="width:100%; margin-bottom:20px" onclick="Game.invite()">Пригласить в забой</button>
+        <div id="ref-list">
+            <div class="list-item">
+                <div class="ref-info"><b>Напарник #421</b><br><small>Доход: +0.0 💎/сек</small></div>
+                <div style="color:var(--p-color); font-weight:900">20%</div>
+            </div>
         </div>
     </div>
 
+    <div class="screen" id="scr-market">
+        <h2 style="margin-bottom:20px">Золотой резерв</h2>
+        <div class="list-item" style="flex-direction:column; text-align:center; gap:15px">
+            <p style="font-size:14px; opacity:0.7">Обмен 100,000 кристаллов на 1 слиток.</p>
+            <div id="m-lock" style="color:#ff3b30; font-weight:900; font-size:12px">НУЖЕН 15 УРОВЕНЬ</div>
+            <div id="m-ui" style="display:none; width:100%">
+                <button class="btn" style="width:100%; padding:15px; border-radius:12px; background:var(--p-color); font-weight:900" onclick="Game.exchange()">Выплавить 1 слиток</button>
+            </div>
+        </div>
+        <button id="ui-withdraw" class="btn btn-withdraw" onclick="Game.withdraw()">Вывести 100 Слитков</button>
+    </div>
+
     <nav class="nav">
-        <div class="nav-btn active" onclick="UI.go('main', this)"><i>⛏️</i></div>
-        <div class="nav-btn" onclick="UI.go('shop', this)"><i>🛒</i></div>
-        <div class="nav-btn" onclick="UI.go('market', this)"><i>💰</i></div>
+        <div class="nav-item active" onclick="UI.go('main', this)"><i>⛏️</i></div>
+        <div class="nav-item" onclick="UI.go('shop', this)"><i>🛒</i></div>
+        <div class="nav-item" onclick="UI.go('ref', this)"><i>👥</i></div>
+        <div class="nav-item" onclick="UI.go('market', this)"><i>💰</i></div>
     </nav>
 
     <script>
-        // --- ПРИЯТНАЯ ФОНОВАЯ МУЗЫКА (Synthesized) ---
-        const AudioFX = {
-            ctx: null,
-            init() {
-                if (this.ctx) return;
-                this.ctx = new (window.AudioContext || window.webkitAudioContext)();
-                this.playAmbient();
-            },
-            playAmbient() {
-                const osc = this.ctx.createOscillator();
-                const gain = this.ctx.createGain();
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(110, this.ctx.currentTime); // Глубокий бас
-                gain.gain.setValueAtTime(0.02, this.ctx.currentTime);
-                osc.connect(gain);
-                gain.connect(this.ctx.destination);
-                osc.start();
-                // Модуляция звука для эффекта "космоса"
-                setInterval(() => {
-                    osc.frequency.exponentialRampToValueAtTime(Math.random() * 20 + 100, this.ctx.currentTime + 2);
-                }, 2000);
-            }
-        };
-
-        // --- ДВИЖОК ОТРИСОВКИ ЧАСТИЦ ---
+        // --- ДВИЖОК ЭФФЕКТОВ ---
         const FX = {
-            canvas: document.getElementById('fx-layer'),
-            ctx: null,
-            particles: [],
-            init() {
-                this.ctx = this.canvas.getContext('2d');
-                this.resize();
-                window.onresize = () => this.resize();
-                this.loop();
-            },
-            resize() {
-                this.canvas.width = window.innerWidth;
-                this.canvas.height = window.innerHeight;
-            },
-            spawn(x, y, text) {
-                this.particles.push({ x, y, text, life: 1, vy: -2 });
-            },
+            c: document.getElementById('fx-canvas'),
+            ctx: null, particles: [],
+            init() { this.ctx = this.c.getContext('2d'); this.res(); window.onresize = () => this.res(); this.loop(); },
+            res() { this.c.width = window.innerWidth; this.c.height = window.innerHeight; },
+            pop(x, y, txt) { this.particles.push({ x, y, txt, l: 1 }); },
             loop() {
-                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-                this.ctx.font = "bold 24px sans-serif";
-                for (let i = this.particles.length - 1; i >= 0; i--) {
-                    let p = this.particles[i];
-                    p.y += p.vy;
-                    p.life -= 0.02;
-                    this.ctx.fillStyle = `rgba(0, 212, 255, ${p.life})`;
-                    this.ctx.fillText(p.text, p.x, p.y);
-                    if (p.life <= 0) this.particles.splice(i, 1);
+                this.ctx.clearRect(0,0,this.c.width,this.c.height);
+                this.ctx.font = "bold 26px Inter";
+                for(let i=this.particles.length-1; i>=0; i--){
+                    let p = this.particles[i]; p.y -= 2; p.l -= 0.02;
+                    this.ctx.fillStyle = `rgba(0, 212, 255, ${p.l})`;
+                    this.ctx.fillText(p.txt, p.x, p.y);
+                    if(p.l <= 0) this.particles.splice(i, 1);
                 }
                 requestAnimationFrame(() => this.loop());
             }
         };
 
-        // --- ЛОГИКА ИГРЫ ---
+        // --- ЗВУКОВОЙ ДВИЖОК ---
+        const Sound = {
+            ctx: null, s: false,
+            init() { 
+                if(this.s) return;
+                this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const o = this.ctx.createOscillator();
+                const g = this.ctx.createGain();
+                o.type = 'sine'; o.frequency.setValueAtTime(100, this.ctx.currentTime);
+                g.gain.setValueAtTime(0.01, this.ctx.currentTime);
+                o.connect(g); g.connect(this.ctx.destination);
+                o.start(); this.s = true;
+            }
+        };
+
+        // --- ЯДРО ИГРЫ ---
         const Game = {
-            data: { bal: 0, gold: 0, pwr: 1, dps: 0, xp: 0, lvl: 1, mult: 1, u: [0, 0, 0, 0] },
+            save_key: 'nebula_pro_v10',
+            d: { bal: 0, gold: 0, pwr: 1, dps: 0, xp: 0, lvl: 1, mult: 1, u: [0,0,0,0] },
             shop: [
-                { n: "Ручная кирка", p: 100, b: 0.5, t: 'pwr' },
-                { n: "Дробилка", p: 500, b: 1.5, t: 'dps' },
-                { n: "Лазерный бур", p: 2500, b: 5, t: 'pwr' },
-                { n: "Шахтный ИИ", p: 10000, b: 20, t: 'dps' }
+                { n: "Кирка стажера", p: 120, b: 0.5, t: 'pwr' },
+                { n: "Дрель 'Крот'", p: 600, b: 2.0, t: 'dps' },
+                { n: "Лазер 'Звезда'", p: 3000, b: 8, t: 'pwr' },
+                { n: "ИИ-Забойщик", p: 15000, b: 50, t: 'dps' }
             ],
 
             init() {
                 this.load();
                 FX.init();
-                
-                const crystal = document.getElementById('crystal-node');
-                crystal.addEventListener('touchstart', (e) => {
-                    e.preventDefault();
-                    AudioFX.init(); // Музыка включится при первом тапе
-                    for (let t of e.changedTouches) this.tap(t.clientX, t.clientY);
+                const cry = document.getElementById('crystal');
+                cry.addEventListener('touchstart', (e) => {
+                    e.preventDefault(); Sound.init();
+                    for(let t of e.changedTouches) this.tap(t.clientX, t.clientY);
                 });
-
-                // Основной цикл обновления (10 раз в сек)
                 setInterval(() => this.tick(), 100);
-                // Плавное обновление шкалы (60 раз в сек)
-                this.updateLvlBar();
+                this.render();
             },
 
             tap(x, y) {
-                const gain = this.data.pwr * this.data.mult;
-                this.data.bal += gain;
-                this.data.xp += 10;
-                FX.spawn(x, y, `+${gain.toFixed(1)}`);
-                
-                const cry = document.getElementById('crystal-node');
-                cry.style.transform = 'scale(0.92)';
-                setTimeout(() => cry.style.transform = 'scale(1)', 50);
-
-                if (window.Telegram?.WebApp?.HapticFeedback) {
-                    Telegram.WebApp.HapticFeedback.impactOccurred('light');
-                }
+                const g = this.d.pwr * this.d.mult;
+                this.d.bal += g; this.d.xp += 12;
+                this.checkLvl();
+                FX.pop(x, y, `+${g.toFixed(1)}`);
+                if(window.Telegram?.WebApp?.HapticFeedback) Telegram.WebApp.HapticFeedback.impactOccurred('light');
+                document.getElementById('crystal').style.transform = 'scale(0.94)';
+                setTimeout(()=>document.getElementById('crystal').style.transform='scale(1)', 50);
             },
 
-            tick() {
-                if (this.data.dps > 0) this.data.bal += this.data.dps / 10;
-                this.checkLvl();
-                this.renderUI();
+            tick() { 
+                if(this.d.dps > 0) this.d.bal += this.d.dps/10; 
+                this.render(); 
             },
 
             checkLvl() {
-                const req = this.data.lvl * 1000;
-                if (this.data.xp >= req) {
-                    this.data.xp = 0;
-                    this.data.lvl++;
-                    this.save();
-                }
+                const req = this.d.lvl * 1200;
+                if(this.d.xp >= req) { this.d.xp = 0; this.d.lvl++; this.save(); }
             },
 
-            // Плавная шкала без багов
-            updateLvlBar() {
-                const req = this.data.lvl * 1000;
-                const target = this.data.xp / req;
-                const bar = document.getElementById('ui-bar');
+            render() {
+                document.getElementById('ui-bal').innerText = Math.floor(this.d.bal).toLocaleString();
+                document.getElementById('ui-gold').innerText = this.d.gold;
+                document.getElementById('ui-pwr').innerText = (this.d.pwr * this.d.mult).toFixed(1);
+                document.getElementById('ui-dps').innerText = this.d.dps.toFixed(1);
+                document.getElementById('ui-lvl').innerText = `УР. ${this.d.lvl}`;
                 
-                // Используем transform для макс производительности
-                bar.style.transform = `scaleX(${target})`;
-                requestAnimationFrame(() => this.updateLvlBar());
-            },
+                const req = this.d.lvl * 1200;
+                document.getElementById('ui-bar').style.transform = `scaleX(${Math.min(this.d.xp/req, 1)})`;
 
-            renderUI() {
-                document.getElementById('ui-bal').innerText = Math.floor(this.data.bal).toLocaleString();
-                document.getElementById('ui-gold').innerText = this.data.gold;
-                document.getElementById('ui-pwr').innerText = (this.data.pwr * this.data.mult).toFixed(1);
-                document.getElementById('ui-dps').innerText = this.data.dps.toFixed(1);
-                document.getElementById('ui-lvl-num').innerText = `УР. ${this.data.lvl}`;
-
-                if (this.data.lvl >= 15) {
+                if(this.d.lvl >= 15) {
                     document.getElementById('m-lock').style.display = 'none';
-                    document.getElementById('m-btn').style.display = 'block';
+                    document.getElementById('m-ui').style.display = 'block';
                 }
+
+                // Условие появления кнопки вывода (100 слитков)
+                const wBtn = document.getElementById('ui-withdraw');
+                wBtn.style.display = this.d.gold >= 100 ? 'block' : 'none';
             },
 
             exchange() {
-                if (this.data.bal >= 100000) {
-                    this.data.bal -= 100000;
-                    this.data.gold += 1;
-                    this.save();
+                if(this.d.bal >= 100000) {
+                    this.d.bal -= 100000; this.d.gold += 1; this.save();
+                    Telegram.WebApp.showPopup({ title: 'Готово!', message: 'Выплавлен 1 слиток' });
+                } else { Telegram.WebApp.showAlert('Не хватает ресурсов!'); }
+            },
+
+            withdraw() {
+                const wallet = prompt("Введите номер кошелька для выплаты:");
+                if(wallet) {
+                    this.d.gold -= 100; this.save();
+                    alert("Заявка на вывод принята! Ожидайте обработки.");
                 }
             },
 
-            save() { localStorage.setItem('nebula_gold_v2', JSON.stringify(this.data)); },
-            load() { 
-                const s = localStorage.getItem('nebula_gold_v2'); 
-                if (s) this.data = {...this.data, ...JSON.parse(s)}; 
-            },
-            
             runAd() {
-                // Имитация для примера, здесь будет твой Adsgram
-                this.data.mult = 3;
-                setTimeout(() => { this.data.mult = 1; }, 30000);
-            }
+                const start = () => {
+                    this.d.mult = 3;
+                    setTimeout(() => { this.d.mult = 1; }, 30000);
+                };
+                if(window.Adsgram) {
+                    Adsgram.init({ blockId: "19895" }).show().then(start).catch(start);
+                } else start();
+            },
+
+            invite() {
+                const uid = Telegram.WebApp.initDataUnsafe?.user?.id || "0";
+                const link = `https://t.me/YOUR_BOT_NAME/app?startapp=${uid}`;
+                Telegram.WebApp.openTelegramLink(`https://t.me/share/url?url=${link}&text=Вступай в мою артель!`);
+            },
+
+            buy(i) {
+                const itm = this.shop[i];
+                const cost = Math.floor(itm.p * Math.pow(1.6, this.d.u[i]));
+                if(this.d.bal >= cost) {
+                    this.d.bal -= cost; this.d.u[i]++;
+                    if(itm.t === 'pwr') this.d.pwr += itm.b; else this.d.dps += itm.b;
+                    UI.drawShop(); this.save();
+                }
+            },
+
+            save() { localStorage.setItem(this.save_key, JSON.stringify(this.d)); },
+            load() { const s = localStorage.getItem(this.save_key); if(s) this.d = {...this.d, ...JSON.parse(s)}; }
         };
 
         const UI = {
             go(id, el) {
-                document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
                 document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
                 el.classList.add('active');
-                if (id !== 'main') {
-                    document.getElementById('scr-' + id).classList.add('active');
-                    if (id === 'shop') this.drawShop();
+                if(id !== 'main') {
+                    document.getElementById('scr-'+id).classList.add('active');
+                    if(id === 'shop') this.drawShop();
                 }
             },
             drawShop() {
                 document.getElementById('shop-list').innerHTML = Game.shop.map((itm, i) => {
-                    const cost = Math.floor(itm.p * Math.pow(1.6, Game.data.u[i]));
-                    return `<div class="shop-card" onclick="Game.buy(${i})">
-                        <div><b>${itm.n}</b><br><small>+${itm.b} к добыче</small></div>
-                        <div style="font-weight: 900">${cost.toLocaleString()} 💎</div>
+                    const cost = Math.floor(itm.p * Math.pow(1.6, Game.d.u[i]));
+                    return `<div class="list-item" onclick="Game.buy(${i})">
+                        <div><b>${itm.n}</b><br><small>+${itm.b} к силе</small></div>
+                        <div style="font-weight:900">${cost.toLocaleString()} 💎</div>
                     </div>`;
                 }).join('');
-            }
-        };
-
-        Game.buy = function(i) {
-            const itm = this.shop[i];
-            const cost = Math.floor(itm.p * Math.pow(1.6, this.data.u[i]));
-            if (this.data.bal >= cost) {
-                this.data.bal -= cost;
-                this.data.u[i]++;
-                if (itm.t === 'pwr') this.data.pwr += itm.b; else this.data.dps += itm.b;
-                UI.drawShop();
-                this.save();
             }
         };
 
