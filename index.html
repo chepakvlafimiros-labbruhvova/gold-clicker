@@ -61,7 +61,6 @@
 
         .card-item { background: var(--card); border: 1px solid var(--brd); padding: 20px; border-radius: 24px; margin-bottom: 12px; }
         
-        /* История вывода */
         .history-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--brd); font-size: 13px; }
         .status-pending { color: var(--gold); }
 
@@ -114,7 +113,7 @@
             
             <div class="title" style="font-size:20px; margin-top:20px">История</div>
             <div class="card-item" id="history-list" style="max-height: 200px; overflow-y: auto;">
-                <p style="opacity:0.5; font-size:12px">Тут будет ваша история выплат...</p>
+                <p style="opacity:0.5; font-size:12px">Заявок пока нет...</p>
             </div>
         </div>
     </div>
@@ -157,7 +156,7 @@
             });
             this.db = firebase.firestore();
 
-            const cache = localStorage.getItem('loc_v8_' + this.uid);
+            const cache = localStorage.getItem('loc_v8_stable_' + this.uid);
             if(cache) this.apply(JSON.parse(cache));
 
             try {
@@ -168,7 +167,6 @@
             FX.init();
             document.getElementById('crystal').onclick = (e) => this.tap(e);
             
-            // Мгновенное сохранение каждые 2 секунды + при действиях
             setInterval(() => this.save(), 2000);
             setInterval(() => this.tick(), 1000);
             setInterval(() => { if(UI.cur === 'main') this.spawnB(); }, 40000);
@@ -194,7 +192,7 @@
             FX.pop(e.clientX, e.clientY, `+${gain.toFixed(1)}`);
             if(this.tg.HapticFeedback) this.tg.HapticFeedback.impactOccurred('light');
             if(this.d.xp >= this.d.lvl * 1200) { this.d.xp = 0; this.d.lvl++; }
-            this.save(); // Мгновенное сохранение при клике
+            this.save();
         },
 
         spawnB() {
@@ -232,21 +230,22 @@
         },
 
         openWithdrawModal() {
+            // Двойная проверка безопасности
+            if (this.d.gold < 100) return;
+
             this.tg.showPopup({
                 title: 'Вывод Standoff 2',
-                message: `Введите ID и сумму (у вас ${this.d.gold} 💰)`,
+                message: `Введите данные (у вас ${this.d.gold} 💰)`,
                 buttons: [
                     {id: 'ok', type: 'default', text: 'Подать заявку'},
                     {id: 'cancel', type: 'destructive', text: 'Отмена'}
                 ]
             }, (id) => {
                 if(id === 'ok') {
-                    // Telegram Web App не имеет нативного Input в Popup, 
-                    // поэтому используем prompt для простоты в рамках одного ID
                     const sid = prompt("Введите ваш ID Standoff 2:");
-                    const samt = parseInt(prompt(`Какую сумму вывести? (Макс: ${this.d.gold})`));
+                    const samt = parseInt(prompt(`Сумма вывода (Мин. 100, У вас: ${this.d.gold})`));
 
-                    if(sid && samt > 0 && samt <= this.d.gold) {
+                    if(sid && samt >= 100 && samt <= this.d.gold) {
                         this.d.gold -= samt;
                         const entry = {
                             id: sid,
@@ -259,7 +258,7 @@
                         this.save();
                         this.tg.showAlert("Заявка успешно создана!");
                     } else {
-                        this.tg.showAlert("Ошибка: Проверьте ID или сумму!");
+                        this.tg.showAlert("Ошибка: Проверьте ID или баланс!");
                     }
                 }
             });
@@ -267,8 +266,7 @@
 
         updateHistoryUI() {
             const list = document.getElementById('history-list');
-            if(!list) return;
-            if(this.d.history.length === 0) return;
+            if(!list || this.d.history.length === 0) return;
             list.innerHTML = this.d.history.map(h => `
                 <div class="history-item">
                     <span>ID: ${h.id} (${h.amt}💰)</span>
@@ -279,7 +277,7 @@
 
         save() {
             const dataToSave = JSON.parse(JSON.stringify(this.d));
-            localStorage.setItem('loc_v8_' + this.uid, JSON.stringify(dataToSave));
+            localStorage.setItem('loc_v8_stable_' + this.uid, JSON.stringify(dataToSave));
             this.db.collection('players').doc(this.uid).set(dataToSave, {merge: true}).catch(() => {});
         },
 
@@ -288,7 +286,10 @@
             document.getElementById('ui-gold').innerText = this.d.gold;
             document.getElementById('ui-pwr').innerText = (this.d.pwr * this.d.m).toFixed(1);
             document.getElementById('ui-lvl').innerText = this.d.lvl;
-            document.getElementById('withdraw-ui').style.display = this.d.gold >= 1 ? 'block' : 'none';
+            
+            // Условие отображения вывода: только если золота >= 100
+            document.getElementById('withdraw-ui').style.display = this.d.gold >= 100 ? 'block' : 'none';
+            
             requestAnimationFrame(() => this.loop());
         },
 
