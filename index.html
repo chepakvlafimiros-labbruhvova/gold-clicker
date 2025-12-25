@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Locus Gold: Official Drop</title>
+    <title>Locus Gold: Final Stable</title>
     
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -13,180 +13,153 @@
     <style>
         :root {
             --accent: #00d4ff; --gold: #ffcc00; --bg: #050505;
-            --card: rgba(255, 255, 255, 0.07); --brd: rgba(255, 255, 255, 0.12);
+            --card: rgba(255, 255, 255, 0.08); --brd: rgba(255, 255, 255, 0.15);
             --safe: env(safe-area-inset-bottom);
         }
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; user-select: none; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; user-select: none; touch-action: manipulation; }
         body { background: var(--bg); color: #fff; height: 100vh; overflow: hidden; position: fixed; width: 100%; }
         
-        .app { display: flex; flex-direction: column; height: 100%; padding: 20px 20px calc(95px + var(--safe)); z-index: 10; position: relative; }
+        .app { display: flex; flex-direction: column; height: 100%; padding: 20px 20px calc(95px + var(--safe)); position: relative; z-index: 10; }
         
         /* Баланс */
-        .bal-wrap { text-align: center; margin-bottom: 20px; transition: all 0.3s; }
-        .bal-val { font-size: 58px; font-weight: 900; color: #fff; text-shadow: 0 0 20px rgba(0,212,255,0.4); }
-        .gold-val { color: var(--gold); font-size: 26px; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .bal-wrap { text-align: center; margin-bottom: 15px; }
+        .bal-val { font-size: 60px; font-weight: 900; line-height: 1.1; text-shadow: 0 0 30px rgba(0,212,255,0.4); }
+        .gold-val { color: var(--gold); font-size: 26px; font-weight: 800; margin-top: 5px; display: flex; align-items: center; justify-content: center; gap: 8px; }
 
-        /* Зона клика */
-        .click-area { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; }
+        /* Центр */
+        .mine-zone { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; }
+        .crystal-container { position: relative; width: 240px; height: 240px; display: flex; align-items: center; justify-content: center; }
         .crystal { 
-            width: 230px; height: 230px; background: radial-gradient(circle at 30% 30%, var(--accent), #0033ff);
+            width: 100%; height: 100%; background: radial-gradient(circle at 30% 30%, var(--accent), #0033ff);
             clip-path: polygon(50% 0%, 95% 25%, 95% 75%, 50% 100%, 5% 75%, 5% 25%);
-            display: flex; align-items: center; justify-content: center; transition: transform 0.05s;
-            box-shadow: 0 0 50px rgba(0, 211, 255, 0.3); z-index: 5;
+            transition: transform 0.05s cubic-bezier(0, 0, 0.2, 1);
+            box-shadow: 0 0 60px rgba(0, 211, 255, 0.2);
         }
         .crystal:active { transform: scale(0.92); }
-        .crystal img { width: 100px; filter: drop-shadow(0 0 10px rgba(255,255,255,0.5)); }
+        .crystal-img { position: absolute; width: 100px; pointer-events: none; filter: drop-shadow(0 0 15px rgba(255,255,255,0.3)); }
 
-        /* Маленькая кнопка бонуса (Исправлена) */
+        /* Мини-бонус */
         #mini-bonus {
-            margin-top: 30px; background: rgba(255, 204, 0, 0.1); border: 1.5px solid var(--gold);
-            padding: 10px 20px; border-radius: 50px; display: none; align-items: center; gap: 10px;
-            cursor: pointer; z-index: 20; backdrop-filter: blur(5px);
-            animation: bounce 2s infinite;
+            margin-top: 25px; background: rgba(255, 204, 0, 0.12); border: 2px solid var(--gold);
+            padding: 10px 22px; border-radius: 40px; display: none; align-items: center; gap: 10px;
+            cursor: pointer; animation: float 3s infinite ease-in-out;
         }
-        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
-        #mini-bonus span { font-size: 14px; font-weight: 800; color: var(--gold); }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+        #mini-bonus b { color: var(--gold); font-size: 14px; }
 
-        /* Инфо-панели */
-        .stats-box { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; width: 100%; margin-top: 10px; }
-        .stat-card { background: var(--card); border: 1px solid var(--brd); padding: 18px; border-radius: 24px; text-align: center; }
-        .stat-card b { display: block; font-size: 22px; color: var(--accent); }
-        .stat-card small { font-size: 12px; opacity: 0.6; text-transform: uppercase; letter-spacing: 1px; }
+        /* Статы */
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 15px; }
+        .stat-node { background: var(--card); border: 1px solid var(--brd); padding: 18px; border-radius: 24px; text-align: center; }
+        .stat-node b { display: block; font-size: 22px; color: var(--accent); }
+        .stat-node span { font-size: 12px; opacity: 0.5; text-transform: uppercase; letter-spacing: 0.5px; }
 
         /* Навигация */
-        .nav { position: fixed; bottom: 0; width: 100%; height: calc(85px + var(--safe)); background: rgba(10,10,10,0.95); border-top: 1px solid var(--brd); display: flex; padding-bottom: var(--safe); z-index: 1000; backdrop-filter: blur(10px); }
-        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #666; transition: 0.2s; cursor: pointer; }
+        .nav { position: fixed; bottom: 0; left: 0; right: 0; height: calc(85px + var(--safe)); background: rgba(10,10,10,0.98); border-top: 1px solid var(--brd); display: flex; padding-bottom: var(--safe); z-index: 1000; backdrop-filter: blur(15px); }
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #555; transition: 0.3s; }
         .nav-item.active { color: var(--accent); }
-        .nav-item i { font-size: 24px; font-style: normal; margin-bottom: 5px; }
-        .nav-item span { font-size: 12px; font-weight: 700; }
+        .nav-item i { font-size: 24px; font-style: normal; margin-bottom: 4px; }
+        .nav-item span { font-size: 11px; font-weight: 700; }
 
         /* Экраны */
         .screen { position: fixed; inset: 0; background: var(--bg); padding: 40px 25px 120px; display: none; overflow-y: auto; flex-direction: column; z-index: 500; }
         .screen.active { display: flex; }
-        .screen-title { font-size: 28px; font-weight: 900; margin-bottom: 25px; border-left: 5px solid var(--accent); padding-left: 15px; }
+        .title { font-size: 30px; font-weight: 900; margin-bottom: 30px; }
 
-        .btn-action { width: 100%; padding: 20px; border-radius: 20px; border: none; font-weight: 900; text-transform: uppercase; cursor: pointer; transition: 0.2s; color: #fff; }
-        .btn-action:active { transform: scale(0.97); }
-        .btn-main { background: linear-gradient(135deg, #ff9d00, #ff5e00); box-shadow: 0 5px 15px rgba(255,94,0,0.3); }
-        .btn-alt { background: var(--accent); box-shadow: 0 5px 15px rgba(0,212,255,0.3); }
+        .btn { width: 100%; padding: 20px; border-radius: 22px; border: none; font-weight: 900; text-transform: uppercase; cursor: pointer; color: #fff; }
+        .btn-boost { background: var(--accent); box-shadow: 0 8px 20px rgba(0,212,255,0.3); }
+        .btn-gold { background: linear-gradient(135deg, #ff9d00, #ff5e00); }
 
-        .item-card { background: var(--card); border: 1px solid var(--brd); padding: 22px; border-radius: 25px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; transition: 0.2s; }
-        .item-card:active { background: rgba(255,255,255,0.1); }
-        .item-info b { font-size: 18px; display: block; }
-        .item-info small { color: var(--accent); font-weight: 600; }
+        .card-item { background: var(--card); border: 1px solid var(--brd); padding: 22px; border-radius: 26px; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center; }
+        .card-info b { font-size: 18px; display: block; margin-bottom: 4px; }
+        .card-info small { color: var(--accent); font-weight: 700; }
 
-        #fx-layer { position: absolute; inset: 0; pointer-events: none; z-index: 100; }
+        #fx-canvas { position: absolute; inset: 0; pointer-events: none; z-index: 100; }
     </style>
 </head>
 <body>
-    <canvas id="fx-layer"></canvas>
+    <canvas id="fx-canvas"></canvas>
 
     <div class="app">
         <div class="bal-wrap">
-            <div class="bal-val" id="main-bal">0</div>
-            <div class="gold-val">💰 <span id="gold-bal">0</span></div>
+            <div class="bal-val" id="ui-bal">0</div>
+            <div class="gold-val">💰 <span id="ui-gold">0</span></div>
         </div>
 
-        <div class="click-area">
-            <div class="crystal" id="tap-target">
-                <img src="https://cdn-icons-png.flaticon.com/512/3203/3203925.png">
+        <div class="mine-zone">
+            <div class="crystal-container">
+                <div class="crystal" id="crystal"></div>
+                <img src="https://cdn-icons-png.flaticon.com/512/3203/3203925.png" class="crystal-img">
             </div>
             
-            <div id="mini-bonus">
-                <span>🎁 БОНУС: +<span id="bonus-amount">5000</span></span>
-                <b id="bonus-timer" style="color:#ff3b30; margin-left:5px">10с</b>
+            <div id="mini-bonus" onclick="Game.takeBonus()">
+                <b>🎁 БОНУС: +<span id="bonus-amt">0</span></b>
+                <span id="bonus-sec" style="color:red; font-weight:900; margin-left:8px">10</span>
             </div>
         </div>
 
-        <div class="stats-box">
-            <div class="stat-card">
-                <small>Мощность</small>
-                <b id="pwr-display">1.0</b>
-            </div>
-            <div class="stat-card">
-                <small>Уровень</small>
-                <b id="lvl-display">1</b>
-            </div>
+        <div class="stats-grid">
+            <div class="stat-node"><span>Клик</span><b id="ui-pwr">1.0</b></div>
+            <div class="stat-node"><span>Уровень</span><b id="ui-lvl">1</b></div>
         </div>
     </div>
 
     <div class="screen" id="scr-shop">
-        <div class="screen-title">Магазин</div>
-        <button class="btn-action btn-alt" style="margin-bottom:25px" onclick="GameCore.showAd('boost')">🚀 ФОРСАЖ X3 (30 СЕК)</button>
-        <div id="shop-items-list"></div>
+        <div class="title">Улучшения</div>
+        <button class="btn btn-boost" style="margin-bottom:25px" onclick="Game.ad('boost')">🚀 ФОРСАЖ X3 (30 СЕК)</button>
+        <div id="shop-content"></div>
     </div>
 
     <div class="screen" id="scr-market">
-        <div class="screen-title">Обмен</div>
-        <div class="item-card" style="flex-direction:column; text-align:center; gap:20px; background: rgba(255,204,0,0.05); border-color: var(--gold);">
-            <p style="font-size: 18px; font-weight: 700;">100,000 💎 = 1 💰</p>
-            <button class="btn-action btn-main" onclick="GameCore.doExchange()">ОБМЕНЯТЬ</button>
-            <p style="font-size:12px; opacity:0.6;">При обмене уровень и инструменты сбрасываются!</p>
+        <div class="title">Обмен</div>
+        <div class="card-item" style="flex-direction:column; text-align:center; gap:20px; border-color:var(--gold)">
+            <p>100,000 💎 ➔ 1 💰</p>
+            <button class="btn btn-gold" onclick="Game.exchange()">ПЕРЕПЛАВИТЬ</button>
+            <small style="opacity:0.6">Уровень и предметы будут сброшены</small>
         </div>
-
-        <div id="withdraw-container" style="display:none; margin-top:30px;">
-            <div class="screen-title" style="border-color: #00ff88;">Вывод</div>
-            <div class="item-card" style="border-color: #00ff88; background: rgba(0,255,136,0.05);">
-                <div class="item-info">
-                    <b>Доступно к выводу</b>
-                    <small style="color:#00ff88">Прямой перевод на кошелек</small>
-                </div>
-                <button class="btn-action btn-alt" style="width:auto; padding:12px 25px; background:#00ff88;" onclick="GameCore.doWithdraw()">ВЫВЕСТИ</button>
+        <div id="withdraw-ui" style="display:none; margin-top:30px">
+            <div class="title" style="font-size:22px">Вывод</div>
+            <div class="card-item">
+                <div class="card-info"><b>Доступно золото</b><small>Вывод в Telegram</small></div>
+                <button class="btn" style="width:auto; padding:12px 20px; background:#00ff88" onclick="Game.withdraw()">ВЫВЕСТИ</button>
             </div>
         </div>
     </div>
 
-    <div class="screen" id="scr-friends">
-        <div class="screen-title">Друзья</div>
-        <div class="item-card" style="margin-top:20px; text-align:center; flex-direction:column; gap:20px;">
-            <p>Получайте <span style="color:var(--accent); font-weight:900;">20%</span> от дохода каждого приглашенного друга!</p>
-            <button class="btn-action btn-alt" onclick="GameCore.invite()">ПРИГЛАСИТЬ</button>
+    <div class="screen" id="scr-ref">
+        <div class="title">Друзья</div>
+        <div class="card-item" style="flex-direction:column; gap:20px; text-align:center">
+            <p>Приглашай друзей и забирай 20% их добычи!</p>
+            <button class="btn btn-boost" onclick="Game.invite()">ПРИГЛАСИТЬ</button>
         </div>
     </div>
 
     <nav class="nav">
-        <div class="nav-item active" data-tab="main"><i>⛏️</i><span>Добыча</span></div>
-        <div class="nav-item" data-tab="shop"><i>🛒</i><span>Магазин</span></div>
-        <div class="nav-item" data-tab="market"><i>💰</i><span>Обмен</span></div>
-        <div class="nav-item" data-tab="friends"><i>👥</i><span>Друзья</span></div>
+        <div class="nav-item active" onclick="UI.go('main', this)"><i>⛏️</i><span>Добыча</span></div>
+        <div class="nav-item" onclick="UI.go('shop', this)"><i>🛒</i><span>Магазин</span></div>
+        <div class="nav-item" onclick="UI.go('market', this)"><i>💰</i><span>Обмен</span></div>
+        <div class="nav-item" onclick="UI.go('ref', this)"><i>👥</i><span>Друзья</span></div>
     </nav>
 
     <script>
     /**
-     * LOCUS GOLD ENGINE v6.0 - DROP READY
-     * Авторские правки: Фикс 0.0, Deep Save, Работающие кнопки
+     * LOCUS GOLD STABLE KERNEL
      */
-    const GameCore = {
+    const Game = {
         db: null, tg: window.Telegram.WebApp, uid: null,
-        
-        // Жесткая инициализация данных для предотвращения 0.0
-        data: {
-            bal: 0.0,
-            gold: 0,
-            pwr: 1.0, // Базовый клик
-            lvl: 1,
-            xp: 0,
-            upg: [0,0,0,0],
-            mult: 1.0,
-            lastSave: Date.now()
-        },
-
-        shop: [
-            { n: "Кирка Новичка", p: 150, b: 0.5 },
+        d: { bal: 0, gold: 0, pwr: 1.0, lvl: 1, xp: 0, u: [0,0,0,0], m: 1 },
+        items: [
+            { n: "Кирка Новичка", p: 200, b: 0.5 },
             { n: "Дрель Nebula", p: 1500, b: 2.5 },
             { n: "Плазма-Ган", p: 12000, b: 12.0 },
             { n: "Орбитальный Бур", p: 85000, b: 65.0 }
         ],
-
-        isBonusLive: false,
-        bonusTimer: 0,
+        bOn: false, bT: 0,
 
         async init() {
             this.tg.expand();
-            this.tg.ready();
-            this.uid = this.tg.initDataUnsafe?.user?.id?.toString() || "DEBUG_PLAYER";
+            this.uid = this.tg.initDataUnsafe?.user?.id?.toString() || "DEV_STABLE";
 
-            // Firebase
+            // FIREBASE
             firebase.initializeApp({
                 apiKey: "AIzaSyCoa29KS-sin6hoRz0ZbE4f3ki0tZLwkKI",
                 projectId: "gold-clicker-5d882",
@@ -194,246 +167,182 @@
             });
             this.db = firebase.firestore();
 
-            await this.loadProgress();
-            this.setupListeners();
-            
-            // Циклы
-            setInterval(() => this.cloudSave(), 20000);
-            setInterval(() => this.processBonusLogic(), 1000);
-            setInterval(() => { if(UI.current === 'main') this.triggerBonus(); }, 45000);
-            
-            Visuals.init();
-            this.renderFrame();
-        },
+            // LOAD
+            const cache = localStorage.getItem('loc_v7_' + this.uid);
+            if(cache) this.applyData(JSON.parse(cache));
 
-        async loadProgress() {
-            // 1. Сначала пробуем LocalStorage
-            const local = localStorage.getItem('locus_gold_v6_' + this.uid);
-            if(local) {
-                const parsed = JSON.parse(local);
-                if(parsed.pwr < 1.0) parsed.pwr = 1.0; // Фикс багов старых версий
-                this.data = {...this.data, ...parsed};
-            }
-
-            // 2. Затем Firebase (Deep Merge)
             try {
-                const doc = await this.db.collection('players').doc(this.uid).get();
-                if(doc.exists) {
-                    const cloud = doc.data();
-                    // Берем максимальные значения, чтобы не потерять прогресс
-                    this.data.gold = Math.max(this.data.gold, cloud.gold || 0);
-                    this.data.bal = Math.max(this.data.bal, cloud.bal || 0);
-                    this.data.lvl = Math.max(this.data.lvl, cloud.lvl || 1);
-                    if(cloud.pwr > this.data.pwr) this.data.pwr = cloud.pwr;
-                    if(cloud.upg) this.data.upg = cloud.upg;
-                }
-            } catch(e) { console.warn("Firebase Load Error", e); }
+                const snap = await this.db.collection('players').doc(this.uid).get();
+                if(snap.exists) this.applyData(snap.data());
+            } catch(e) {}
+
+            this.validate(); // Проверка на NaN
+            
+            FX.init();
+            document.getElementById('crystal').onclick = (e) => this.tap(e);
+            
+            setInterval(() => this.save(), 15000);
+            setInterval(() => this.tick(), 1000);
+            setInterval(() => { if(UI.cur === 'main') this.spawnB(); }, 40000);
+            
+            this.loop();
         },
 
-        setupListeners() {
-            // Исправленные слушатели для кнопок навигации
-            document.querySelectorAll('.nav-item').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    UI.switch(btn.dataset.tab, btn);
-                });
-            });
-
-            // Клик по кристаллу
-            document.getElementById('tap-target').addEventListener('click', (e) => {
-                this.handleTap(e);
-            });
-
-            // Бонусная кнопка
-            document.getElementById('mini-bonus').addEventListener('click', () => {
-                this.claimBonus();
-            });
+        applyData(source) {
+            if(!source) return;
+            // Умное слияние, чтобы не потерять прогресс при undefined в базе
+            this.d.bal = source.bal ?? this.d.bal;
+            this.d.gold = source.gold ?? this.d.gold;
+            this.d.pwr = source.pwr ?? this.d.pwr;
+            this.d.lvl = source.lvl ?? this.d.lvl;
+            this.d.u = Array.isArray(source.u) ? source.u : [0,0,0,0];
         },
 
-        handleTap(e) {
-            const gain = parseFloat(this.data.pwr) * parseFloat(this.data.mult);
-            this.data.bal += gain;
-            this.data.xp += 15;
+        validate() {
+            // Исправляет "не число" и 0.0
+            if(isNaN(this.d.pwr) || this.d.pwr < 1) this.d.pwr = 1.0;
+            if(isNaN(this.d.bal)) this.d.bal = 0;
+            if(!Array.isArray(this.d.u) || this.d.u.length < 4) this.d.u = [0,0,0,0];
+            this.d.u = this.d.u.map(v => isNaN(v) ? 0 : v);
+        },
 
-            Visuals.spawn(e.clientX, e.clientY, `+${gain.toFixed(1)}`);
+        tap(e) {
+            const gain = this.d.pwr * this.d.m;
+            this.d.bal += gain;
+            this.d.xp += 10;
+            FX.pop(e.clientX, e.clientY, `+${gain.toFixed(1)}`);
             if(this.tg.HapticFeedback) this.tg.HapticFeedback.impactOccurred('light');
-
-            // Уровни
-            const needed = this.data.lvl * 1500;
-            if(this.data.xp >= needed) {
-                this.data.xp = 0;
-                this.data.lvl++;
-                this.tg.HapticFeedback?.notificationOccurred('success');
-            }
+            if(this.d.xp >= this.d.lvl * 1200) { this.d.xp = 0; this.d.lvl++; }
         },
 
-        triggerBonus() {
-            if(this.isBonusLive) return;
-            const amount = Math.floor(5000 + (this.data.bal * 0.15));
-            document.getElementById('bonus-amount').innerText = amount.toLocaleString();
-            this.bonusTimer = 10;
-            this.isBonusLive = true;
+        spawnB() {
+            if(this.bOn) return;
+            const amt = Math.floor(5000 + (this.d.bal * 0.1));
+            document.getElementById('bonus-amt').innerText = amt.toLocaleString();
+            this.bT = 10; this.bOn = true;
             document.getElementById('mini-bonus').style.display = 'flex';
         },
 
-        processBonusLogic() {
-            if(this.isBonusLive) {
-                this.bonusTimer--;
-                document.getElementById('bonus-timer').innerText = this.bonusTimer + 'с';
-                if(this.bonusTimer <= 0) {
-                    this.isBonusLive = false;
+        tick() {
+            if(this.bOn) {
+                this.bT--;
+                document.getElementById('bonus-sec').innerText = this.bT;
+                if(this.bT <= 0) {
+                    this.bOn = false;
                     document.getElementById('mini-bonus').style.display = 'none';
                 }
             }
         },
 
-        claimBonus() {
+        takeBonus() {
             const ad = Adsgram.init({ blockId: "19969" });
             ad.show().then(() => {
-                const amount = Math.floor(5000 + (this.data.bal * 0.15));
-                this.data.bal += amount;
-                this.isBonusLive = false;
+                const amt = Math.floor(5000 + (this.d.bal * 0.1));
+                this.d.bal += amt;
+                this.bOn = false;
                 document.getElementById('mini-bonus').style.display = 'none';
-                this.cloudSave();
+                this.save();
             }).catch(() => { this.tg.showAlert("Реклама не готова"); });
         },
 
-        showAd(type) {
+        ad(type) {
             const ad = Adsgram.init({ blockId: "19969" });
             ad.show().then(() => {
                 if(type === 'boost') {
-                    this.data.mult = 3.0;
-                    setTimeout(() => { this.data.mult = 1.0; }, 30000);
-                    this.tg.showAlert("ФОРСАЖ x3 ВКЛЮЧЕН!");
+                    this.d.m = 3;
+                    setTimeout(() => { this.d.m = 1; }, 30000);
+                    this.tg.showAlert("ФОРСАЖ x3!");
                 }
-                this.cloudSave();
+                this.save();
             });
         },
 
-        doExchange() {
-            if(this.data.bal >= 100000) {
-                this.data.bal -= 100000;
-                this.data.gold += 1;
-                this.data.upg = [0,0,0,0];
-                this.data.pwr = 1.0;
-                this.data.lvl = 1;
-                this.data.xp = 0;
-                this.cloudSave();
-                this.tg.showAlert("Слиток получен! Инструменты сброшены.");
-                UI.drawShop();
-            } else {
-                this.tg.showAlert("Нужно минимум 100,000 💎");
+        exchange() {
+            if(this.d.bal >= 100000) {
+                this.d.bal -= 100000; this.d.gold++;
+                this.d.u = [0,0,0,0]; this.d.pwr = 1.0; this.d.lvl = 1;
+                this.save(); UI.drawShop();
+                this.tg.showAlert("Золото получено!");
             }
         },
 
-        doWithdraw() {
-            this.tg.showPopup({
-                title: "Вывод средств",
-                message: `У вас ${this.data.gold} 💰. Желаете перевести на баланс бота?`,
-                buttons: [{id: 'send', type: 'default', text: 'Подать заявку'}]
-            }, (btn) => {
-                if(btn === 'send') this.tg.showAlert("Заявка принята! Ожидайте обработки.");
-            });
+        loop() {
+            document.getElementById('ui-bal').innerText = Math.floor(this.d.bal).toLocaleString();
+            document.getElementById('ui-gold').innerText = this.d.gold;
+            document.getElementById('ui-pwr').innerText = (this.d.pwr * this.d.m).toFixed(1);
+            document.getElementById('ui-lvl').innerText = this.d.lvl;
+            document.getElementById('withdraw-ui').style.display = this.d.gold >= 1 ? 'block' : 'none';
+            requestAnimationFrame(() => this.loop());
         },
 
-        renderFrame() {
-            document.getElementById('main-bal').innerText = Math.floor(this.data.bal).toLocaleString();
-            document.getElementById('gold-bal').innerText = this.data.gold;
-            document.getElementById('pwr-display').innerText = (this.data.pwr * this.data.mult).toFixed(1);
-            document.getElementById('lvl-display').innerText = this.data.lvl;
-
-            // Кнопка вывода
-            document.getElementById('withdraw-container').style.display = this.data.gold >= 1 ? 'block' : 'none';
-
-            requestAnimationFrame(() => this.renderFrame());
-        },
-
-        cloudSave() {
-            this.data.lastSave = Date.now();
-            const payload = JSON.parse(JSON.stringify(this.data));
-            localStorage.setItem('locus_gold_v6_' + this.uid, JSON.stringify(payload));
-            this.db.collection('players').doc(this.uid).set(payload, {merge: true}).catch(e => {});
+        save() {
+            this.validate();
+            localStorage.setItem('loc_v7_' + this.uid, JSON.stringify(this.d));
+            this.db.collection('players').doc(this.uid).set(this.d, {merge: true}).catch(() => {});
         },
 
         buy(i) {
-            const itm = this.shop[i];
-            const cost = Math.floor(itm.p * Math.pow(1.9, this.data.upg[i]));
-            if(this.data.bal >= cost) {
-                this.data.bal -= cost;
-                this.data.upg[i]++;
-                this.data.pwr = parseFloat(this.data.pwr) + itm.b;
-                this.cloudSave();
-                UI.drawShop();
-            } else {
-                this.tg.showAlert("Недостаточно кристаллов!");
+            const itm = this.items[i];
+            const lvl = this.d.u[i] || 0;
+            const cost = Math.floor(itm.p * Math.pow(1.9, lvl));
+            if(this.d.bal >= cost) {
+                this.d.bal -= cost;
+                this.d.u[i]++;
+                this.d.pwr += itm.b;
+                this.save(); UI.drawShop();
             }
         },
 
         invite() {
             const link = `https://t.me/Locus_Gold_bot/app?startapp=${this.uid}`;
-            this.tg.openTelegramLink(`https://t.me/share/url?url=${link}&text=Помоги мне добыть золото в Locus!`);
+            this.tg.openTelegramLink(`https://t.me/share/url?url=${link}&text=Забирай дроп!`);
         }
     };
 
     const UI = {
-        current: 'main',
-        switch(id, el) {
-            this.current = id;
+        cur: 'main',
+        go(id, el) {
+            this.cur = id;
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             el.classList.add('active');
             if(id !== 'main') {
-                const screen = document.getElementById('scr-' + id);
-                if(screen) screen.classList.add('active');
+                document.getElementById('scr-' + id).classList.add('active');
                 if(id === 'shop') this.drawShop();
             }
         },
         drawShop() {
-            const container = document.getElementById('shop-items-list');
-            container.innerHTML = GameCore.shop.map((item, i) => {
-                const cost = Math.floor(item.p * Math.pow(1.9, GameCore.data.upg[i]));
-                return `
-                <div class="item-card" onclick="GameCore.buy(${i})">
-                    <div class="item-info">
-                        <b>${item.n} [${GameCore.data.upg[i]}]</b>
-                        <small>+${item.b} к клику</small>
-                    </div>
+            const list = document.getElementById('shop-content');
+            list.innerHTML = Game.items.map((itm, i) => {
+                const lvl = Game.d.u[i] || 0;
+                const cost = Math.floor(itm.p * Math.pow(1.9, lvl));
+                return `<div class="card-item" onclick="Game.buy(${i})">
+                    <div class="card-info"><b>${itm.n} [${lvl}]</b><small>+${itm.b} к клику</small></div>
                     <div style="font-weight:900; color:var(--gold)">${cost.toLocaleString()} 💎</div>
                 </div>`;
             }).join('');
         }
     };
 
-    const Visuals = {
-        canvas: document.getElementById('fx-layer'),
-        ctx: null,
-        pops: [],
-        init() {
-            this.ctx = this.canvas.getContext('2d');
-            this.canvas.width = window.innerWidth;
-            this.canvas.height = window.innerHeight;
-            this.loop();
-        },
-        spawn(x, y, txt) {
-            this.pops.push({ x, y, txt, a: 1.0, v: 2 });
-        },
-        loop() {
-            this.ctx.clearRect(0,0,this.canvas.width,this.canvas.height);
+    const FX = {
+        c: document.getElementById('fx-canvas'), ctx: null, p: [],
+        init() { this.ctx = this.c.getContext('2d'); this.res(); window.onresize = () => this.res(); this.anim(); },
+        res() { this.c.width = window.innerWidth; this.c.height = window.innerHeight; },
+        pop(x, y, t) { this.p.push({ x, y, t, a: 1 }); },
+        anim() {
+            this.ctx.clearRect(0,0,this.c.width,this.c.height);
             this.ctx.font = "bold 26px Inter";
-            for(let i=this.pops.length-1; i>=0; i--) {
-                const p = this.pops[i];
-                p.y -= p.v; p.a -= 0.02;
+            for(let i=this.p.length-1; i>=0; i--) {
+                let p = this.p[i]; p.y -= 2.5; p.a -= 0.025;
                 this.ctx.fillStyle = `rgba(0, 212, 255, ${p.a})`;
-                this.ctx.fillText(p.txt, p.x - 20, p.y);
-                if(p.a <= 0) this.pops.splice(i, 1);
+                this.ctx.fillText(p.t, p.x - 20, p.y);
+                if(p.a <= 0) this.p.splice(i, 1);
             }
-            requestAnimationFrame(() => this.loop());
+            requestAnimationFrame(() => this.anim());
         }
     };
 
-    // Глобальная обработка ошибок для предотвращения вылетов
-    window.onerror = function() { return true; };
-
-    window.onload = () => GameCore.init();
+    window.onload = () => Game.init();
     </script>
 </body>
 </html>
