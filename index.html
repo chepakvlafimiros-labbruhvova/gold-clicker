@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Locus Nebula: Crystal Miner</title>
+    <title>Locus Gold: Nebula Elite</title>
     
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -11,245 +11,739 @@
     <script src="https://sad.adsgram.ai/js/sad.min.js"></script>
 
     <style>
+        /* Переменные дизайна */
         :root {
-            --bg-deep: #0a0a0c;
-            --glass: rgba(255, 255, 255, 0.05);
-            --accent: #00d4ff;
-            --gold: #ffcc00;
-            --text: #e0e0e0;
-            --safe-bottom: env(safe-area-inset-bottom);
+            --p-color: #00d4ff;
+            --p-color-deep: #0055ff;
+            --accent-gold: #ffcc00;
+            --danger: #ff3b30;
+            --bg-dark: #050507;
+            --card-bg: rgba(255, 255, 255, 0.03);
+            --border: rgba(255, 255, 255, 0.08);
+            --safe-area: env(safe-area-inset-bottom);
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', -apple-system, sans-serif; -webkit-tap-highlight-color: transparent; }
-        body { background: var(--bg-deep); color: var(--text); height: 100vh; overflow: hidden; position: fixed; width: 100%; }
-
-        .app-container { height: 100%; display: flex; flex-direction: column; padding: 20px; }
-
-        .header-stats { text-align: center; margin-bottom: 20px; }
-        .main-balance { font-size: 42px; font-weight: 800; color: #fff; text-shadow: 0 0 15px rgba(0,212,255,0.4); }
-        .lvl-info { display: flex; justify-content: space-between; font-size: 11px; color: var(--accent); font-weight: bold; margin-bottom: 4px; }
-        .lvl-bar { width: 100%; height: 10px; background: #1a1a1a; border-radius: 5px; overflow: hidden; border: 1px solid #333; position: relative; }
-        .lvl-progress { height: 100%; background: linear-gradient(90deg, #00d4ff, #0055ff); width: 0%; transition: width 0.1s linear; }
-
-        .game-world { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .crystal-container { position: relative; width: 220px; height: 220px; cursor: pointer; }
-        .crystal {
-            width: 100%; height: 100%; background: linear-gradient(135deg, #00d4ff, #0055ff);
-            clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
-            display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 0 50px rgba(0, 212, 255, 0.2); transition: transform 0.05s;
+        /* Общие стили */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
         }
-        .crystal:active { transform: scale(0.90); }
-        .crystal-icon { font-size: 80px; filter: drop-shadow(0 0 10px rgba(0,0,0,0.3)); user-select: none; }
 
-        /* Таймер буста */
-        #boost-timer { color: #ff3b30; font-weight: bold; display: none; margin-top: 10px; font-size: 14px; }
+        body {
+            background-color: var(--bg-dark);
+            color: #fff;
+            height: 100vh;
+            overflow: hidden;
+            position: fixed;
+            width: 100%;
+        }
 
-        .action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 80px; }
-        .card { background: var(--glass); border: 1px solid rgba(255,255,255,0.1); padding: 15px; border-radius: 16px; text-align: center; }
-        .card b { display: block; font-size: 16px; margin-bottom: 4px; color: #fff; }
-        .card span { font-size: 10px; color: #888; text-transform: uppercase; }
+        /* Фоновое свечение */
+        .ambient-light {
+            position: absolute;
+            width: 150vw;
+            height: 150vw;
+            background: radial-gradient(circle, rgba(0, 212, 255, 0.05) 0%, transparent 70%);
+            top: -50%;
+            left: -25%;
+            z-index: -1;
+            pointer-events: none;
+            transition: background 1s;
+        }
 
-        .btn-boost { background: linear-gradient(90deg, #ff9d00, #ff5e00); color: #fff; font-weight: 800; border: none; grid-column: span 2; padding: 16px; border-radius: 14px; font-size: 14px; }
-        .btn-boost.active-mode { background: #111; border: 2px solid #ff9d00; color: #ff9d00; }
+        .rage-mode-bg {
+            background: radial-gradient(circle, rgba(255, 100, 0, 0.1) 0%, transparent 70%);
+        }
 
-        .navbar { position: fixed; bottom: 0; left: 0; right: 0; height: calc(65px + var(--safe-bottom)); background: #0f0f14; display: flex; border-top: 1px solid #222; padding-bottom: var(--safe-bottom); }
-        .nav-link { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #555; text-decoration: none; font-size: 10px; }
-        .nav-link.active { color: var(--accent); }
+        /* Основной контейнер */
+        .app {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            padding: 20px 20px calc(85px + var(--safe-area));
+        }
 
-        .screen { position: fixed; inset: 0; background: var(--bg-deep); z-index: 100; display: none; padding: 20px 20px 100px 20px; overflow-y: auto; }
-        .screen.active { display: block; }
-        .list-entry { background: var(--glass); padding: 18px; border-radius: 16px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; border: 1px solid rgba(255,255,255,0.05); }
+        /* Хедер и прогресс */
+        .header {
+            text-align: center;
+            padding-top: 10px;
+        }
 
-        .floating-text { position: absolute; pointer-events: none; color: var(--accent); font-weight: 900; animation: floatUp 0.6s ease-out forwards; font-size: 26px; z-index: 500; }
-        @keyframes floatUp { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-100px); } }
+        .balance-container {
+            margin-bottom: 25px;
+        }
+
+        .balance-label {
+            font-size: 12px;
+            color: rgba(255,255,255,0.4);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 5px;
+        }
+
+        .balance-value {
+            font-size: 48px;
+            font-weight: 900;
+            background: linear-gradient(to bottom, #fff, #888);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        /* Дизайнерская шкала уровня */
+        .level-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            padding: 15px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .level-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 10px;
+        }
+
+        .level-name {
+            font-weight: 800;
+            color: var(--p-color);
+            font-size: 14px;
+            text-transform: uppercase;
+        }
+
+        .level-badge {
+            background: rgba(0, 212, 255, 0.1);
+            color: var(--p-color);
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-size: 10px;
+            font-weight: 900;
+        }
+
+        .progress-track {
+            width: 100%;
+            height: 12px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--p-color-deep), var(--p-color));
+            box-shadow: 0 0 20px var(--p-color);
+            transition: width 0.2s cubic-bezier(0.17, 0.67, 0.83, 0.67);
+            position: relative;
+        }
+
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            animation: shine 2s infinite;
+        }
+
+        @keyframes shine {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        /* Игровая зона */
+        .game-main {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .crystal-wrapper {
+            position: relative;
+            z-index: 10;
+            transition: transform 0.1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .crystal-node {
+            width: 240px;
+            height: 240px;
+            background: linear-gradient(135deg, var(--p-color), var(--p-color-deep));
+            clip-path: polygon(50% 0%, 95% 25%, 95% 75%, 50% 100%, 5% 75%, 5% 25%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            box-shadow: 0 0 60px rgba(0, 212, 255, 0.3);
+            cursor: pointer;
+        }
+
+        .crystal-node::before {
+            content: '';
+            position: absolute;
+            inset: 5px;
+            background: rgba(0,0,0,0.2);
+            clip-path: inherit;
+            z-index: 1;
+        }
+
+        .crystal-inner {
+            font-size: 90px;
+            z-index: 2;
+            filter: drop-shadow(0 0 20px rgba(0,0,0,0.5));
+        }
+
+        /* Кнопки и сетка */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .stat-item {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            padding: 16px;
+            border-radius: 20px;
+            text-align: center;
+            transition: all 0.2s;
+        }
+
+        .stat-item:active {
+            transform: scale(0.95);
+            background: rgba(255,255,255,0.05);
+        }
+
+        .stat-label {
+            display: block;
+            font-size: 10px;
+            color: rgba(255,255,255,0.3);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 18px;
+            font-weight: 800;
+            color: #fff;
+        }
+
+        .boost-button {
+            grid-column: span 2;
+            height: 60px;
+            border-radius: 20px;
+            border: none;
+            background: linear-gradient(135deg, #ff9d00, #ff5e00);
+            color: #fff;
+            font-weight: 900;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 10px 20px rgba(255, 94, 0, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.3s;
+        }
+
+        .boost-button:disabled {
+            filter: grayscale(1);
+            opacity: 0.5;
+            transform: scale(1) !important;
+        }
+
+        .boost-button:active {
+            transform: translateY(2px) scale(0.98);
+            box-shadow: 0 5px 10px rgba(255, 94, 0, 0.1);
+        }
+
+        /* Навигация */
+        .nav-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: calc(75px + var(--safe-area));
+            background: rgba(10, 10, 12, 0.95);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid var(--border);
+            display: flex;
+            padding: 0 10px var(--safe-area);
+            z-index: 1000;
+        }
+
+        .nav-tab {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: rgba(255,255,255,0.3);
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .nav-tab.active {
+            color: var(--p-color);
+        }
+
+        .nav-tab.active::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            width: 30px;
+            height: 3px;
+            background: var(--p-color);
+            border-radius: 0 0 10px 10px;
+            box-shadow: 0 0 15px var(--p-color);
+        }
+
+        .nav-icon {
+            font-size: 24px;
+            margin-bottom: 4px;
+        }
+
+        .nav-text {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        /* Всплывающие экраны */
+        .screen {
+            position: fixed;
+            inset: 0;
+            background: var(--bg-dark);
+            z-index: 500;
+            display: none;
+            padding: 30px 20px 100px;
+            animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        .screen-header {
+            font-size: 28px;
+            font-weight: 900;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        /* Список улучшений */
+        .upgrade-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            padding: 20px;
+            border-radius: 24px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .upg-info h4 {
+            font-size: 16px;
+            margin-bottom: 4px;
+        }
+
+        .upg-info p {
+            font-size: 12px;
+            color: rgba(255,255,255,0.4);
+        }
+
+        .upg-price {
+            background: #fff;
+            color: #000;
+            padding: 10px 15px;
+            border-radius: 12px;
+            font-weight: 800;
+            font-size: 14px;
+        }
+
+        /* Эффекты при клике */
+        .click-vfx {
+            position: absolute;
+            pointer-events: none;
+            color: var(--p-color);
+            font-weight: 900;
+            font-size: 28px;
+            z-index: 1000;
+            animation: vfxFly 0.7s forwards ease-out;
+            text-shadow: 0 0 10px rgba(0,212,255,0.5);
+        }
+
+        @keyframes vfxFly {
+            0% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+            100% { opacity: 0; transform: translate(-50%, -150px) scale(1.5); }
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: var(--p-color);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 999;
+            animation: partFly 0.5s forwards;
+        }
+
+        @keyframes partFly {
+            to { transform: translate(var(--twx), var(--twy)); opacity: 0; }
+        }
     </style>
 </head>
 <body>
 
-    <div class="app-container">
-        <header class="header-stats">
-            <div class="main-balance" id="val-bal">0</div>
-            <div id="boost-timer">КВАНТОВЫЙ ПРЫЖОК (x3): 00:30</div>
-            <div class="lvl-info">
-                <span id="val-lvl-name">Космический кадет</span>
-                <span id="val-lvl-num">Ур. 1</span>
+    <div class="ambient-light" id="ambient"></div>
+
+    <div class="app">
+        <header class="header">
+            <div class="balance-container">
+                <p class="balance-label">Кристаллы Небулы</p>
+                <h1 class="balance-value" id="ui-balance">0</h1>
             </div>
-            <div class="lvl-bar"><div class="lvl-progress" id="val-prog"></div></div>
+
+            <div class="level-card">
+                <div class="level-header">
+                    <span class="level-name" id="ui-lvl-name">Загрузка...</span>
+                    <span class="level-badge" id="ui-lvl-num">LVL 1</span>
+                </div>
+                <div class="progress-track">
+                    <div class="progress-fill" id="ui-progress"></div>
+                </div>
+            </div>
         </header>
 
-        <main class="game-world">
-            <div class="crystal-container" id="tap-zone">
-                <div class="crystal"><span class="crystal-icon">💎</span></div>
+        <main class="game-main">
+            <div class="crystal-wrapper" id="tap-target">
+                <div class="crystal-node">
+                    <span class="crystal-inner">💎</span>
+                </div>
             </div>
         </main>
 
-        <section class="action-grid">
-            <div class="card"><span>За клик</span><b id="val-pwr">1.0</b></div>
-            <div class="card"><span>Авто-сбор</span><b id="val-dps">0.0</b></div>
-            <button class="btn-boost" id="ad-btn" onclick="Engine.showRewardAd()">🔥 УСКОРЕНИЕ x3 (РЕКЛАМА)</button>
-        </section>
+        <footer class="stats-grid">
+            <div class="stat-item">
+                <span class="stat-label">Мощность</span>
+                <span class="stat-value" id="ui-pwr">1.0</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Авто-добыча</span>
+                <span class="stat-value" id="ui-dps">0.0</span>
+            </div>
+            <button class="boost-button" id="ui-boost-btn" onclick="Game.activateRage()">
+                <span>⚡</span> КВАНТОВЫЙ ПРЫЖОК (x3)
+            </button>
+        </footer>
     </div>
 
-    <div class="screen" id="scr-upg">
-        <h2 style="margin-bottom: 20px; text-align: center;">Технологии Небулы</h2>
-        <div class="list-entry" onclick="Engine.buyUpg('pwr')">
-            <div><b>Лазерный бур</b><br><small>+0.5 за клик</small></div>
-            <b id="cost-pwr">100 💎</b>
+    <div class="screen" id="screen-upgrades">
+        <h2 class="screen-header">Технологии</h2>
+        <div id="upgrades-list">
+            </div>
+    </div>
+
+    <div class="screen" id="screen-friends">
+        <h2 class="screen-header">Экипаж</h2>
+        <div class="level-card" style="margin-bottom: 20px; text-align: center;">
+            <p style="margin-bottom: 15px; color: rgba(255,255,255,0.6);">Приглашайте друзей и получайте 15% от их добычи в реальном времени!</p>
+            <button class="boost-button" onclick="Game.shareLink()">ПРИГЛАСИТЬ ДРУГА</button>
         </div>
-        <div class="list-entry" onclick="Engine.buyUpg('dps')">
-            <div><b>Бот-сборщик</b><br><small>+1.0/сек</small></div>
-            <b id="cost-dps">500 💎</b>
+        <div id="friends-list"></div>
+    </div>
+
+    <nav class="nav-bar">
+        <div class="nav-tab active" onclick="UI.switchTab('main', this)">
+            <span class="nav-icon">🛸</span>
+            <span class="nav-text">Добыча</span>
         </div>
-    </div>
-
-    <div class="screen" id="scr-ref">
-        <h2 style="margin-bottom: 20px; text-align: center;">Команда шахтеров</h2>
-        <button class="btn-boost" onclick="Engine.copyRef()">ПРИГЛАСИТЬ НАПАРНИКА</button>
-    </div>
-
-    <nav class="navbar">
-        <div class="nav-link active" onclick="UI.go('main', this)"><i>🛸</i><span>Добыча</span></div>
-        <div class="nav-link" onclick="UI.go('upg', this)"><i>🛠️</i><span>Апгрейды</span></div>
-        <div class="nav-link" onclick="UI.go('ref', this)"><i>👥</i><span>Друзья</span></div>
+        <div class="nav-tab" onclick="UI.switchTab('upgrades', this)">
+            <span class="nav-icon">🛠️</span>
+            <span class="nav-text">Апгрейды</span>
+        </div>
+        <div class="nav-tab" onclick="UI.switchTab('friends', this)">
+            <span class="nav-icon">👥</span>
+            <span class="nav-text">Друзья</span>
+        </div>
     </nav>
 
     <script>
-        const Engine = {
-            state: { bal: 0, pwr: 1, dps: 0, xp: 0, lvl: 1, uid: "0", boost: 1 },
-            levels: [
-                "Космический кадет", "Сборщик пыли", "Лунный старатель", "Марсианский барон", 
-                "Мастер Сатурна", "Искатель черных дыр", "Звездный император", "Повелитель Небулы",
-                "Кристальный бог", "Вне времени"
-            ],
-            tg: window.Telegram.WebApp,
-            
-            init() {
-                this.tg.expand();
-                this.state.uid = this.tg.initDataUnsafe?.user?.id || "dev_user";
-                this.load();
-                this.render();
-                this.loop();
-
-                // Мгновенное срабатывание шкалы при нажатии (pointerdown)
-                document.getElementById('tap-zone').addEventListener('pointerdown', (e) => {
-                    this.tap(e);
-                });
-
-                setInterval(() => this.save(), 5000);
-            },
-
-            tap(e) {
-                const clickPower = this.state.pwr * this.state.boost;
-                this.state.bal += clickPower;
-                this.state.xp += 10; // Опыт за клик
-                
-                this.checkLvl();
-                this.spawn(e.clientX, e.clientY, `+${clickPower.toFixed(1)}`);
-                this.render();
-                if(this.tg.HapticFeedback) this.tg.HapticFeedback.impactOccurred('light');
-            },
-
-            checkLvl() {
-                let xpNeeded = this.state.lvl * 500;
-                if(this.state.xp >= xpNeeded) {
-                    this.state.xp = 0;
-                    this.state.lvl++;
-                    this.tg.showAlert(`🚀 Вы достигли статуса: ${this.levels[this.state.lvl-1] || "Легенда"}`);
+        /**
+         * ENGINE: ОСНОВНАЯ ЛОГИКА ИГРЫ
+         */
+        const Game = {
+            data: {
+                balance: 0,
+                power: 1,
+                dps: 0,
+                xp: 0,
+                level: 1,
+                multiplier: 1,
+                isRage: false,
+                upgrades: {
+                    click: 0,
+                    auto: 0
                 }
             },
 
-            showRewardAd() {
-                const ad = Adsgram.init({ blockId: "19895" }); // Замените на ваш ID
-                ad.show().then(() => {
-                    this.activateBoost();
-                }).catch(() => {
-                    this.tg.showAlert("Реклама не загрузилась, но мы дали вам бонус за попытку!");
-                    this.activateBoost(); // Для теста можно оставить
-                });
+            titles: [
+                "Новичок Пустоты", "Звездный Пылевик", "Лунный Шахтер", 
+                "Марсианский Техник", "Мастер Сатурна", "Искатель Нептуна", 
+                "Командор Галактики", "Лорд Небулы", "Звездный Бог"
+            ],
+
+            init() {
+                this.load();
+                this.setupListeners();
+                this.startAutoMiner();
+                this.render();
+                Telegram.WebApp.ready();
             },
 
-            activateBoost() {
-                if(this.state.boost > 1) return;
-                this.state.boost = 3;
-                let timeLeft = 30;
-                const btn = document.getElementById('ad-btn');
-                const timerLabel = document.getElementById('boost-timer');
+            setupListeners() {
+                const target = document.getElementById('tap-target');
                 
-                btn.disabled = true;
-                btn.classList.add('active-mode');
-                timerLabel.style.display = 'block';
+                // Обработка клика (Multi-touch поддержка)
+                const handleTap = (e) => {
+                    e.preventDefault();
+                    const touches = e.changedTouches ? e.changedTouches : [e];
+                    
+                    for (let i = 0; i < touches.length; i++) {
+                        this.processClick(touches[i].clientX, touches[i].clientY);
+                    }
+                };
 
-                const countdown = setInterval(() => {
-                    timeLeft--;
-                    timerLabel.innerText = `КВАНТОВЫЙ ПРЫЖОК (x3): 00:${timeLeft < 10 ? '0'+timeLeft : timeLeft}`;
-                    if(timeLeft <= 0) {
-                        clearInterval(countdown);
-                        this.state.boost = 1;
-                        btn.disabled = false;
-                        btn.classList.remove('active-mode');
-                        timerLabel.style.display = 'none';
+                target.addEventListener('pointerdown', handleTap);
+            },
+
+            processClick(x, y) {
+                const gain = this.data.power * this.data.multiplier;
+                this.data.balance += gain;
+                this.data.xp += 10;
+                
+                this.checkLevelUp();
+                this.vfx(x, y, `+${gain.toFixed(1)}`);
+                this.animateCrystal();
+                this.render();
+                
+                if (window.Telegram && Telegram.WebApp.HapticFeedback) {
+                    Telegram.WebApp.HapticFeedback.impactOccurred('light');
+                }
+            },
+
+            checkLevelUp() {
+                const needed = this.data.level * 1000;
+                if (this.data.xp >= needed) {
+                    this.data.xp = 0;
+                    this.data.level++;
+                    Telegram.WebApp.showAlert(`✨ УРОВЕНЬ ПОВЫШЕН! \nТеперь вы: ${this.titles[this.data.level-1] || "Легенда Вселенной"}`);
+                    this.save();
+                }
+            },
+
+            activateRage() {
+                if (this.data.isRage) return;
+
+                // Запуск рекламы через Adsgram
+                const AdController = window.Adsgram ? Adsgram.init({ blockId: "YOUR_ID" }) : null;
+                
+                const startRage = () => {
+                    this.data.isRage = true;
+                    this.data.multiplier = 3;
+                    document.getElementById('ambient').classList.add('rage-mode-bg');
+                    document.getElementById('ui-boost-btn').disabled = true;
+                    
+                    let timeLeft = 30;
+                    const interval = setInterval(() => {
+                        timeLeft--;
+                        document.getElementById('ui-boost-btn').innerText = `ЯРОСТЬ: ${timeLeft}s`;
+                        
+                        if (timeLeft <= 0) {
+                            clearInterval(interval);
+                            this.data.isRage = false;
+                            this.data.multiplier = 1;
+                            document.getElementById('ambient').classList.remove('rage-mode-bg');
+                            document.getElementById('ui-boost-btn').disabled = false;
+                            document.getElementById('ui-boost-btn').innerHTML = `<span>⚡</span> КВАНТОВЫЙ ПРЫЖОК (x3)`;
+                            this.render();
+                        }
+                    }, 1000);
+                };
+
+                if (AdController) {
+                    AdController.show().then(startRage).catch(() => {
+                        Telegram.WebApp.showAlert("Реклама не готова, но мы дарим вам бонус!");
+                        startRage();
+                    });
+                } else {
+                    startRage(); // Тестовый режим
+                }
+            },
+
+            buyUpgrade(type) {
+                const costs = {
+                    click: Math.floor(100 * Math.pow(1.5, this.data.upgrades.click)),
+                    auto: Math.floor(500 * Math.pow(1.6, this.data.upgrades.auto))
+                };
+
+                if (this.data.balance >= costs[type]) {
+                    this.data.balance -= costs[type];
+                    if (type === 'click') {
+                        this.data.upgrades.click++;
+                        this.data.power += 0.5;
+                    } else {
+                        this.data.upgrades.auto++;
+                        this.data.dps += 1.2;
+                    }
+                    this.save();
+                    this.render();
+                    UI.renderUpgrades();
+                    Telegram.WebApp.HapticFeedback.notificationOccurred('success');
+                } else {
+                    Telegram.WebApp.showAlert("Недостаточно ресурсов!");
+                }
+            },
+
+            startAutoMiner() {
+                setInterval(() => {
+                    if (this.data.dps > 0) {
+                        this.data.balance += this.data.dps / 10;
                         this.render();
                     }
-                }, 1000);
+                }, 100);
             },
 
             render() {
-                document.getElementById('val-bal').innerText = Math.floor(this.state.bal).toLocaleString();
-                document.getElementById('val-pwr').innerText = (this.state.pwr * this.state.boost).toFixed(1);
-                document.getElementById('val-dps').innerText = this.state.dps.toFixed(1);
+                document.getElementById('ui-balance').innerText = Math.floor(this.data.balance).toLocaleString();
+                document.getElementById('ui-pwr').innerText = (this.data.power * this.data.multiplier).toFixed(1);
+                document.getElementById('ui-dps').innerText = this.data.dps.toFixed(1);
                 
-                // Названия уровней
-                document.getElementById('val-lvl-name').innerText = this.levels[this.state.lvl-1] || "Космический скиталец";
-                document.getElementById('val-lvl-num').innerText = `Ур. ${this.state.lvl}`;
+                const lvlIdx = Math.min(this.data.level - 1, this.titles.length - 1);
+                document.getElementById('ui-lvl-name').innerText = this.titles[lvlIdx];
+                document.getElementById('ui-lvl-num').innerText = `LVL ${this.data.level}`;
                 
-                // Апгрейды
-                document.getElementById('cost-pwr').innerText = Math.floor(this.state.pwr * 250) + " 💎";
-                document.getElementById('cost-dps').innerText = Math.floor((this.state.dps + 1) * 600) + " 💎";
-                
-                // Прогресс-бар
-                let xpNeeded = this.state.lvl * 500;
-                let perc = (this.state.xp / xpNeeded) * 100;
-                document.getElementById('val-prog').style.width = perc + "%";
+                const needed = this.data.level * 1000;
+                const progress = (this.data.xp / needed) * 100;
+                document.getElementById('ui-progress').style.width = `${progress}%`;
             },
 
-            // Вспомогательные функции
-            loop() { setInterval(() => { if(this.state.dps > 0) { this.state.bal += this.state.dps / 10; this.render(); } }, 100); },
-            spawn(x, y, txt) {
+            vfx(x, y, text) {
+                // Текст
                 const el = document.createElement('div');
-                el.className = 'floating-text';
-                if(this.state.boost > 1) el.style.color = '#ff9d00';
-                el.innerText = txt;
-                el.style.left = x + 'px'; el.style.top = y + 'px';
+                el.className = 'click-vfx';
+                el.style.left = `${x}px`;
+                el.style.top = `${y}px`;
+                el.innerText = text;
+                if(this.data.isRage) el.style.color = 'var(--accent-gold)';
                 document.body.appendChild(el);
-                setTimeout(() => el.remove(), 600);
+                setTimeout(() => el.remove(), 700);
+
+                // Частицы
+                for(let i=0; i<5; i++) {
+                    const p = document.createElement('div');
+                    p.className = 'particle';
+                    p.style.left = `${x}px`;
+                    p.style.top = `${y}px`;
+                    const tx = (Math.random() - 0.5) * 200;
+                    const ty = (Math.random() - 0.5) * 200;
+                    p.style.setProperty('--twx', `${tx}px`);
+                    p.style.setProperty('--twy', `${ty}px`);
+                    document.body.appendChild(p);
+                    setTimeout(() => p.remove(), 500);
+                }
             },
-            save() { localStorage.setItem('locus_nebula_save', JSON.stringify(this.state)); },
-            load() { const data = localStorage.getItem('locus_nebula_save'); if(data) this.state = {...this.state, ...JSON.parse(data)}; },
-            copyRef() { 
-                const link = `https://t.me/Locus_Gold_bot/app?startapp=${this.state.uid}`;
-                this.tg.openTelegramLink(`https://t.me/share/url?url=${link}&text=Давай добывать кристаллы вместе!`);
+
+            animateCrystal() {
+                const wrapper = document.getElementById('tap-target');
+                wrapper.style.transform = 'scale(0.92)';
+                setTimeout(() => wrapper.style.transform = 'scale(1)', 50);
             },
-            buyUpg(type) {
-                let cost = type === 'pwr' ? Math.floor(this.state.pwr * 250) : Math.floor((this.state.dps + 1) * 600);
-                if(this.state.bal >= cost) {
-                    this.state.bal -= cost;
-                    if(type === 'pwr') this.state.pwr += 0.5; else this.state.dps += 1.0;
-                    this.render(); this.save();
-                } else { this.tg.showAlert("Нужно больше ресурсов!"); }
+
+            save() {
+                localStorage.setItem('locus_v3_save', JSON.stringify(this.state));
+            },
+
+            load() {
+                const saved = localStorage.getItem('locus_v3_save');
+                if(saved) {
+                    const parsed = JSON.parse(saved);
+                    this.data = {...this.data, ...parsed};
+                }
+            },
+
+            shareLink() {
+                const uid = Telegram.WebApp.initDataUnsafe?.user?.id || "0";
+                const url = `https://t.me/YOUR_BOT/app?startapp=${uid}`;
+                Telegram.WebApp.openTelegramLink(`https://t.me/share/url?url=${url}&text=Стань лучшим шахтёром в Nebula Elite!`);
             }
         };
 
+        /**
+         * UI: УПРАВЛЕНИЕ ИНТЕРФЕЙСОМ
+         */
         const UI = {
-            go(id, el) {
-                document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-                document.querySelectorAll('.nav-link').forEach(n => n.classList.remove('active'));
-                if(id !== 'main') document.getElementById('scr-' + id).classList.add('active');
+            switchTab(screenId, el) {
+                // Навигация
+                document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
                 el.classList.add('active');
+
+                // Экраны
+                document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+                if(screenId !== 'main') {
+                    const target = document.getElementById(`screen-${screenId}`);
+                    target.classList.add('active');
+                }
+
+                if(screenId === 'upgrades') this.renderUpgrades();
+            },
+
+            renderUpgrades() {
+                const list = document.getElementById('upgrades-list');
+                const costs = {
+                    click: Math.floor(100 * Math.pow(1.5, Game.data.upgrades.click)),
+                    auto: Math.floor(500 * Math.pow(1.6, Game.data.upgrades.auto))
+                };
+
+                list.innerHTML = `
+                    <div class="upgrade-card" onclick="Game.buyUpgrade('click')">
+                        <div class="upg-info">
+                            <h4>Лазерный бур</h4>
+                            <p>+0.5 к силе клика (Ур. ${Game.data.upgrades.click})</p>
+                        </div>
+                        <div class="upg-price">${costs.click} 💎</div>
+                    </div>
+                    <div class="upgrade-card" onclick="Game.buyUpgrade('auto')">
+                        <div class="upg-info">
+                            <h4>Бот-сборщик</h4>
+                            <p>+1.2 кристаллов в сек (Ур. ${Game.data.upgrades.auto})</p>
+                        </div>
+                        <div class="upg-price">${costs.auto} 💎</div>
+                    </div>
+                `;
             }
         };
 
-        window.onload = () => Engine.init();
+        // Запуск
+        window.onload = () => Game.init();
     </script>
 </body>
 </html>
