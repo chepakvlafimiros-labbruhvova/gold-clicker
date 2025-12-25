@@ -90,6 +90,7 @@
         db: null, tg: window.Telegram.WebApp, uid: null,
         d: { bal: 0, gold: 0, pwr: 1.0, lvl: 1, u: [0,0,0,0], m: 1, history: [] },
         items: [{n:"Кирка",p:200,b:0.5},{n:"Дрель",p:1500,b:2.5},{n:"Плазма",p:12000,b:12},{n:"Бур",p:85000,b:65}],
+        adId: "19985", // НОВЫЙ РЕКЛАМНЫЙ ID
 
         async init() {
             this.tg.expand();
@@ -102,11 +103,9 @@
             });
             this.db = firebase.firestore();
 
-            // 1. Сначала берем из локалки (мгновенно)
             const local = localStorage.getItem('loc_v11_' + this.uid);
             if(local) this.apply(JSON.parse(local));
 
-            // 2. Затем из облака, но только если там прогресс больше
             try {
                 const snap = await this.db.collection('players').doc(this.uid).get();
                 if(snap.exists) {
@@ -120,13 +119,8 @@
 
             FX.init();
             document.getElementById('crystal').addEventListener('touchstart', (e) => this.tap(e), {passive: true});
-            
-            // Авто-сохранение в облако (раз в 15 сек)
             setInterval(() => this.saveCloud(), 15000);
-            
-            // Принудительное сохранение при закрытии/сворачивании
             document.addEventListener('visibilitychange', () => { if(document.hidden) this.saveCloud(); });
-
             this.loop();
         },
 
@@ -145,19 +139,11 @@
             this.d.bal += gain;
             FX.pop(e.touches[0].clientX, e.touches[0].clientY, `+${gain.toFixed(1)}`);
             if(this.tg.HapticFeedback) this.tg.HapticFeedback.impactOccurred('light');
-            this.saveLocal(); // В локалку - каждое нажатие
+            this.saveLocal();
         },
 
-        saveLocal() {
-            localStorage.setItem('loc_v11_' + this.uid, JSON.stringify(this.d));
-        },
-
-        async saveCloud() {
-            try {
-                await this.db.collection('players').doc(this.uid).set(this.d, {merge: true});
-                console.log("Cloud synced");
-            } catch(e) {}
-        },
+        saveLocal() { localStorage.setItem('loc_v11_' + this.uid, JSON.stringify(this.d)); },
+        async saveCloud() { try { await this.db.collection('players').doc(this.uid).set(this.d, {merge: true}); } catch(e) {} },
 
         exchange() {
             if(this.d.bal >= 100000) {
@@ -194,15 +180,14 @@
             }
         },
 
-        invite() {
-            this.tg.openTelegramLink(`https://t.me/share/url?url=https://t.me/Locus_Gold_bot/app?startapp=${this.uid}&text=Голду за клики!`);
-        },
+        invite() { this.tg.openTelegramLink(`https://t.me/share/url?url=https://t.me/Locus_Gold_bot/app?startapp=${this.uid}&text=Голду за клики!`); },
 
         ad(t) {
-            Adsgram.init({ blockId: "19969" }).show().then(() => {
+            const ad = Adsgram.init({ blockId: this.adId });
+            ad.show().then(() => {
                 if(t === 'boost') { this.d.m = 3; setTimeout(() => { this.d.m = 1; }, 30000); }
                 this.saveLocal(); this.saveCloud();
-            });
+            }).catch(() => { this.tg.showAlert("Реклама не готова"); });
         }
     };
 
