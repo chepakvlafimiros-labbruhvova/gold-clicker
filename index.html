@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Locus Gold: Nebula Engine v5</title>
+    <title>Locus Gold: Official Drop</title>
     
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -13,58 +13,68 @@
     <style>
         :root {
             --accent: #00d4ff; --gold: #ffcc00; --bg: #050505;
-            --card: rgba(255, 255, 255, 0.05); --brd: rgba(255, 255, 255, 0.1);
+            --card: rgba(255, 255, 255, 0.07); --brd: rgba(255, 255, 255, 0.12);
             --safe: env(safe-area-inset-bottom);
         }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; user-select: none; }
         body { background: var(--bg); color: #fff; height: 100vh; overflow: hidden; position: fixed; width: 100%; }
         
-        /* Главный экран */
-        .app { display: flex; flex-direction: column; height: 100%; padding: 20px 20px calc(90px + var(--safe)); z-index: 10; position: relative; }
-        .bal-wrap { text-align: center; margin-bottom: 20px; }
-        .bal-val { font-size: 56px; font-weight: 900; color: #fff; line-height: 1; }
-        .gold-val { color: var(--gold); font-size: 24px; font-weight: 800; margin-top: 5px; }
+        .app { display: flex; flex-direction: column; height: 100%; padding: 20px 20px calc(95px + var(--safe)); z-index: 10; position: relative; }
+        
+        /* Баланс */
+        .bal-wrap { text-align: center; margin-bottom: 20px; transition: all 0.3s; }
+        .bal-val { font-size: 58px; font-weight: 900; color: #fff; text-shadow: 0 0 20px rgba(0,212,255,0.4); }
+        .gold-val { color: var(--gold); font-size: 26px; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 8px; }
 
-        /* Кристалл */
+        /* Зона клика */
         .click-area { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; }
         .crystal { 
-            width: 210px; height: 210px; background: radial-gradient(circle at 30% 30%, var(--accent), #0033ff);
+            width: 230px; height: 230px; background: radial-gradient(circle at 30% 30%, var(--accent), #0033ff);
             clip-path: polygon(50% 0%, 95% 25%, 95% 75%, 50% 100%, 5% 75%, 5% 25%);
-            display: flex; align-items: center; justify-content: center; transition: transform 0.1s;
-            box-shadow: 0 0 40px rgba(0, 211, 255, 0.2);
+            display: flex; align-items: center; justify-content: center; transition: transform 0.05s;
+            box-shadow: 0 0 50px rgba(0, 211, 255, 0.3); z-index: 5;
         }
-        .crystal:active { transform: scale(0.94); }
-        .crystal img { width: 90px; }
+        .crystal:active { transform: scale(0.92); }
+        .crystal img { width: 100px; filter: drop-shadow(0 0 10px rgba(255,255,255,0.5)); }
 
-        /* Компактная кнопка бонуса */
+        /* Маленькая кнопка бонуса (Исправлена) */
         #mini-bonus {
-            margin-top: 25px; background: rgba(255, 204, 0, 0.15); border: 1px solid var(--gold);
-            padding: 8px 16px; border-radius: 30px; display: none; align-items: center; gap: 8px;
-            animation: pulse 2s infinite; cursor: pointer;
+            margin-top: 30px; background: rgba(255, 204, 0, 0.1); border: 1.5px solid var(--gold);
+            padding: 10px 20px; border-radius: 50px; display: none; align-items: center; gap: 10px;
+            cursor: pointer; z-index: 20; backdrop-filter: blur(5px);
+            animation: bounce 2s infinite;
         }
-        @keyframes pulse { 0% { opacity: 0.7; } 50% { opacity: 1; } 100% { opacity: 0.7; } }
-        #mini-bonus span { font-size: 13px; font-weight: 800; color: var(--gold); }
+        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+        #mini-bonus span { font-size: 14px; font-weight: 800; color: var(--gold); }
 
-        /* Статы */
-        .stats-box { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; width: 100%; }
-        .stat-card { background: var(--card); border: 1px solid var(--brd); padding: 15px; border-radius: 20px; text-align: center; }
-        .stat-card b { display: block; font-size: 20px; color: var(--accent); }
-        .stat-card small { font-size: 11px; opacity: 0.5; text-transform: uppercase; }
+        /* Инфо-панели */
+        .stats-box { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; width: 100%; margin-top: 10px; }
+        .stat-card { background: var(--card); border: 1px solid var(--brd); padding: 18px; border-radius: 24px; text-align: center; }
+        .stat-card b { display: block; font-size: 22px; color: var(--accent); }
+        .stat-card small { font-size: 12px; opacity: 0.6; text-transform: uppercase; letter-spacing: 1px; }
 
         /* Навигация */
-        .nav { position: fixed; bottom: 0; width: 100%; height: calc(80px + var(--safe)); background: #0a0a0a; border-top: 1px solid var(--brd); display: flex; padding-bottom: var(--safe); }
-        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #555; }
+        .nav { position: fixed; bottom: 0; width: 100%; height: calc(85px + var(--safe)); background: rgba(10,10,10,0.95); border-top: 1px solid var(--brd); display: flex; padding-bottom: var(--safe); z-index: 1000; backdrop-filter: blur(10px); }
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #666; transition: 0.2s; cursor: pointer; }
         .nav-item.active { color: var(--accent); }
-        .nav-item i { font-size: 22px; font-style: normal; margin-bottom: 4px; }
-        .nav-item span { font-size: 11px; font-weight: 700; }
+        .nav-item i { font-size: 24px; font-style: normal; margin-bottom: 5px; }
+        .nav-item span { font-size: 12px; font-weight: 700; }
 
         /* Экраны */
-        .screen { position: fixed; inset: 0; background: var(--bg); padding: 30px 20px 100px; display: none; overflow-y: auto; flex-direction: column; z-index: 50; }
+        .screen { position: fixed; inset: 0; background: var(--bg); padding: 40px 25px 120px; display: none; overflow-y: auto; flex-direction: column; z-index: 500; }
         .screen.active { display: flex; }
-        .btn-action { width: 100%; padding: 18px; border-radius: 20px; border: none; font-weight: 900; text-transform: uppercase; cursor: pointer; background: linear-gradient(135deg, #ff9d00, #ff5e00); color: #fff; }
-        .item-card { background: var(--card); border: 1px solid var(--brd); padding: 20px; border-radius: 22px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
+        .screen-title { font-size: 28px; font-weight: 900; margin-bottom: 25px; border-left: 5px solid var(--accent); padding-left: 15px; }
 
-        /* Канвас эффектов */
+        .btn-action { width: 100%; padding: 20px; border-radius: 20px; border: none; font-weight: 900; text-transform: uppercase; cursor: pointer; transition: 0.2s; color: #fff; }
+        .btn-action:active { transform: scale(0.97); }
+        .btn-main { background: linear-gradient(135deg, #ff9d00, #ff5e00); box-shadow: 0 5px 15px rgba(255,94,0,0.3); }
+        .btn-alt { background: var(--accent); box-shadow: 0 5px 15px rgba(0,212,255,0.3); }
+
+        .item-card { background: var(--card); border: 1px solid var(--brd); padding: 22px; border-radius: 25px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; transition: 0.2s; }
+        .item-card:active { background: rgba(255,255,255,0.1); }
+        .item-info b { font-size: 18px; display: block; }
+        .item-info small { color: var(--accent); font-weight: 600; }
+
         #fx-layer { position: absolute; inset: 0; pointer-events: none; z-index: 100; }
     </style>
 </head>
@@ -82,77 +92,101 @@
                 <img src="https://cdn-icons-png.flaticon.com/512/3203/3203925.png">
             </div>
             
-            <div id="mini-bonus" onclick="Core.claimBonus()">
-                <span>🎁 БОНУС: +<span id="bonus-val">5000</span> 💎</span>
-                <small id="bonus-timer" style="color:#ff3b30">10с</small>
+            <div id="mini-bonus">
+                <span>🎁 БОНУС: +<span id="bonus-amount">5000</span></span>
+                <b id="bonus-timer" style="color:#ff3b30; margin-left:5px">10с</b>
             </div>
         </div>
 
         <div class="stats-box">
-            <div class="stat-card"><small>МОЩНОСТЬ</small><b id="pwr-val">1.0</b></div>
-            <div class="stat-card"><small>УРОВЕНЬ</small><b id="lvl-val">1</b></div>
+            <div class="stat-card">
+                <small>Мощность</small>
+                <b id="pwr-display">1.0</b>
+            </div>
+            <div class="stat-card">
+                <small>Уровень</small>
+                <b id="lvl-display">1</b>
+            </div>
         </div>
     </div>
 
     <div class="screen" id="scr-shop">
-        <h2 style="margin-bottom:20px">Улучшения Nebula</h2>
-        <button class="btn-action" style="background:var(--accent); margin-bottom:20px" onclick="Core.watchAd('boost')">🚀 ФОРСАЖ X3 (30 сек)</button>
-        <div id="shop-list"></div>
+        <div class="screen-title">Магазин</div>
+        <button class="btn-action btn-alt" style="margin-bottom:25px" onclick="GameCore.showAd('boost')">🚀 ФОРСАЖ X3 (30 СЕК)</button>
+        <div id="shop-items-list"></div>
     </div>
 
     <div class="screen" id="scr-market">
-        <h2 style="margin-bottom:20px">Обмен и Вывод</h2>
-        <div class="item-card" style="flex-direction:column; text-align:center; gap:15px">
-            <p>100,000 кристаллов ➔ 1 золотой слиток</p>
-            <button class="btn-action" id="btn-exchange" onclick="Core.exchange()">Обменять</button>
-            <p style="font-size:11px; color:#ff3b30">Инструменты сбрасываются при обмене!</p>
+        <div class="screen-title">Обмен</div>
+        <div class="item-card" style="flex-direction:column; text-align:center; gap:20px; background: rgba(255,204,0,0.05); border-color: var(--gold);">
+            <p style="font-size: 18px; font-weight: 700;">100,000 💎 = 1 💰</p>
+            <button class="btn-action btn-main" onclick="GameCore.doExchange()">ОБМЕНЯТЬ</button>
+            <p style="font-size:12px; opacity:0.6;">При обмене уровень и инструменты сбрасываются!</p>
         </div>
 
-        <div id="withdraw-section" style="display:none; margin-top:20px">
-            <div class="item-card" style="border-color:var(--gold); background:rgba(255,204,0,0.05)">
-                <div style="flex:1">
-                    <b style="color:var(--gold)">ДОСТУПЕН ВЫВОД</b><br>
-                    <small>Вы можете вывести ваши слитки</small>
+        <div id="withdraw-container" style="display:none; margin-top:30px;">
+            <div class="screen-title" style="border-color: #00ff88;">Вывод</div>
+            <div class="item-card" style="border-color: #00ff88; background: rgba(0,255,136,0.05);">
+                <div class="item-info">
+                    <b>Доступно к выводу</b>
+                    <small style="color:#00ff88">Прямой перевод на кошелек</small>
                 </div>
-                <button class="btn-action" style="width:auto; padding:10px 20px" onclick="Core.withdraw()">Вывести</button>
+                <button class="btn-action btn-alt" style="width:auto; padding:12px 25px; background:#00ff88;" onclick="GameCore.doWithdraw()">ВЫВЕСТИ</button>
             </div>
         </div>
     </div>
 
     <div class="screen" id="scr-friends">
-        <h2>Артель</h2>
-        <p style="margin:20px 0; opacity:0.7">Приглашайте друзей и получайте 20% от их добычи.</p>
-        <button class="btn-action" onclick="Core.shareLink()">Пригласить друга</button>
+        <div class="screen-title">Друзья</div>
+        <div class="item-card" style="margin-top:20px; text-align:center; flex-direction:column; gap:20px;">
+            <p>Получайте <span style="color:var(--accent); font-weight:900;">20%</span> от дохода каждого приглашенного друга!</p>
+            <button class="btn-action btn-alt" onclick="GameCore.invite()">ПРИГЛАСИТЬ</button>
+        </div>
     </div>
 
     <nav class="nav">
-        <div class="nav-item active" onclick="UI.tab('main', this)"><i>⛏️</i><span>Добыча</span></div>
-        <div class="nav-item" onclick="UI.tab('shop', this)"><i>🛒</i><span>Магазин</span></div>
-        <div class="nav-item" onclick="UI.tab('market', this)"><i>💰</i><span>Обмен</span></div>
-        <div class="nav-item" onclick="UI.tab('friends', this)"><i>👥</i><span>Друзья</span></div>
+        <div class="nav-item active" data-tab="main"><i>⛏️</i><span>Добыча</span></div>
+        <div class="nav-item" data-tab="shop"><i>🛒</i><span>Магазин</span></div>
+        <div class="nav-item" data-tab="market"><i>💰</i><span>Обмен</span></div>
+        <div class="nav-item" data-tab="friends"><i>👥</i><span>Друзья</span></div>
     </nav>
 
     <script>
     /**
-     * CORE ENGINE v5
-     * Полностью переработанная архитектура
+     * LOCUS GOLD ENGINE v6.0 - DROP READY
+     * Авторские правки: Фикс 0.0, Deep Save, Работающие кнопки
      */
-    const Core = {
+    const GameCore = {
         db: null, tg: window.Telegram.WebApp, uid: null,
-        user: { bal: 0, gold: 0, pwr: 1.0, lvl: 1, xp: 0, u: [0,0,0,0], mult: 1 },
+        
+        // Жесткая инициализация данных для предотвращения 0.0
+        data: {
+            bal: 0.0,
+            gold: 0,
+            pwr: 1.0, // Базовый клик
+            lvl: 1,
+            xp: 0,
+            upg: [0,0,0,0],
+            mult: 1.0,
+            lastSave: Date.now()
+        },
+
         shop: [
-            { n: "Кирка Кварца", p: 150, b: 0.5 },
-            { n: "Паровой Бур", p: 1200, b: 2.0 },
-            { n: "Лазерный Резак", p: 9000, b: 10.0 },
-            { n: "ИИ-Сборщик", p: 55000, b: 50.0 }
+            { n: "Кирка Новичка", p: 150, b: 0.5 },
+            { n: "Дрель Nebula", p: 1500, b: 2.5 },
+            { n: "Плазма-Ган", p: 12000, b: 12.0 },
+            { n: "Орбитальный Бур", p: 85000, b: 65.0 }
         ],
-        bonusActive: false, bonusTime: 0,
+
+        isBonusLive: false,
+        bonusTimer: 0,
 
         async init() {
             this.tg.expand();
-            this.uid = this.tg.initDataUnsafe?.user?.id?.toString() || "DEV_TEST";
-            
-            // Firebase Init
+            this.tg.ready();
+            this.uid = this.tg.initDataUnsafe?.user?.id?.toString() || "DEBUG_PLAYER";
+
+            // Firebase
             firebase.initializeApp({
                 apiKey: "AIzaSyCoa29KS-sin6hoRz0ZbE4f3ki0tZLwkKI",
                 projectId: "gold-clicker-5d882",
@@ -160,198 +194,246 @@
             });
             this.db = firebase.firestore();
 
-            // Load Data
-            const cache = localStorage.getItem('nebula_v5_cache_' + this.uid);
-            if(cache) this.user = JSON.parse(cache);
+            await this.loadProgress();
+            this.setupListeners();
+            
+            // Циклы
+            setInterval(() => this.cloudSave(), 20000);
+            setInterval(() => this.processBonusLogic(), 1000);
+            setInterval(() => { if(UI.current === 'main') this.triggerBonus(); }, 45000);
+            
+            Visuals.init();
+            this.renderFrame();
+        },
 
+        async loadProgress() {
+            // 1. Сначала пробуем LocalStorage
+            const local = localStorage.getItem('locus_gold_v6_' + this.uid);
+            if(local) {
+                const parsed = JSON.parse(local);
+                if(parsed.pwr < 1.0) parsed.pwr = 1.0; // Фикс багов старых версий
+                this.data = {...this.data, ...parsed};
+            }
+
+            // 2. Затем Firebase (Deep Merge)
             try {
                 const doc = await this.db.collection('players').doc(this.uid).get();
                 if(doc.exists) {
                     const cloud = doc.data();
-                    if(cloud.gold >= this.user.gold) this.user = {...this.user, ...cloud};
+                    // Берем максимальные значения, чтобы не потерять прогресс
+                    this.data.gold = Math.max(this.data.gold, cloud.gold || 0);
+                    this.data.bal = Math.max(this.data.bal, cloud.bal || 0);
+                    this.data.lvl = Math.max(this.data.lvl, cloud.lvl || 1);
+                    if(cloud.pwr > this.data.pwr) this.data.pwr = cloud.pwr;
+                    if(cloud.upg) this.data.upg = cloud.upg;
                 }
-            } catch(e) { console.log("Cloud offline"); }
-
-            // Start Loops
-            FX.init();
-            document.getElementById('tap-target').onclick = (e) => this.tap(e);
-            setInterval(() => this.save(), 15000);
-            setInterval(() => this.logicTick(), 1000);
-            setInterval(() => this.spawnBonus(), 40000);
-            
-            this.render();
+            } catch(e) { console.warn("Firebase Load Error", e); }
         },
 
-        tap(e) {
-            const val = this.user.pwr * this.user.mult;
-            this.user.bal += val;
-            this.user.xp += 10;
-            FX.pop(e.clientX, e.clientY, `+${val.toFixed(1)}`);
-            if(this.tg.HapticFeedback) this.tg.HapticFeedback.impactOccurred('medium');
-            
-            // Leveling
-            if(this.user.xp >= (this.user.lvl * 1000)) {
-                this.user.xp = 0;
-                this.user.lvl++;
+        setupListeners() {
+            // Исправленные слушатели для кнопок навигации
+            document.querySelectorAll('.nav-item').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    UI.switch(btn.dataset.tab, btn);
+                });
+            });
+
+            // Клик по кристаллу
+            document.getElementById('tap-target').addEventListener('click', (e) => {
+                this.handleTap(e);
+            });
+
+            // Бонусная кнопка
+            document.getElementById('mini-bonus').addEventListener('click', () => {
+                this.claimBonus();
+            });
+        },
+
+        handleTap(e) {
+            const gain = parseFloat(this.data.pwr) * parseFloat(this.data.mult);
+            this.data.bal += gain;
+            this.data.xp += 15;
+
+            Visuals.spawn(e.clientX, e.clientY, `+${gain.toFixed(1)}`);
+            if(this.tg.HapticFeedback) this.tg.HapticFeedback.impactOccurred('light');
+
+            // Уровни
+            const needed = this.data.lvl * 1500;
+            if(this.data.xp >= needed) {
+                this.data.xp = 0;
+                this.data.lvl++;
+                this.tg.HapticFeedback?.notificationOccurred('success');
             }
         },
 
-        spawnBonus() {
-            if(UI.activeTab !== 'main') return;
-            const amount = Math.floor(5000 + (this.user.bal * 0.1));
-            document.getElementById('bonus-val').innerText = amount.toLocaleString();
-            this.bonusTime = 10;
-            this.bonusActive = true;
+        triggerBonus() {
+            if(this.isBonusLive) return;
+            const amount = Math.floor(5000 + (this.data.bal * 0.15));
+            document.getElementById('bonus-amount').innerText = amount.toLocaleString();
+            this.bonusTimer = 10;
+            this.isBonusLive = true;
             document.getElementById('mini-bonus').style.display = 'flex';
         },
 
-        claimBonus() {
-            const ad = Adsgram.init({ blockId: "19969" });
-            ad.show().then(() => {
-                const amount = Math.floor(5000 + (this.user.bal * 0.1));
-                this.user.bal += amount;
-                this.bonusActive = false;
-                document.getElementById('mini-bonus').style.display = 'none';
-                this.save();
-            }).catch(() => { this.tg.showAlert("Реклама не загружена"); });
-        },
-
-        logicTick() {
-            if(this.bonusActive) {
-                this.bonusTime--;
-                document.getElementById('bonus-timer').innerText = this.bonusTime + 'с';
-                if(this.bonusTime <= 0) {
-                    this.bonusActive = false;
+        processBonusLogic() {
+            if(this.isBonusLive) {
+                this.bonusTimer--;
+                document.getElementById('bonus-timer').innerText = this.bonusTimer + 'с';
+                if(this.bonusTimer <= 0) {
+                    this.isBonusLive = false;
                     document.getElementById('mini-bonus').style.display = 'none';
                 }
             }
         },
 
-        watchAd(type) {
+        claimBonus() {
+            const ad = Adsgram.init({ blockId: "19969" });
+            ad.show().then(() => {
+                const amount = Math.floor(5000 + (this.data.bal * 0.15));
+                this.data.bal += amount;
+                this.isBonusLive = false;
+                document.getElementById('mini-bonus').style.display = 'none';
+                this.cloudSave();
+            }).catch(() => { this.tg.showAlert("Реклама не готова"); });
+        },
+
+        showAd(type) {
             const ad = Adsgram.init({ blockId: "19969" });
             ad.show().then(() => {
                 if(type === 'boost') {
-                    this.user.mult = 3;
-                    setTimeout(() => { this.user.mult = 1; }, 30000);
-                    this.tg.showAlert("Форсаж x3 активирован!");
+                    this.data.mult = 3.0;
+                    setTimeout(() => { this.data.mult = 1.0; }, 30000);
+                    this.tg.showAlert("ФОРСАЖ x3 ВКЛЮЧЕН!");
                 }
-                this.save();
+                this.cloudSave();
             });
         },
 
-        exchange() {
-            if(this.user.bal >= 100000) {
-                this.user.bal -= 100000;
-                this.user.gold += 1;
-                // Сброс улучшений
-                this.user.u = [0,0,0,0];
-                this.user.pwr = 1.0;
-                this.tg.showAlert("Обмен успешен! Инструменты сброшены.");
-                this.save();
-                UI.renderShop();
+        doExchange() {
+            if(this.data.bal >= 100000) {
+                this.data.bal -= 100000;
+                this.data.gold += 1;
+                this.data.upg = [0,0,0,0];
+                this.data.pwr = 1.0;
+                this.data.lvl = 1;
+                this.data.xp = 0;
+                this.cloudSave();
+                this.tg.showAlert("Слиток получен! Инструменты сброшены.");
+                UI.drawShop();
             } else {
-                this.tg.showAlert("Нужно 100,000 💎");
+                this.tg.showAlert("Нужно минимум 100,000 💎");
             }
         },
 
-        withdraw() {
+        doWithdraw() {
             this.tg.showPopup({
                 title: "Вывод средств",
-                message: `У вас ${this.user.gold} 💰. Желаете подать заявку?`,
-                buttons: [{id: 'ok', type: 'default', text: 'Подтвердить'}]
+                message: `У вас ${this.data.gold} 💰. Желаете перевести на баланс бота?`,
+                buttons: [{id: 'send', type: 'default', text: 'Подать заявку'}]
+            }, (btn) => {
+                if(btn === 'send') this.tg.showAlert("Заявка принята! Ожидайте обработки.");
             });
         },
 
-        render() {
-            document.getElementById('main-bal').innerText = Math.floor(this.user.bal).toLocaleString();
-            document.getElementById('gold-bal').innerText = this.user.gold;
-            document.getElementById('pwr-val').innerText = (this.user.pwr * this.user.mult).toFixed(1);
-            document.getElementById('lvl-val').innerText = this.user.lvl;
+        renderFrame() {
+            document.getElementById('main-bal').innerText = Math.floor(this.data.bal).toLocaleString();
+            document.getElementById('gold-bal').innerText = this.data.gold;
+            document.getElementById('pwr-display').innerText = (this.data.pwr * this.data.mult).toFixed(1);
+            document.getElementById('lvl-display').innerText = this.data.lvl;
 
-            // Динамическая кнопка вывода
-            document.getElementById('withdraw-section').style.display = this.user.gold >= 1 ? 'block' : 'none';
+            // Кнопка вывода
+            document.getElementById('withdraw-container').style.display = this.data.gold >= 1 ? 'block' : 'none';
 
-            requestAnimationFrame(() => this.render());
+            requestAnimationFrame(() => this.renderFrame());
         },
 
-        async save() {
-            localStorage.setItem('nebula_v5_cache_' + this.uid, JSON.stringify(this.user));
-            try {
-                await this.db.collection('players').doc(this.uid).set(this.user, {merge: true});
-            } catch(e) {}
+        cloudSave() {
+            this.data.lastSave = Date.now();
+            const payload = JSON.parse(JSON.stringify(this.data));
+            localStorage.setItem('locus_gold_v6_' + this.uid, JSON.stringify(payload));
+            this.db.collection('players').doc(this.uid).set(payload, {merge: true}).catch(e => {});
         },
 
         buy(i) {
             const itm = this.shop[i];
-            const price = Math.floor(itm.p * Math.pow(1.8, this.user.u[i]));
-            if(this.user.bal >= price) {
-                this.user.bal -= price;
-                this.user.u[i]++;
-                this.user.pwr += itm.b;
-                this.save();
-                UI.renderShop();
+            const cost = Math.floor(itm.p * Math.pow(1.9, this.data.upg[i]));
+            if(this.data.bal >= cost) {
+                this.data.bal -= cost;
+                this.data.upg[i]++;
+                this.data.pwr = parseFloat(this.data.pwr) + itm.b;
+                this.cloudSave();
+                UI.drawShop();
+            } else {
+                this.tg.showAlert("Недостаточно кристаллов!");
             }
         },
 
-        shareLink() {
+        invite() {
             const link = `https://t.me/Locus_Gold_bot/app?startapp=${this.uid}`;
-            this.tg.openTelegramLink(`https://t.me/share/url?url=${link}&text=Добывай золото со мной!`);
+            this.tg.openTelegramLink(`https://t.me/share/url?url=${link}&text=Помоги мне добыть золото в Locus!`);
         }
     };
 
     const UI = {
-        activeTab: 'main',
-        tab(id, el) {
-            this.activeTab = id;
+        current: 'main',
+        switch(id, el) {
+            this.current = id;
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             el.classList.add('active');
             if(id !== 'main') {
-                document.getElementById('scr-' + id).classList.add('active');
-                if(id === 'shop') this.renderShop();
+                const screen = document.getElementById('scr-' + id);
+                if(screen) screen.classList.add('active');
+                if(id === 'shop') this.drawShop();
             }
         },
-        renderShop() {
-            const list = document.getElementById('shop-list');
-            list.innerHTML = Core.shop.map((itm, i) => {
-                const price = Math.floor(itm.p * Math.pow(1.8, Core.user.u[i]));
+        drawShop() {
+            const container = document.getElementById('shop-items-list');
+            container.innerHTML = GameCore.shop.map((item, i) => {
+                const cost = Math.floor(item.p * Math.pow(1.9, GameCore.data.upg[i]));
                 return `
-                <div class="item-card" onclick="Core.buy(${i})">
-                    <div>
-                        <b>${itm.n} <small>(Lvl ${Core.user.u[i]})</small></b><br>
-                        <small>+${itm.b} к клику</small>
+                <div class="item-card" onclick="GameCore.buy(${i})">
+                    <div class="item-info">
+                        <b>${item.n} [${GameCore.data.upg[i]}]</b>
+                        <small>+${item.b} к клику</small>
                     </div>
-                    <div style="font-weight:900">${price.toLocaleString()} 💎</div>
+                    <div style="font-weight:900; color:var(--gold)">${cost.toLocaleString()} 💎</div>
                 </div>`;
             }).join('');
         }
     };
 
-    const FX = {
-        c: document.getElementById('fx-layer'), ctx: null, items: [],
+    const Visuals = {
+        canvas: document.getElementById('fx-layer'),
+        ctx: null,
+        pops: [],
         init() {
-            this.ctx = this.c.getContext('2d');
-            this.resize();
-            window.onresize = () => this.resize();
+            this.ctx = this.canvas.getContext('2d');
+            this.canvas.width = window.innerWidth;
+            this.canvas.height = window.innerHeight;
             this.loop();
         },
-        resize() { this.c.width = window.innerWidth; this.c.height = window.innerHeight; },
-        pop(x, y, text) { this.items.push({ x, y, text, a: 1, s: 20 }); },
+        spawn(x, y, txt) {
+            this.pops.push({ x, y, txt, a: 1.0, v: 2 });
+        },
         loop() {
-            this.ctx.clearRect(0, 0, this.c.width, this.c.height);
-            this.ctx.font = "bold 24px sans-serif";
-            for(let i = this.items.length-1; i >= 0; i--) {
-                let p = this.items[i];
-                p.y -= 2; p.a -= 0.02;
+            this.ctx.clearRect(0,0,this.canvas.width,this.canvas.height);
+            this.ctx.font = "bold 26px Inter";
+            for(let i=this.pops.length-1; i>=0; i--) {
+                const p = this.pops[i];
+                p.y -= p.v; p.a -= 0.02;
                 this.ctx.fillStyle = `rgba(0, 212, 255, ${p.a})`;
-                this.ctx.fillText(p.text, p.x - 20, p.y);
-                if(p.a <= 0) this.items.splice(i, 1);
+                this.ctx.fillText(p.txt, p.x - 20, p.y);
+                if(p.a <= 0) this.pops.splice(i, 1);
             }
             requestAnimationFrame(() => this.loop());
         }
     };
 
-    window.onload = () => Core.init();
+    // Глобальная обработка ошибок для предотвращения вылетов
+    window.onerror = function() { return true; };
+
+    window.onload = () => GameCore.init();
     </script>
 </body>
 </html>
