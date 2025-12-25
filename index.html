@@ -27,8 +27,9 @@
 
         .header-stats { text-align: center; margin-bottom: 20px; }
         .main-balance { font-size: 42px; font-weight: 800; color: #fff; text-shadow: 0 0 15px rgba(0,212,255,0.4); }
-        .lvl-bar { width: 100%; height: 8px; background: #222; border-radius: 4px; overflow: hidden; margin-top: 8px; border: 1px solid #333; }
-        .lvl-progress { height: 100%; background: var(--accent); width: 0%; transition: width 0.3s; }
+        .lvl-info { display: flex; justify-content: space-between; font-size: 11px; color: var(--accent); font-weight: bold; margin-bottom: 4px; }
+        .lvl-bar { width: 100%; height: 10px; background: #1a1a1a; border-radius: 5px; overflow: hidden; border: 1px solid #333; position: relative; }
+        .lvl-progress { height: 100%; background: linear-gradient(90deg, #00d4ff, #0055ff); width: 0%; transition: width 0.1s linear; }
 
         .game-world { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         .crystal-container { position: relative; width: 220px; height: 220px; cursor: pointer; }
@@ -38,31 +39,29 @@
             display: flex; align-items: center; justify-content: center;
             box-shadow: 0 0 50px rgba(0, 212, 255, 0.2); transition: transform 0.05s;
         }
-        .crystal:active { transform: scale(0.92); }
+        .crystal:active { transform: scale(0.90); }
         .crystal-icon { font-size: 80px; filter: drop-shadow(0 0 10px rgba(0,0,0,0.3)); user-select: none; }
+
+        /* Таймер буста */
+        #boost-timer { color: #ff3b30; font-weight: bold; display: none; margin-top: 10px; font-size: 14px; }
 
         .action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 80px; }
         .card { background: var(--glass); border: 1px solid rgba(255,255,255,0.1); padding: 15px; border-radius: 16px; text-align: center; }
         .card b { display: block; font-size: 16px; margin-bottom: 4px; color: #fff; }
-        .card span { font-size: 10px; color: #888; text-transform: uppercase; letter-spacing: 1px; }
+        .card span { font-size: 10px; color: #888; text-transform: uppercase; }
 
-        .btn-boost { background: linear-gradient(90deg, #00d4ff, #0055ff); color: #fff; font-weight: 700; border: none; grid-column: span 2; padding: 14px; border-radius: 14px; font-size: 14px; text-transform: uppercase; }
+        .btn-boost { background: linear-gradient(90deg, #ff9d00, #ff5e00); color: #fff; font-weight: 800; border: none; grid-column: span 2; padding: 16px; border-radius: 14px; font-size: 14px; }
+        .btn-boost.active-mode { background: #111; border: 2px solid #ff9d00; color: #ff9d00; }
 
-        .navbar {
-            position: fixed; bottom: 0; left: 0; right: 0; height: calc(65px + var(--safe-bottom));
-            background: #0f0f14; display: flex; border-top: 1px solid #222; padding-bottom: var(--safe-bottom); z-index: 1000;
-        }
+        .navbar { position: fixed; bottom: 0; left: 0; right: 0; height: calc(65px + var(--safe-bottom)); background: #0f0f14; display: flex; border-top: 1px solid #222; padding-bottom: var(--safe-bottom); }
         .nav-link { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #555; text-decoration: none; font-size: 10px; }
         .nav-link.active { color: var(--accent); }
-        .nav-link i { font-size: 20px; margin-bottom: 4px; font-style: normal; }
 
         .screen { position: fixed; inset: 0; background: var(--bg-deep); z-index: 100; display: none; padding: 20px 20px 100px 20px; overflow-y: auto; }
         .screen.active { display: block; }
         .list-entry { background: var(--glass); padding: 18px; border-radius: 16px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; border: 1px solid rgba(255,255,255,0.05); }
-        .list-entry b { color: var(--accent); font-size: 16px; }
-        .list-entry small { color: #888; font-size: 12px; }
 
-        .floating-text { position: absolute; pointer-events: none; color: var(--accent); font-weight: 900; animation: floatUp 0.6s ease-out forwards; font-size: 24px; z-index: 500; }
+        .floating-text { position: absolute; pointer-events: none; color: var(--accent); font-weight: 900; animation: floatUp 0.6s ease-out forwards; font-size: 26px; z-index: 500; }
         @keyframes floatUp { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-100px); } }
     </style>
 </head>
@@ -71,7 +70,11 @@
     <div class="app-container">
         <header class="header-stats">
             <div class="main-balance" id="val-bal">0</div>
-            <div id="val-lvl-text" style="font-size: 12px; color: var(--accent); font-weight: bold;">УРОВЕНЬ 1</div>
+            <div id="boost-timer">КВАНТОВЫЙ ПРЫЖОК (x3): 00:30</div>
+            <div class="lvl-info">
+                <span id="val-lvl-name">Космический кадет</span>
+                <span id="val-lvl-num">Ур. 1</span>
+            </div>
             <div class="lvl-bar"><div class="lvl-progress" id="val-prog"></div></div>
         </header>
 
@@ -82,51 +85,43 @@
         </main>
 
         <section class="action-grid">
-            <div class="card"><span>Клик</span><b id="val-pwr">1.0</b></div>
-            <div class="card"><span>Авто-добыча</span><b id="val-dps">0.0</b></div>
-            <button class="btn-boost" onclick="Engine.showRewardAd()">АКТИВИРОВАТЬ БУСТ (РЕКЛАМА)</button>
+            <div class="card"><span>За клик</span><b id="val-pwr">1.0</b></div>
+            <div class="card"><span>Авто-сбор</span><b id="val-dps">0.0</b></div>
+            <button class="btn-boost" id="ad-btn" onclick="Engine.showRewardAd()">🔥 УСКОРЕНИЕ x3 (РЕКЛАМА)</button>
         </section>
     </div>
 
     <div class="screen" id="scr-upg">
-        <h2 style="margin-bottom: 20px; text-align: center;">Улучшения Небулы</h2>
+        <h2 style="margin-bottom: 20px; text-align: center;">Технологии Небулы</h2>
         <div class="list-entry" onclick="Engine.buyUpg('pwr')">
-            <div><b>Кирка новичка</b><br><small>+0.5 к силе клика</small></div>
+            <div><b>Лазерный бур</b><br><small>+0.5 за клик</small></div>
             <b id="cost-pwr">100 💎</b>
         </div>
         <div class="list-entry" onclick="Engine.buyUpg('dps')">
-            <div><b>Дрон-шахтер</b><br><small>+1.0 к авто-добыче/сек</small></div>
+            <div><b>Бот-сборщик</b><br><small>+1.0/сек</small></div>
             <b id="cost-dps">500 💎</b>
         </div>
     </div>
 
     <div class="screen" id="scr-ref">
-        <h2 style="margin-bottom: 10px; text-align: center;">Друзья</h2>
-        <p style="text-align: center; color: #888; font-size: 14px; margin-bottom: 20px;">Приглашай друзей и получай 10% от их добычи!</p>
-        <button class="btn-boost" onclick="Engine.copyRef()" style="margin-bottom: 20px;">КОПИРОВАТЬ ССЫЛКУ</button>
-        <div id="ref-list-container">
-            <div class="list-entry"><span>Твои друзья появятся здесь...</span></div>
-        </div>
-    </div>
-
-    <div class="screen" id="scr-market">
-        <h2 style="margin-bottom: 20px; text-align: center;">Звездный Маркет</h2>
-        <div class="list-entry">
-            <div><b>Обмен кристаллов</b><br><small>Доступно с 15 уровня</small></div>
-            <button onclick="Engine.marketAction()" style="background:#222; color:#555; border:none; padding:8px 15px; border-radius:8px; font-weight: bold;">ЗАБЛОКИРОВАНО</button>
-        </div>
+        <h2 style="margin-bottom: 20px; text-align: center;">Команда шахтеров</h2>
+        <button class="btn-boost" onclick="Engine.copyRef()">ПРИГЛАСИТЬ НАПАРНИКА</button>
     </div>
 
     <nav class="navbar">
         <div class="nav-link active" onclick="UI.go('main', this)"><i>🛸</i><span>Добыча</span></div>
-        <div class="nav-link" onclick="UI.go('upg', this)"><i>🛠️</i><span>Улучшения</span></div>
+        <div class="nav-link" onclick="UI.go('upg', this)"><i>🛠️</i><span>Апгрейды</span></div>
         <div class="nav-link" onclick="UI.go('ref', this)"><i>👥</i><span>Друзья</span></div>
-        <div class="nav-link" onclick="UI.go('market', this)"><i>🌌</i><span>Маркет</span></div>
     </nav>
 
     <script>
         const Engine = {
-            state: { bal: 0, pwr: 1, dps: 0, xp: 0, lvl: 1, uid: "0" },
+            state: { bal: 0, pwr: 1, dps: 0, xp: 0, lvl: 1, uid: "0", boost: 1 },
+            levels: [
+                "Космический кадет", "Сборщик пыли", "Лунный старатель", "Марсианский барон", 
+                "Мастер Сатурна", "Искатель черных дыр", "Звездный император", "Повелитель Небулы",
+                "Кристальный бог", "Вне времени"
+            ],
             tg: window.Telegram.WebApp,
             
             init() {
@@ -136,111 +131,112 @@
                 this.render();
                 this.loop();
 
-                document.getElementById('tap-zone').addEventListener('touchstart', (e) => {
-                    e.preventDefault();
-                    this.tap(e.touches[0]);
+                // Мгновенное срабатывание шкалы при нажатии (pointerdown)
+                document.getElementById('tap-zone').addEventListener('pointerdown', (e) => {
+                    this.tap(e);
                 });
 
-                // Авто-сохранение каждые 5 сек
                 setInterval(() => this.save(), 5000);
             },
 
-            tap(touch) {
-                this.state.bal += this.state.pwr;
-                this.state.xp += 1;
+            tap(e) {
+                const clickPower = this.state.pwr * this.state.boost;
+                this.state.bal += clickPower;
+                this.state.xp += 10; // Опыт за клик
+                
                 this.checkLvl();
-                this.spawn(touch.clientX, touch.clientY, `+${this.state.pwr}`);
+                this.spawn(e.clientX, e.clientY, `+${clickPower.toFixed(1)}`);
                 this.render();
                 if(this.tg.HapticFeedback) this.tg.HapticFeedback.impactOccurred('light');
             },
 
-            loop() {
-                setInterval(() => {
-                    if(this.state.dps > 0) {
-                        this.state.bal += this.state.dps / 10;
+            checkLvl() {
+                let xpNeeded = this.state.lvl * 500;
+                if(this.state.xp >= xpNeeded) {
+                    this.state.xp = 0;
+                    this.state.lvl++;
+                    this.tg.showAlert(`🚀 Вы достигли статуса: ${this.levels[this.state.lvl-1] || "Легенда"}`);
+                }
+            },
+
+            showRewardAd() {
+                const ad = Adsgram.init({ blockId: "19895" }); // Замените на ваш ID
+                ad.show().then(() => {
+                    this.activateBoost();
+                }).catch(() => {
+                    this.tg.showAlert("Реклама не загрузилась, но мы дали вам бонус за попытку!");
+                    this.activateBoost(); // Для теста можно оставить
+                });
+            },
+
+            activateBoost() {
+                if(this.state.boost > 1) return;
+                this.state.boost = 3;
+                let timeLeft = 30;
+                const btn = document.getElementById('ad-btn');
+                const timerLabel = document.getElementById('boost-timer');
+                
+                btn.disabled = true;
+                btn.classList.add('active-mode');
+                timerLabel.style.display = 'block';
+
+                const countdown = setInterval(() => {
+                    timeLeft--;
+                    timerLabel.innerText = `КВАНТОВЫЙ ПРЫЖОК (x3): 00:${timeLeft < 10 ? '0'+timeLeft : timeLeft}`;
+                    if(timeLeft <= 0) {
+                        clearInterval(countdown);
+                        this.state.boost = 1;
+                        btn.disabled = false;
+                        btn.classList.remove('active-mode');
+                        timerLabel.style.display = 'none';
                         this.render();
                     }
-                }, 100);
-            },
-
-            checkLvl() {
-                let next = this.state.lvl * 300;
-                if(this.state.xp >= next) {
-                    this.state.lvl++;
-                    this.state.xp = 0;
-                    this.tg.showAlert(`🎉 Новый уровень достигнут! Теперь у вас ${this.state.lvl} уровень.`);
-                }
-            },
-
-            buyUpg(type) {
-                let cost = type === 'pwr' ? Math.floor(this.state.pwr * 250) : Math.floor((this.state.dps + 1) * 600);
-                
-                if(this.state.bal >= cost) {
-                    this.state.bal -= cost;
-                    if(type === 'pwr') this.state.pwr += 0.5;
-                    else this.state.dps += 1.0;
-                    this.save();
-                    this.render();
-                    this.tg.HapticFeedback.notificationOccurred('success');
-                } else {
-                    // ИСПРАВЛЕННЫЙ БАГ: Вместо QR-кода используем обычное уведомление
-                    this.tg.showAlert("Недостаточно кристаллов! Продолжайте добычу ⛏️");
-                }
+                }, 1000);
             },
 
             render() {
                 document.getElementById('val-bal').innerText = Math.floor(this.state.bal).toLocaleString();
-                document.getElementById('val-pwr').innerText = this.state.pwr.toFixed(1);
+                document.getElementById('val-pwr').innerText = (this.state.pwr * this.state.boost).toFixed(1);
                 document.getElementById('val-dps').innerText = this.state.dps.toFixed(1);
-                document.getElementById('val-lvl-text').innerText = `УРОВЕНЬ ${this.state.lvl}`;
                 
+                // Названия уровней
+                document.getElementById('val-lvl-name').innerText = this.levels[this.state.lvl-1] || "Космический скиталец";
+                document.getElementById('val-lvl-num').innerText = `Ур. ${this.state.lvl}`;
+                
+                // Апгрейды
                 document.getElementById('cost-pwr').innerText = Math.floor(this.state.pwr * 250) + " 💎";
                 document.getElementById('cost-dps').innerText = Math.floor((this.state.dps + 1) * 600) + " 💎";
                 
-                let next = this.state.lvl * 300;
-                let perc = (this.state.xp / next) * 100;
+                // Прогресс-бар
+                let xpNeeded = this.state.lvl * 500;
+                let perc = (this.state.xp / xpNeeded) * 100;
                 document.getElementById('val-prog').style.width = perc + "%";
             },
 
+            // Вспомогательные функции
+            loop() { setInterval(() => { if(this.state.dps > 0) { this.state.bal += this.state.dps / 10; this.render(); } }, 100); },
             spawn(x, y, txt) {
                 const el = document.createElement('div');
                 el.className = 'floating-text';
+                if(this.state.boost > 1) el.style.color = '#ff9d00';
                 el.innerText = txt;
-                el.style.left = (x - 10) + 'px'; el.style.top = (y - 20) + 'px';
+                el.style.left = x + 'px'; el.style.top = y + 'px';
                 document.body.appendChild(el);
                 setTimeout(() => el.remove(), 600);
             },
-
-            save() {
-                localStorage.setItem('locus_nebula_save', JSON.stringify(this.state));
-            },
-
-            load() {
-                const data = localStorage.getItem('locus_nebula_save');
-                if(data) {
-                    const parsed = JSON.parse(data);
-                    this.state = {...this.state, ...parsed};
-                }
-            },
-
-            copyRef() {
+            save() { localStorage.setItem('locus_nebula_save', JSON.stringify(this.state)); },
+            load() { const data = localStorage.getItem('locus_nebula_save'); if(data) this.state = {...this.state, ...JSON.parse(data)}; },
+            copyRef() { 
                 const link = `https://t.me/Locus_Gold_bot/app?startapp=${this.state.uid}`;
-                const input = document.createElement('input');
-                input.value = link;
-                document.body.appendChild(input);
-                input.select();
-                document.execCommand('copy');
-                document.body.removeChild(input);
-                this.tg.showAlert("Ссылка скопирована! Отправь её другу.");
+                this.tg.openTelegramLink(`https://t.me/share/url?url=${link}&text=Давай добывать кристаллы вместе!`);
             },
-
-            showRewardAd() {
-                this.tg.showAlert("Реклама временно загружается... Попробуйте через минуту.");
-                // Здесь будет ваш вызов Adsgram: ad.show()...
-            },
-
-            marketAction() {
-                this.tg.showAlert("Эта функция открывается на 15 уровне!");
+            buyUpg(type) {
+                let cost = type === 'pwr' ? Math.floor(this.state.pwr * 250) : Math.floor((this.state.dps + 1) * 600);
+                if(this.state.bal >= cost) {
+                    this.state.bal -= cost;
+                    if(type === 'pwr') this.state.pwr += 0.5; else this.state.dps += 1.0;
+                    this.render(); this.save();
+                } else { this.tg.showAlert("Нужно больше ресурсов!"); }
             }
         };
 
