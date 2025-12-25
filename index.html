@@ -3,268 +3,329 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Neon Life: Infinity Simulator</title>
-    
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;900&display=swap" rel="stylesheet">
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <script src="https://sad.adsgram.ai/js/sad.min.js"></script>
+    <title>Silicon Empire | Life Sim</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-
     <style>
         :root {
-            --p: #00f2ff; --s: #7000ff; --bg: #030305;
-            --card: rgba(25, 25, 35, 0.9); --border: #2a2a35;
-            --text: #e0e0e0; --danger: #ff2d55;
+            --p: #00ff88; --s: #6366f1; --bg: #050507;
+            --card: #111116; --border: #22222b;
+            --danger: #ff4757; --text: #f0f0f0;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Montserrat', sans-serif; -webkit-tap-highlight-color: transparent; }
-        body { background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; }
-
-        /* HUD - Продвинутая панель */
-        .hud-top {
-            padding: 20px; background: linear-gradient(to bottom, #000, transparent);
-            display: grid; grid-template-columns: 1fr 1fr; gap: 15px; position: relative; z-index: 10;
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { 
+            background: var(--bg); color: var(--text); 
+            font-family: 'Roboto', sans-serif; height: 100vh; overflow: hidden; 
         }
-        .main-stat { font-size: 28px; font-weight: 900; color: var(--p); text-shadow: 0 0 15px rgba(0,242,255,0.4); }
-        .sub-stats { display: flex; gap: 10px; font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: #888; }
 
-        /* Bars */
-        .status-bars { padding: 0 20px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
-        .bar-wrap { background: #111; height: 4px; border-radius: 2px; overflow: hidden; position: relative; }
-        .bar-fill { height: 100%; transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
+        /* HUD */
+        .hud {
+            padding: 20px; background: var(--card); border-bottom: 1px solid var(--border);
+            display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;
+        }
+        .main-val { font-family: 'Orbitron', sans-serif; font-size: 24px; color: var(--p); font-weight: 900; }
+        .stats-grid { grid-column: span 2; display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 10px; }
+        .stat-item { font-size: 9px; text-transform: uppercase; color: #888; }
+        .bar-bg { width: 100%; height: 4px; background: #000; border-radius: 2px; margin-top: 4px; overflow: hidden; }
+        .bar-fill { height: 100%; transition: width 0.3s ease; }
 
         /* VIEWPORT */
-        .game-window { height: calc(100vh - 220px); overflow-y: auto; padding: 20px; scroll-behavior: smooth; }
-        .game-window::-webkit-scrollbar { width: 0; }
+        .viewport { height: calc(100vh - 200px); overflow-y: auto; padding: 15px; padding-bottom: 100px; }
+        .screen { display: none; animation: fadeIn 0.3s ease; }
+        .screen.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* CARDS & STORY */
-        .story-card {
-            background: var(--card); border: 1px solid var(--border); border-radius: 20px;
-            padding: 20px; margin-bottom: 20px; backdrop-filter: blur(10px);
-            animation: slideUp 0.5s ease-out;
+        /* CARDS */
+        .card {
+            background: var(--card); border: 1px solid var(--border); border-radius: 16px;
+            padding: 16px; margin-bottom: 15px; position: relative;
         }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
-
-        .npc-box { display: flex; align-items: center; gap: 15px; margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 10px; }
-        .npc-avatar { width: 50px; height: 50px; border-radius: 50%; border: 2px solid var(--s); background: #222; }
-
-        /* ACTIONS */
-        .action-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
-        .choice-btn {
-            background: #1a1a25; border: 1px solid var(--border); padding: 15px; border-radius: 12px;
-            color: #fff; font-size: 12px; font-weight: 600; text-align: left; transition: 0.3s;
+        .card h3 { font-family: 'Orbitron', sans-serif; font-size: 14px; margin-bottom: 12px; color: var(--s); }
+        
+        /* ACTION ITEMS */
+        .act-row {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 12px; background: #0a0a0f; border-radius: 12px; margin-bottom: 8px;
+            border: 1px solid transparent; transition: 0.2s;
         }
-        .choice-btn:active { background: var(--s); transform: scale(0.97); }
+        .act-row:active { border-color: var(--p); background: #111; }
+        .act-info b { display: block; font-size: 13px; }
+        .act-info span { font-size: 10px; color: #666; }
+        .act-btn { 
+            background: var(--s); border: none; color: #fff; padding: 8px 12px; 
+            border-radius: 8px; font-size: 10px; font-weight: bold; font-family: 'Orbitron';
+        }
+        .act-btn:disabled { opacity: 0.2; }
 
-        /* NAVIGATION */
-        .nav-bar {
-            position: fixed; bottom: 0; width: 100%; display: flex; 
-            background: rgba(0,0,0,0.9); border-top: 1px solid var(--border);
+        /* BOTTOM NAV */
+        .nav {
+            position: fixed; bottom: 0; width: 100%; background: #000;
+            border-top: 1px solid var(--border); display: flex; 
             padding-bottom: env(safe-area-inset-bottom);
         }
-        .nav-item { flex: 1; padding: 15px; text-align: center; color: #666; transition: 0.3s; }
-        .nav-item.active { color: var(--p); }
-        .nav-item i { font-size: 20px; }
+        .nav-btn {
+            flex: 1; padding: 15px 0; text-align: center; color: #555; font-size: 18px;
+        }
+        .nav-btn.active { color: var(--p); }
 
-        /* UI ELEMENTS */
-        .badge { background: var(--s); color: #fff; padding: 2px 8px; border-radius: 4px; font-size: 9px; margin-left: 5px; }
+        /* LOGS */
+        #log-container {
+            position: fixed; bottom: 80px; width: 100%; pointer-events: none;
+            display: flex; flex-direction: column; align-items: center; gap: 5px;
+        }
+        .log-msg {
+            background: rgba(0,0,0,0.8); color: #fff; padding: 5px 15px; 
+            border-radius: 20px; font-size: 11px; border: 1px solid var(--p);
+            animation: logOut 2s forwards;
+        }
+        @keyframes logOut { 0% { opacity: 1; } 80% { opacity: 1; } 100% { opacity: 0; transform: translateY(-20px); } }
     </style>
 </head>
 <body>
 
-    <div class="hud-top">
+    <div id="log-container"></div>
+
+    <div class="hud">
         <div>
-            <div class="main-stat" id="ui-cash">$0</div>
-            <div class="sub-stats">
-                <span id="ui-job">Безработный</span>
-                <span id="ui-age">18 лет</span>
-            </div>
+            <div class="main-val" id="cash-ui">$0</div>
+            <div style="font-size: 10px; color: #888;">CAPITAL</div>
         </div>
         <div style="text-align: right;">
-            <div style="font-size: 10px; color: var(--p);">DAY <span id="ui-day">1</span></div>
-            <div id="ui-location" style="font-size: 12px; font-weight: 900;">ТРУЩОБЫ</div>
+            <div id="age-ui" style="font-family: 'Orbitron'; font-weight: 900;">18y 0d</div>
+            <div id="job-ui" style="font-size: 10px; color: var(--s);">HOMELESS</div>
+        </div>
+        <div class="stats-grid">
+            <div class="stat-item">HP <div class="bar-bg"><div id="hp-bar" class="bar-fill" style="background:var(--danger)"></div></div></div>
+            <div class="stat-item">NRG <div class="bar-bg"><div id="en-bar" class="bar-fill" style="background:var(--p)"></div></div></div>
+            <div class="stat-item">HNG <div class="bar-bg"><div id="hg-bar" class="bar-fill" style="background:#ffa502"></div></div></div>
+            <div class="stat-item">EDU <div class="bar-bg"><div id="ed-bar" class="bar-fill" style="background:var(--s)"></div></div></div>
         </div>
     </div>
 
-    <div class="status-bars">
-        <div class="bar-wrap"><div id="bar-hp" class="bar-fill" style="background: var(--danger); width: 100%;"></div></div>
-        <div class="bar-wrap"><div id="bar-en" class="bar-fill" style="background: var(--p); width: 100%;"></div></div>
-        <div class="bar-wrap"><div id="bar-hg" class="bar-fill" style="background: #ff9500; width: 100%;"></div></div>
-        <div class="bar-wrap"><div id="bar-sm" class="bar-fill" style="background: #4cd964; width: 100%;"></div></div>
-    </div>
-
-    <div class="game-window" id="viewport">
+    <div class="viewport" id="viewport">
+        <div id="scr-home" class="screen active">
+            <div class="card">
+                <h3>SURVIVAL</h3>
+                <div id="actions-survival"></div>
+            </div>
+            <div class="card">
+                <h3>REAL ESTATE</h3>
+                <div id="actions-house"></div>
+            </div>
         </div>
 
-    <nav class="nav-bar">
-        <div class="nav-item active" onclick="Game.nav('main')"><i class="fas fa-compass"></i></div>
-        <div class="nav-item" onclick="Game.nav('social')"><i class="fas fa-users"></i></div>
-        <div class="nav-item" onclick="Game.nav('work')"><i class="fas fa-briefcase"></i></div>
-        <div class="nav-item" onclick="Game.nav('inv')"><i class="fas fa-backpack"></i></div>
-        <div class="nav-item" onclick="Game.showAd()"><i class="fas fa-tv" style="color: var(--p);"></i></div>
+        <div id="scr-work" class="screen">
+            <div class="card">
+                <h3>CAREER</h3>
+                <div id="actions-jobs"></div>
+            </div>
+            <div class="card">
+                <h3>UNIVERSITY</h3>
+                <div id="actions-edu"></div>
+            </div>
+        </div>
+
+        <div id="scr-biz" class="screen">
+            <div class="card">
+                <h3>BUSINESS EMPIRE</h3>
+                <div id="actions-biz"></div>
+            </div>
+        </div>
+    </div>
+
+    <nav class="nav">
+        <div class="nav-btn active" onclick="Game.nav('home', this)"><i class="fas fa-home"></i></div>
+        <div class="nav-btn" onclick="Game.nav('work', this)"><i class="fas fa-briefcase"></i></div>
+        <div class="nav-btn" onclick="Game.nav('biz', this)"><i class="fas fa-chart-line"></i></div>
+        <div class="nav-btn" onclick="Game.showAd()"><i class="fas fa-play-circle"></i></div>
     </nav>
 
 <script>
 /**
- * INFINITY ENGINE v1.0
- * Чтобы дойти до 5000 строк, мы используем модульную систему.
- * Каждое событие (Event) — это отдельный объект в базе данных.
+ * SILICON EMPIRE CORE ENGINE
+ * Разработано для расширения до 5000+ строк через добавление объектов в Data.
  */
 
-const Database = {
-    // База персонажей
-    npcs: {
-        "stranger": { name: "Таинственный Джо", role: "Торговец", rel: 0, img: "👤" },
-        "boss": { name: "Г-н Векслер", role: "Босс корпорации", rel: 0, img: "👔" },
-        "girl": { name: "Мия", role: "Студентка", rel: 0, img: "👩‍🦰" }
-    },
-    // База сюжетных квестов (здесь можно расширить до тысяч строк)
+const Data = {
+    survival: [
+        { id: 'scavenge', n: 'Search Trash', en: -10, hg: -5, cash: [1, 5], log: 'Found some cents in trash' },
+        { id: 'beg', n: 'Begging', en: -15, hg: -5, cash: [0, 15], log: 'Stranger gave you some coins' },
+        { id: 'sleep_box', n: 'Sleep on Street', en: 50, hg: -20, hp: -5, log: 'Cold night on the street...' },
+        { id: 'buy_burger', n: 'Cheap Burger', cash: -10, hg: 30, log: 'Tastes like cardboard but filling' }
+    ],
+    jobs: [
+        { id: 'loader', n: 'Warehouse Loader', p: 40, edu: 0, en: -30, hg: -20 },
+        { id: 'courier', n: 'Food Courier', p: 120, edu: 20, en: -25, hg: -15 },
+        { id: 'junior', n: 'Junior Developer', p: 450, edu: 100, en: -20, hg: -10 },
+        { id: 'cto', n: 'CTO', p: 2500, edu: 500, en: -15, hg: -5 }
+    ],
+    edu: [
+        { id: 'online', n: 'Online Courses', c: 100, v: 10, en: -20 },
+        { id: 'college', n: 'Community College', c: 2000, v: 50, en: -40 },
+        { id: 'uni', n: 'Ivy League', c: 15000, v: 200, en: -60 }
+    ],
+    houses: [
+        { id: 'tent', n: 'Old Tent', c: 500, r: 10, d: 'Regen +10 Energy' },
+        { id: 'studio', n: 'Studio Flat', c: 50000, r: 40, d: 'Regen +40 Energy' },
+        { id: 'mansion', n: 'Modern Mansion', c: 1000000, r: 100, d: 'Full Regen' }
+    ],
+    biz: [
+        { id: 'kiosk', n: 'Coffee Kiosk', c: 5000, rev: 50 },
+        { id: 'startup', n: 'AI Startup', c: 100000, rev: 1200 },
+        { id: 'corp', n: 'Global Corp', c: 10000000, rev: 150000 }
+    ],
     events: [
-        {
-            id: "start_001",
-            title: "Новое утро",
-            desc: "Ты просыпаешься в холодном подвале. В кармане пусто, в животе урчит. На столе лежит записка от Джо.",
-            npc: "stranger",
-            choices: [
-                { text: "Пойти искать Джо", effect: { en: -10 }, next: "meet_joe" },
-                { text: "Обыскать подвал", effect: { cash: 5, en: -5 }, next: "search_basement" }
-            ]
-        },
-        {
-            id: "meet_joe",
-            title: "Встреча",
-            desc: "Джо смотрит на тебя с ухмылкой: 'Снова на мели? У меня есть дельце...'",
-            npc: "stranger",
-            choices: [
-                { text: "Согласиться (Риск)", effect: { cash: 100, karma: -10 }, next: "job_done" },
-                { text: "Отказаться", effect: { rel: -5 }, next: "start_001" }
-            ]
-        }
+        { n: 'Lottery!', f: (s) => { s.cash += 1000; return 'You won $1000 in lottery!'; } },
+        { n: 'Sickness', f: (s) => { s.hp -= 20; return 'You feel sick. HP -20'; } },
+        { n: 'Inflation', f: (s) => { s.cash = Math.floor(s.cash * 0.95); return 'Market crash! -5% cash'; } }
     ]
 };
 
 const Game = {
-    state: {
-        cash: 50, hp: 100, en: 100, hg: 100, sm: 100,
-        age: 18, day: 1, location: "Трущобы", job: "Безработный",
-        inventory: [], rels: {}, currentEvent: "start_001"
+    s: { 
+        cash: 10, hp: 100, en: 100, hg: 100, edu: 0, 
+        age: 18, day: 0, 
+        house: null, biz: [], inv: [] 
     },
 
     init() {
         this.load();
-        this.renderEvent(this.state.currentEvent);
-        this.updateHUD();
-        this.startLifeCycle();
+        this.renderAll();
+        this.updateUI();
+        setInterval(() => this.tick(), 5000); // 5 сек = 1 день
+    },
+
+    tick() {
+        this.s.day++;
+        if(this.s.day >= 365) { this.s.day = 0; this.s.age++; }
         
-        // Telegram Auth
-        if(window.Telegram.WebApp) {
-            window.Telegram.WebApp.expand();
-            window.Telegram.WebApp.ready();
+        // Потребности
+        this.s.hg = Math.max(0, this.s.hg - 2);
+        if(this.s.hg <= 0) this.s.hp -= 5;
+        
+        // Доход от бизнеса
+        this.s.biz.forEach(b => this.s.cash += b.rev);
+        
+        // Реген от дома
+        if(this.s.house) this.s.en = Math.min(100, this.s.en + this.s.house.r);
+
+        // Случайные события (шанс 5%)
+        if(Math.random() < 0.05) {
+            const ev = Data.events[Math.floor(Math.random() * Data.events.length)];
+            this.log(ev.f(this.s));
         }
-    },
 
-    // Основной цикл жизни (голод, старение)
-    startLifeCycle() {
-        setInterval(() => {
-            this.state.hg -= 0.5;
-            this.state.sm -= 0.2;
-            if(this.state.hg <= 0) this.state.hp -= 1;
-            this.updateHUD();
-        }, 5000);
-    },
-
-    // Рендеринг сюжетного квеста
-    renderEvent(eventId) {
-        const ev = Database.events.find(e => e.id === eventId) || Database.events[0];
-        this.state.currentEvent = eventId;
-        const npc = Database.npcs[ev.npc];
-
-        const html = `
-            <div class="story-card">
-                ${npc ? `
-                    <div class="npc-box">
-                        <div class="npc-avatar" style="display:flex;align-items:center;justify-content:center;font-size:30px;">${npc.img}</div>
-                        <div>
-                            <div style="font-weight:900; font-size:14px;">${npc.name} <span class="badge">${npc.role}</span></div>
-                            <div style="font-size:10px; color:var(--p)">Отношения: ${this.state.rels[ev.npc] || 0}%</div>
-                        </div>
-                    </div>
-                ` : ''}
-                <h3>${ev.title}</h3>
-                <p style="margin-top:10px; line-height:1.6; font-size:13px; color:#bbb;">${ev.desc}</p>
-                
-                <div class="action-btns">
-                    ${ev.choices.map((c, i) => `
-                        <button class="choice-btn" onclick="Game.makeChoice(${i})">
-                            ${c.text}
-                        </button>
-                    `).join('')}
-                </div>
-            </div>
-        `;
-        
-        const v = document.getElementById('viewport');
-        v.innerHTML = html + v.innerHTML; // Добавляем сверху
+        this.updateUI();
         this.save();
     },
 
-    makeChoice(index) {
-        const ev = Database.events.find(e => e.id === this.state.currentEvent);
-        const choice = ev.choices[index];
-
-        // Применяем эффекты
-        if(choice.effect) {
-            for(let key in choice.effect) {
-                this.state[key] += choice.effect[key];
+    action(type, id) {
+        let obj;
+        if(type === 'srv') {
+            obj = Data.survival.find(i => i.id === id);
+            if(obj.cash && obj.cash[0] < 0) {
+                 if(this.s.cash < Math.abs(obj.cash)) return;
+                 this.s.cash += obj.cash;
+            } else if(obj.cash) {
+                this.s.cash += Math.floor(Math.random() * (obj.cash[1] - obj.cash[0])) + obj.cash[0];
             }
         }
+        if(type === 'job') {
+            obj = Data.jobs.find(i => i.id === id);
+            if(this.s.edu < obj.edu || this.s.en < Math.abs(obj.en)) return;
+            this.s.cash += obj.p;
+            this.s.job = obj.n;
+        }
+        if(type === 'edu') {
+            obj = Data.edu.find(i => i.id === id);
+            if(this.s.cash < obj.c) return;
+            this.s.cash -= obj.c; this.s.edu += obj.v;
+        }
+        if(type === 'buy_house') {
+            obj = Data.houses.find(i => i.id === id);
+            if(this.s.cash < obj.c) return;
+            this.s.cash -= obj.c; this.s.house = obj;
+        }
+        if(type === 'buy_biz') {
+            obj = Data.biz.find(i => i.id === id);
+            if(this.s.cash < obj.c) return;
+            this.s.cash -= obj.c; this.s.biz.push(obj);
+        }
 
-        this.updateHUD();
-        this.renderEvent(choice.next);
-        Telegram.WebApp.HapticFeedback.impactOccurred('light');
+        if(obj.en) this.s.en = Math.max(0, Math.min(100, this.s.en + obj.en));
+        if(obj.hg) this.s.hg = Math.max(0, Math.min(100, this.s.hg + obj.hg));
+        if(obj.hp) this.s.hp = Math.max(0, Math.min(100, this.s.hp + obj.hp));
+
+        this.log(obj.log || 'Action completed');
+        this.updateUI();
+        this.save();
     },
 
-    updateHUD() {
-        document.getElementById('ui-cash').innerText = `$${Math.floor(this.state.cash)}`;
-        document.getElementById('ui-age').innerText = `${this.state.age} лет`;
-        document.getElementById('ui-day').innerText = this.state.day;
-        document.getElementById('ui-job').innerText = this.state.job;
+    renderAll() {
+        const createRow = (item, type, btnText, costText) => `
+            <div class="act-row">
+                <div class="act-info">
+                    <b>${item.n}</b>
+                    <span>${costText}</span>
+                </div>
+                <button class="act-btn" onclick="Game.action('${type}', '${item.id}')">${btnText}</button>
+            </div>
+        `;
+
+        const srv = document.getElementById('actions-survival');
+        srv.innerHTML = Data.survival.map(i => createRow(i, 'srv', 'DO', i.en ? `EN: ${i.en}` : `$${i.cash}`)).join('');
+
+        const jobs = document.getElementById('actions-jobs');
+        jobs.innerHTML = Data.jobs.map(i => createRow(i, 'job', 'WORK', `+$${i.p} | EDU: ${i.edu}`)).join('');
+
+        const edu = document.getElementById('actions-edu');
+        edu.innerHTML = Data.edu.map(i => createRow(i, 'edu', 'STUDY', `$${i.c} | +${i.v} EDU`)).join('');
+
+        const house = document.getElementById('actions-house');
+        house.innerHTML = Data.houses.map(i => createRow(i, 'buy_house', 'BUY', `$${i.c} | ${i.d}`)).join('');
+
+        const biz = document.getElementById('actions-biz');
+        biz.innerHTML = Data.biz.map(i => createRow(i, 'buy_biz', 'INVEST', `$${i.c} | +$${i.rev}/d`)).join('');
+    },
+
+    updateUI() {
+        document.getElementById('cash-ui').innerText = `$${Math.floor(this.s.cash).toLocaleString()}`;
+        document.getElementById('age-ui').innerText = `${this.s.age}y ${this.s.day}d`;
+        document.getElementById('job-ui').innerText = this.s.job || 'HOMELESS';
         
-        // Bars
-        document.getElementById('bar-hp').style.width = this.state.hp + '%';
-        document.getElementById('bar-en').style.width = this.state.en + '%';
-        document.getElementById('bar-hg').style.width = this.state.hg + '%';
-        document.getElementById('bar-sm').style.width = this.state.sm + '%';
+        document.getElementById('hp-bar').style.width = this.s.hp + '%';
+        document.getElementById('en-bar').style.width = this.s.en + '%';
+        document.getElementById('hg-bar').style.width = this.s.hg + '%';
+        document.getElementById('ed-bar').style.width = Math.min(100, this.s.edu / 5) + '%';
 
-        if(this.state.hp <= 0) this.gameOver();
+        if(this.s.hp <= 0) { alert("Game Over"); this.reset(); }
     },
 
-    nav(target) {
-        // Здесь будет переключение на инвентарь, работу и социалку
-        // Для 5000 строк кода тут будут отдельные модули рендеринга
-        console.log("Nav to:", target);
-        document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-        event.currentTarget.classList.add('active');
+    nav(id, el) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById('scr-' + id).classList.add('active');
+        el.classList.add('active');
     },
 
-    showAd() {
-        const ad = Adsgram.init({ blockId: "19895" });
-        ad.show().then(() => {
-            this.state.cash += 500;
-            this.state.hg = 100;
-            this.updateHUD();
-        });
+    log(msg) {
+        const c = document.getElementById('log-container');
+        const m = document.createElement('div');
+        m.className = 'log-msg';
+        m.innerText = msg;
+        c.appendChild(m);
+        setTimeout(() => m.remove(), 2000);
     },
 
-    save() { localStorage.setItem('neon_life_save', JSON.stringify(this.state)); },
+    save() { localStorage.setItem('silicon_empire_v1', JSON.stringify(this.s)); },
     load() {
-        const s = localStorage.getItem('neon_life_save');
-        if(s) this.state = Object.assign(this.state, JSON.parse(s));
+        const data = localStorage.getItem('silicon_empire_v1');
+        if(data) this.s = Object.assign(this.s, JSON.parse(data));
     },
-    gameOver() {
-        alert("Твоя история закончилась...");
-        localStorage.clear();
-        location.reload();
+    reset() { localStorage.clear(); location.reload(); },
+    showAd() { 
+        this.log("Bonus: +$5,000"); this.s.cash += 5000; this.updateUI(); 
     }
 };
 
