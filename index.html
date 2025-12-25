@@ -3,271 +3,306 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Nebula Core: Gold Foundry</title>
+    <title>Nebula Gold Tycoon</title>
     
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <script src="https://sad.adsgram.ai/js/sad.min.js"></script>
 
     <style>
         :root {
             --p-color: #00d4ff;
             --gold: #ffcc00;
-            --bg: #050608;
-            --card: rgba(255, 255, 255, 0.04);
-            --brd: rgba(255, 255, 255, 0.1);
+            --bg: #0a0b10;
+            --card: rgba(255, 255, 255, 0.03);
+            --brd: rgba(255, 255, 255, 0.08);
             --safe: env(safe-area-inset-bottom);
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; user-select: none; touch-action: none; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Roboto, sans-serif; -webkit-tap-highlight-color: transparent; user-select: none; touch-action: none; }
         body { background: var(--bg); color: #fff; height: 100vh; overflow: hidden; position: fixed; width: 100%; }
 
-        #game-canvas { position: absolute; inset: 0; z-index: 5; pointer-events: none; }
+        /* Слой для частиц */
+        #fx-layer { position: absolute; inset: 0; z-index: 5; pointer-events: none; }
 
-        .app { position: relative; z-index: 10; display: flex; flex-direction: column; height: 100%; padding: 20px 20px calc(90px + var(--safe)); }
+        .app { position: relative; z-index: 10; display: flex; flex-direction: column; height: 100%; padding: 20px 20px calc(85px + var(--safe)); }
 
-        /* Экономика */
-        .header { text-align: center; margin-bottom: 10px; }
-        .bal-main { font-size: 38px; font-weight: 900; color: #fff; display: block; }
-        .gold-row { display: flex; justify-content: center; align-items: center; gap: 8px; color: var(--gold); font-weight: 800; font-size: 18px; margin-top: 5px; }
+        /* Интерфейс баланса */
+        .top-bar { text-align: center; margin-bottom: 15px; }
+        .bal-main { font-size: 48px; font-weight: 900; letter-spacing: -1px; display: block; filter: drop-shadow(0 0 15px rgba(0,212,255,0.3)); }
+        .gold-status { color: var(--gold); font-weight: 700; font-size: 18px; margin-top: 4px; display: flex; align-items: center; justify-content: center; gap: 6px; }
 
-        /* Шкала уровня */
-        .lvl-box { background: var(--card); border: 1px solid var(--brd); padding: 10px; border-radius: 15px; margin-top: 10px; }
-        .lvl-info { display: flex; justify-content: space-between; font-size: 10px; font-weight: 800; color: var(--p-color); margin-bottom: 5px; }
-        .bar-wrap { width: 100%; height: 6px; background: rgba(0,0,0,0.5); border-radius: 10px; overflow: hidden; border: 1px solid var(--brd); }
-        .bar-fill { height: 100%; width: 100%; background: var(--p-color); transform-origin: left; transform: scaleX(0); transition: transform 0.2s linear; }
+        /* Исправленная шкала уровня */
+        .lvl-box { background: var(--card); border: 1px solid var(--brd); padding: 14px; border-radius: 20px; margin-top: 10px; backdrop-filter: blur(10px); }
+        .lvl-info { display: flex; justify-content: space-between; font-size: 11px; font-weight: 800; color: var(--p-color); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }
+        .bar-bg { width: 100%; height: 8px; background: rgba(0,0,0,0.4); border-radius: 10px; overflow: hidden; position: relative; }
+        .bar-fill { position: absolute; top: 0; left: 0; height: 100%; width: 100%; background: linear-gradient(90deg, #0055ff, var(--p-color)); transform-origin: left; transform: scaleX(0); will-change: transform; }
 
-        /* Игровая зона */
-        .mine-zone { flex: 1; display: flex; align-items: center; justify-content: center; }
-        .crystal { width: 200px; height: 200px; background: linear-gradient(135deg, var(--p-color), #0055ff); clip-path: polygon(50% 0%, 95% 25%, 95% 75%, 50% 100%, 5% 75%, 5% 25%); display: flex; align-items: center; justify-content: center; transition: transform 0.05s; }
-        .crystal span { font-size: 70px; filter: drop-shadow(0 5px 15px rgba(0,0,0,0.5)); }
+        /* Центр - Кристалл */
+        .main-zone { flex: 1; display: flex; align-items: center; justify-content: center; position: relative; }
+        .crystal { 
+            width: 220px; height: 220px; 
+            background: radial-gradient(circle at 30% 30%, var(--p-color), #0044aa);
+            clip-path: polygon(50% 0%, 95% 25%, 95% 75%, 50% 100%, 5% 75%, 5% 25%);
+            display: flex; align-items: center; justify-content: center;
+            transition: transform 0.05s cubic-bezier(0, 0, 0.2, 1);
+            box-shadow: 0 0 40px rgba(0, 85, 255, 0.4);
+        }
+        .crystal span { font-size: 80px; filter: drop-shadow(0 10px 10px rgba(0,0,0,0.3)); }
 
-        /* Кнопки */
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-        .card { background: var(--card); border: 1px solid var(--brd); padding: 8px; border-radius: 12px; text-align: center; }
-        .card b { display: block; font-size: 16px; }
-        .card small { font-size: 9px; color: #555; }
+        /* Кнопки и статы */
+        .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px; }
+        .stat-item { background: var(--card); border: 1px solid var(--brd); padding: 12px; border-radius: 16px; text-align: center; }
+        .stat-item small { font-size: 10px; color: rgba(255,255,255,0.4); text-transform: uppercase; display: block; }
+        .stat-item b { font-size: 18px; }
 
-        .btn-action { grid-column: span 2; padding: 14px; border-radius: 15px; border: none; background: linear-gradient(135deg, #ff9d00, #ff5e00); color: #fff; font-weight: 900; text-transform: uppercase; font-size: 12px; }
+        .btn-boost { grid-column: span 2; padding: 18px; border-radius: 20px; border: none; background: linear-gradient(135deg, #ff9d00, #ff5e00); color: #fff; font-weight: 900; text-transform: uppercase; font-size: 13px; margin-top: 5px; box-shadow: 0 5px 15px rgba(255, 94, 0, 0.3); }
 
         /* Навигация */
-        .nav { position: fixed; bottom: 0; left: 0; right: 0; height: calc(70px + var(--safe)); background: rgba(5,6,8,0.98); display: flex; border-top: 1px solid var(--brd); padding-bottom: var(--safe); z-index: 1000; }
-        .nav-link { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #444; }
-        .nav-link.active { color: var(--p-color); }
-        .nav-link i { font-size: 20px; font-style: normal; }
+        .nav { position: fixed; bottom: 0; left: 0; right: 0; height: calc(75px + var(--safe)); background: rgba(10,11,16,0.95); display: flex; border-top: 1px solid var(--brd); padding-bottom: var(--safe); z-index: 1000; }
+        .nav-btn { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #444; }
+        .nav-btn.active { color: var(--p-color); }
+        .nav-btn i { font-size: 22px; font-style: normal; margin-bottom: 2px; }
 
-        .screen { position: fixed; inset: 0; background: var(--bg); z-index: 500; display: none; padding: 25px 20px 100px; overflow-y: auto; }
+        /* Экраны */
+        .screen { position: fixed; inset: 0; background: var(--bg); z-index: 500; display: none; padding: 30px 20px 110px; overflow-y: auto; }
         .screen.active { display: block; }
-        .item { background: var(--card); padding: 15px; border-radius: 15px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--brd); }
-        .upg-info b { display: block; font-size: 14px; }
-        .upg-info small { color: #666; font-size: 11px; }
+        .shop-card { background: var(--card); padding: 18px; border-radius: 20px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--brd); }
     </style>
 </head>
 <body>
 
-    <canvas id="game-canvas"></canvas>
+    <canvas id="fx-layer"></canvas>
 
     <div class="app">
-        <header class="header">
+        <div class="top-bar">
             <span class="bal-main" id="ui-bal">0</span>
-            <div class="gold-row">
-                <span>💰</span> <span id="ui-gold">0</span> <small style="font-size:10px; color:#555">SLOTS</small>
-            </div>
+            <div class="gold-status">💰 <span id="ui-gold">0</span> <small style="font-size: 10px; opacity: 0.5">SLOTS</small></div>
             <div class="lvl-box">
-                <div class="lvl-info"><span id="ui-lvl-name">ШАХТЕР</span><span id="ui-lvl-num">УР. 1</span></div>
-                <div class="bar-wrap"><div class="bar-fill" id="ui-bar"></div></div>
+                <div class="lvl-info"><span id="ui-lvl-name">Новичок</span><span id="ui-lvl-num">УР. 1</span></div>
+                <div class="bar-bg"><div class="bar-fill" id="ui-bar"></div></div>
             </div>
-        </header>
+        </div>
 
-        <div class="mine-zone">
+        <div class="main-zone">
             <div class="crystal" id="crystal-node"><span>💎</span></div>
         </div>
 
-        <div class="grid">
-            <div class="card"><small>КЕРН</small><b id="ui-pwr">1.0</b></div>
-            <div class="card"><small>АВТО</small><b id="ui-dps">0.0</b></div>
-            <button class="btn-action" id="ui-boost" onclick="Game.runAdBoost()">⚡ РЕЖИМ ЯРОСТИ x3 (30с)</button>
+        <div class="stats">
+            <div class="stat-item"><small>Керн</small><b id="ui-pwr">1.0</b></div>
+            <div class="stat-item"><small>Авто</small><b id="ui-dps">0.0</b></div>
+            <button class="btn-boost" id="ui-boost" onclick="Game.runAd()">⚡ УСКОРЕНИЕ x3 (AD)</button>
         </div>
     </div>
 
     <div class="screen" id="scr-shop">
-        <h2 style="margin-bottom:20px">Магазин оборудования</h2>
-        <div class="item" style="border: 1px solid var(--gold); background: rgba(255,204,0,0.05)" onclick="Game.runAdBoost()">
-            <div class="upg-info">
-                <b style="color:var(--gold)">Квантовый стимулятор</b>
-                <small>Мгновенный буст x3 на 30 сек</small>
-            </div>
-            <div style="font-weight:900; font-size:11px; color:var(--gold)">AD 📺</div>
-        </div>
+        <h2 style="margin-bottom: 20px">Инструменты</h2>
         <div id="shop-list"></div>
     </div>
 
     <div class="screen" id="scr-market">
-        <h2 style="margin-bottom:20px">Плавильный цех</h2>
-        <div class="item" style="flex-direction:column; gap:15px; text-align:center">
-            <p style="font-size:13px; color:#888">Переплавка 100,000 кристаллов в 1 золотой слиток.</p>
-            <div id="m-lock" style="color:#ff3b30; font-weight:900; font-size:12px">ТРЕБУЕТСЯ 15 УРОВЕНЬ</div>
-            <div id="m-ui" style="display:none; width:100%">
-                <button class="btn-action" style="width:100%; background:var(--gold); color:#000" onclick="Game.exchange()">ВЫПЛАВИТЬ СЛИТОК</button>
-            </div>
+        <h2 style="margin-bottom: 20px">Обмен кристаллов</h2>
+        <div class="shop-card" style="flex-direction: column; gap: 15px; text-align: center">
+            <p style="opacity: 0.6">Курс: 100,000 кристаллов = 1 слиток</p>
+            <div id="m-lock" style="color: #ff3b30; font-weight: 800">ДОСТУПНО С 15 УРОВНЯ</div>
+            <button id="m-btn" class="btn-boost" style="display: none; width: 100%" onclick="Game.exchange()">ВЫПЛАВИТЬ ЗОЛОТО</button>
         </div>
     </div>
 
-    <div class="screen" id="scr-ref">
-        <h2 style="margin-bottom:20px; text-align:center">Ваша Артель</h2>
-        <button class="btn-action" style="width:100%" onclick="Game.invite()">ПРИГЛАСИТЬ НАПАРНИКА</button>
-    </div>
-
     <nav class="nav">
-        <div class="nav-link active" onclick="UI.go('main', this)"><i>⛏️</i></div>
-        <div class="nav-link" onclick="UI.go('shop', this)"><i>🛒</i></div>
-        <div class="nav-link" onclick="UI.go('ref', this)"><i>👥</i></div>
-        <div class="nav-link" onclick="UI.go('market', this)"><i>💰</i></div>
+        <div class="nav-btn active" onclick="UI.go('main', this)"><i>⛏️</i></div>
+        <div class="nav-btn" onclick="UI.go('shop', this)"><i>🛒</i></div>
+        <div class="nav-btn" onclick="UI.go('market', this)"><i>💰</i></div>
     </nav>
 
     <script>
-        // --- RENDER ENGINE ---
-        const Renderer = {
-            canvas: document.getElementById('game-canvas'),
-            ctx: null, texts: [],
+        // --- ПРИЯТНАЯ ФОНОВАЯ МУЗЫКА (Synthesized) ---
+        const AudioFX = {
+            ctx: null,
+            init() {
+                if (this.ctx) return;
+                this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+                this.playAmbient();
+            },
+            playAmbient() {
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(110, this.ctx.currentTime); // Глубокий бас
+                gain.gain.setValueAtTime(0.02, this.ctx.currentTime);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start();
+                // Модуляция звука для эффекта "космоса"
+                setInterval(() => {
+                    osc.frequency.exponentialRampToValueAtTime(Math.random() * 20 + 100, this.ctx.currentTime + 2);
+                }, 2000);
+            }
+        };
+
+        // --- ДВИЖОК ОТРИСОВКИ ЧАСТИЦ ---
+        const FX = {
+            canvas: document.getElementById('fx-layer'),
+            ctx: null,
+            particles: [],
             init() {
                 this.ctx = this.canvas.getContext('2d');
                 this.resize();
                 window.onresize = () => this.resize();
                 this.loop();
             },
-            resize() { this.canvas.width = window.innerWidth; this.canvas.height = window.innerHeight; },
-            spawn(x, y, val) { this.texts.push({ x, y, val, life: 1 }); },
+            resize() {
+                this.canvas.width = window.innerWidth;
+                this.canvas.height = window.innerHeight;
+            },
+            spawn(x, y, text) {
+                this.particles.push({ x, y, text, life: 1, vy: -2 });
+            },
             loop() {
-                this.ctx.clearRect(0,0,this.canvas.width,this.canvas.height);
-                this.ctx.font = "bold 26px sans-serif";
-                for(let i=this.texts.length-1; i>=0; i--) {
-                    let t = this.texts[i]; t.y -= 2; t.life -= 0.025;
-                    this.ctx.fillStyle = `rgba(0, 212, 255, ${t.life})`;
-                    this.ctx.fillText(t.val, t.x, t.y);
-                    if(t.life <= 0) this.texts.splice(i, 1);
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                this.ctx.font = "bold 24px sans-serif";
+                for (let i = this.particles.length - 1; i >= 0; i--) {
+                    let p = this.particles[i];
+                    p.y += p.vy;
+                    p.life -= 0.02;
+                    this.ctx.fillStyle = `rgba(0, 212, 255, ${p.life})`;
+                    this.ctx.fillText(p.text, p.x, p.y);
+                    if (p.life <= 0) this.particles.splice(i, 1);
                 }
                 requestAnimationFrame(() => this.loop());
             }
         };
 
-        // --- AUDIO ---
-        const Ambience = {
-            ctx: null, started: false,
-            init() {
-                if(this.started) return;
-                this.ctx = new (window.AudioContext || window.webkitAudioContext)();
-                const o = this.ctx.createOscillator();
-                const g = this.ctx.createGain();
-                o.type = 'sine'; o.frequency.setValueAtTime(80, this.ctx.currentTime);
-                g.gain.setValueAtTime(0.01, this.ctx.currentTime);
-                o.connect(g); g.connect(this.ctx.destination);
-                o.start(); this.started = true;
-            }
-        };
-
-        // --- GAME ---
+        // --- ЛОГИКА ИГРЫ ---
         const Game = {
-            d: { bal: 0, gold: 0, pwr: 1, dps: 0, xp: 0, lvl: 1, mult: 1, u: [0,0,0,0] },
+            data: { bal: 0, gold: 0, pwr: 1, dps: 0, xp: 0, lvl: 1, mult: 1, u: [0, 0, 0, 0] },
             shop: [
-                { n: "Ручная кирка", p: 150, b: 0.8, t: 'pwr' },
-                { n: "Авто-дрель", p: 800, b: 2.5, t: 'dps' },
-                { n: "Плазменный резак", p: 5000, b: 10, t: 'pwr' },
-                { n: "Шахтный комбайн", p: 25000, b: 60, t: 'dps' }
+                { n: "Ручная кирка", p: 100, b: 0.5, t: 'pwr' },
+                { n: "Дробилка", p: 500, b: 1.5, t: 'dps' },
+                { n: "Лазерный бур", p: 2500, b: 5, t: 'pwr' },
+                { n: "Шахтный ИИ", p: 10000, b: 20, t: 'dps' }
             ],
 
             init() {
                 this.load();
-                Renderer.init();
-                const node = document.getElementById('crystal-node');
-                node.addEventListener('touchstart', (e) => {
-                    e.preventDefault(); Ambience.init();
-                    for(let t of e.changedTouches) this.tap(t.clientX, t.clientY);
+                FX.init();
+                
+                const crystal = document.getElementById('crystal-node');
+                crystal.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    AudioFX.init(); // Музыка включится при первом тапе
+                    for (let t of e.changedTouches) this.tap(t.clientX, t.clientY);
                 });
+
+                // Основной цикл обновления (10 раз в сек)
                 setInterval(() => this.tick(), 100);
-                this.upd();
+                // Плавное обновление шкалы (60 раз в сек)
+                this.updateLvlBar();
             },
 
             tap(x, y) {
-                const gain = this.d.pwr * this.d.mult;
-                this.d.bal += gain; this.d.xp += 15;
-                this.lvl(); Renderer.spawn(x, y, `+${gain.toFixed(1)}`);
-                if(window.Telegram?.WebApp?.HapticFeedback) Telegram.WebApp.HapticFeedback.impactOccurred('light');
-                document.getElementById('crystal-node').style.transform = 'scale(0.95)';
-                setTimeout(()=>document.getElementById('crystal-node').style.transform='scale(1)', 50);
-            },
+                const gain = this.data.pwr * this.data.mult;
+                this.data.bal += gain;
+                this.data.xp += 10;
+                FX.spawn(x, y, `+${gain.toFixed(1)}`);
+                
+                const cry = document.getElementById('crystal-node');
+                cry.style.transform = 'scale(0.92)';
+                setTimeout(() => cry.style.transform = 'scale(1)', 50);
 
-            tick() { if(this.d.dps > 0) this.d.bal += this.d.dps / 10; this.upd(); },
-
-            lvl() {
-                const req = this.d.lvl * 1500;
-                if(this.d.xp >= req) { this.d.xp = 0; this.d.lvl++; this.save(); }
-            },
-
-            upd() {
-                document.getElementById('ui-bal').innerText = Math.floor(this.d.bal).toLocaleString();
-                document.getElementById('ui-gold').innerText = this.d.gold.toLocaleString();
-                document.getElementById('ui-pwr').innerText = (this.d.pwr * this.d.mult).toFixed(1);
-                document.getElementById('ui-dps').innerText = this.d.dps.toFixed(1);
-                document.getElementById('ui-lvl-num').innerText = `УР. ${this.d.lvl}`;
-                const req = this.d.lvl * 1500;
-                document.getElementById('ui-bar').style.transform = `scaleX(${Math.min(this.d.xp/req, 1)})`;
-                if(this.d.lvl >= 15) { document.getElementById('m-lock').style.display='none'; document.getElementById('m-ui').style.display='block'; }
-            },
-
-            exchange() {
-                if(this.d.bal >= 100000) {
-                    this.d.bal -= 100000; this.d.gold += 1; this.save();
-                    Telegram.WebApp.showPopup({ title: "Успех", message: "Слиток выплавлен!" });
-                } else { Telegram.WebApp.showAlert("Недостаточно кристаллов (нужно 100,000)"); }
-            },
-
-            runAdBoost() {
-                const start = () => {
-                    this.d.mult = 3; document.getElementById('ui-boost').disabled = true;
-                    let s = 30;
-                    const itv = setInterval(() => {
-                        s--; document.getElementById('ui-boost').innerText = `ЯРОСТЬ: ${s}с`;
-                        if(s <= 0) { clearInterval(itv); this.d.mult = 1; document.getElementById('ui-boost').disabled = false; document.getElementById('ui-boost').innerText = `⚡ РЕЖИМ ЯРОСТИ x3 (30с)`; }
-                    }, 1000);
-                };
-                if(window.Adsgram) Adsgram.init({ blockId: "19895" }).show().then(start).catch(start); else start();
-            },
-
-            buy(i) {
-                const itm = this.shop[i];
-                const cost = Math.floor(itm.p * Math.pow(1.65, this.d.u[i]));
-                if(this.d.bal >= cost) {
-                    this.d.bal -= cost; this.d.u[i]++;
-                    if(itm.t === 'pwr') this.d.pwr += itm.b; else this.d.dps += itm.b;
-                    UI.drawShop(); this.save();
+                if (window.Telegram?.WebApp?.HapticFeedback) {
+                    Telegram.WebApp.HapticFeedback.impactOccurred('light');
                 }
             },
 
-            invite() {
-                const uid = Telegram.WebApp.initDataUnsafe?.user?.id || "0";
-                const url = `https://t.me/YOUR_BOT_NAME/app?startapp=${uid}`;
-                Telegram.WebApp.openTelegramLink(`https://t.me/share/url?url=${url}&text=Вступай в мою артель!`);
+            tick() {
+                if (this.data.dps > 0) this.data.bal += this.data.dps / 10;
+                this.checkLvl();
+                this.renderUI();
             },
 
-            save() { localStorage.setItem('nebula_foundry_v1', JSON.stringify(this.d)); },
-            load() { const s = localStorage.getItem('nebula_foundry_v1'); if(s) this.d = {...this.d, ...JSON.parse(s)}; }
+            checkLvl() {
+                const req = this.data.lvl * 1000;
+                if (this.data.xp >= req) {
+                    this.data.xp = 0;
+                    this.data.lvl++;
+                    this.save();
+                }
+            },
+
+            // Плавная шкала без багов
+            updateLvlBar() {
+                const req = this.data.lvl * 1000;
+                const target = this.data.xp / req;
+                const bar = document.getElementById('ui-bar');
+                
+                // Используем transform для макс производительности
+                bar.style.transform = `scaleX(${target})`;
+                requestAnimationFrame(() => this.updateLvlBar());
+            },
+
+            renderUI() {
+                document.getElementById('ui-bal').innerText = Math.floor(this.data.bal).toLocaleString();
+                document.getElementById('ui-gold').innerText = this.data.gold;
+                document.getElementById('ui-pwr').innerText = (this.data.pwr * this.data.mult).toFixed(1);
+                document.getElementById('ui-dps').innerText = this.data.dps.toFixed(1);
+                document.getElementById('ui-lvl-num').innerText = `УР. ${this.data.lvl}`;
+
+                if (this.data.lvl >= 15) {
+                    document.getElementById('m-lock').style.display = 'none';
+                    document.getElementById('m-btn').style.display = 'block';
+                }
+            },
+
+            exchange() {
+                if (this.data.bal >= 100000) {
+                    this.data.bal -= 100000;
+                    this.data.gold += 1;
+                    this.save();
+                }
+            },
+
+            save() { localStorage.setItem('nebula_gold_v2', JSON.stringify(this.data)); },
+            load() { 
+                const s = localStorage.getItem('nebula_gold_v2'); 
+                if (s) this.data = {...this.data, ...JSON.parse(s)}; 
+            },
+            
+            runAd() {
+                // Имитация для примера, здесь будет твой Adsgram
+                this.data.mult = 3;
+                setTimeout(() => { this.data.mult = 1; }, 30000);
+            }
         };
 
         const UI = {
             go(id, el) {
-                document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
                 document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
                 el.classList.add('active');
-                if(id !== 'main') { document.getElementById('scr-'+id).classList.add('active'); if(id === 'shop') this.drawShop(); }
+                if (id !== 'main') {
+                    document.getElementById('scr-' + id).classList.add('active');
+                    if (id === 'shop') this.drawShop();
+                }
             },
             drawShop() {
                 document.getElementById('shop-list').innerHTML = Game.shop.map((itm, i) => {
-                    const cost = Math.floor(itm.p * Math.pow(1.65, Game.d.u[i]));
-                    return `<div class="item" onclick="Game.buy(${i})">
-                        <div class="upg-info"><b>${itm.n}</b><small>+${itm.b} к выработке</small></div>
-                        <div style="font-weight:900; font-size:13px">${cost.toLocaleString()} 💎</div>
+                    const cost = Math.floor(itm.p * Math.pow(1.6, Game.data.u[i]));
+                    return `<div class="shop-card" onclick="Game.buy(${i})">
+                        <div><b>${itm.n}</b><br><small>+${itm.b} к добыче</small></div>
+                        <div style="font-weight: 900">${cost.toLocaleString()} 💎</div>
                     </div>`;
                 }).join('');
+            }
+        };
+
+        Game.buy = function(i) {
+            const itm = this.shop[i];
+            const cost = Math.floor(itm.p * Math.pow(1.6, this.data.u[i]));
+            if (this.data.bal >= cost) {
+                this.data.bal -= cost;
+                this.data.u[i]++;
+                if (itm.t === 'pwr') this.data.pwr += itm.b; else this.data.dps += itm.b;
+                UI.drawShop();
+                this.save();
             }
         };
 
