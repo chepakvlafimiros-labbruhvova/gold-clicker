@@ -4,16 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Black Russia - Locus Gold</title>
-    
     <script src="https://sad.adsgram.ai/js/sad.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@700&family=Montserrat:wght@400;600;800;900&display=swap" rel="stylesheet">
-    
     <style>
         :root { --br-red: #ff3333; --bg: #0a0a0c; }
         body { background: var(--bg); color: #fff; font-family: 'Montserrat', sans-serif; overflow: hidden; height: 100vh; user-select: none; }
         .oswald { font-family: 'Oswald', sans-serif; text-transform: uppercase; font-style: italic; }
-        .click-container { position: relative; width: 220px; height: 220px; margin: 15px auto; display: flex; align-items: center; justify-content: center; }
+        .click-container { position: relative; width: 220px; height: 220px; margin: 30px auto; display: flex; align-items: center; justify-content: center; }
         .main-btn {
             width: 180px; height: 180px; border-radius: 50%;
             background: radial-gradient(circle, #252529 0%, #000 100%);
@@ -52,46 +50,44 @@
     <main class="flex-1 overflow-y-auto px-6 pb-28">
         <section id="tab-home" class="tab-view">
             <div class="click-container"><div class="main-btn" onclick="Game.click(event)"></div></div>
-            <div class="bg-white/5 p-5 rounded-3xl border border-white/5 space-y-4 text-center">
-                <p class="text-[10px] oswald text-gray-400">Кликай и зарабатывай на машины</p>
+            <div class="bg-white/5 p-5 rounded-3xl border border-white/5 space-y-4">
+                <div class="flex justify-between text-[10px] font-bold italic oswald"><span class="text-blue-400">Обмен валюты</span><span class="text-gray-500">1.000.000 ₽ = 1 BC</span></div>
+                <div class="flex gap-2">
+                    <input id="ex-in" type="number" placeholder="Сумма ₽" class="flex-1 bg-black/40 p-3 rounded-xl text-xs outline-none border border-white/5">
+                    <button onclick="Game.exchange()" class="bg-blue-600 px-6 rounded-xl text-[10px] font-black uppercase">Обмен</button>
+                </div>
             </div>
         </section>
 
         <section id="tab-cases" class="tab-view hidden space-y-4">
             <h2 class="oswald text-xl italic mb-4 text-center">Магазин кейсов</h2>
-            
             <div class="bg-white/5 p-4 rounded-2xl flex justify-between items-center border border-white/5">
                 <div class="flex gap-3 items-center"><div class="text-2xl">⌛</div><div><p class="font-bold text-xs uppercase">Ежедневный</p><p id="d-timer" class="text-[9px] text-green-500 italic">ГОТОВ</p></div></div>
                 <button onclick="Game.openCase('daily')" class="btn-red px-6 py-2 rounded-xl text-[10px]">ОТКРЫТЬ</button>
             </div>
-
             <div class="bg-white/5 p-4 rounded-2xl flex justify-between items-center border-l-4 border-green-500">
                 <div class="flex gap-3 items-center"><div class="text-2xl">🎁</div><div><p class="font-bold text-xs uppercase text-green-400">Халява (1 ADS)</p><p class="text-[9px] text-gray-400">Приз: 25 - 100 BC</p></div></div>
                 <button onclick="Game.watchAd('fast')" class="bg-green-600 px-6 py-2 rounded-xl text-[10px] font-black uppercase">ОТКРЫТЬ</button>
             </div>
-
             <div class="bg-white/5 p-4 rounded-2xl flex justify-between items-center border-l-4 border-blue-500">
                 <div class="flex gap-3 items-center"><div class="text-2xl">💎</div><div><p class="font-bold text-xs uppercase text-blue-400">Мажор (5 ADS)</p><p id="ad-stat" class="text-[9px] text-blue-300">Прогресс: 0 / 5</p></div></div>
                 <button onclick="Game.watchAd('major')" class="bg-blue-600 px-6 py-2 rounded-xl text-[10px] font-black uppercase">СМОТРЕТЬ</button>
             </div>
-
             <div class="bg-white/5 p-4 rounded-2xl flex justify-between items-center border border-white/5">
                 <div class="flex gap-3 items-center"><div class="text-2xl">💰</div><div><p class="font-bold text-xs uppercase text-yellow-500">Новичок</p><p class="text-[9px] text-gray-500">Цена: 100.000 ₽</p></div></div>
                 <button onclick="Game.buyCase(100000, 'bronze')" class="bg-white/10 px-6 py-2 rounded-xl text-[10px] font-black uppercase">КУПИТЬ</button>
             </div>
-
             <div class="bg-white/5 p-4 rounded-2xl flex justify-between items-center border border-white/5">
                 <div class="flex gap-3 items-center"><div class="text-2xl">🏎️</div><div><p class="font-bold text-xs uppercase text-purple-400">Магнат</p><p class="text-[9px] text-gray-500">Цена: 1.000.000 ₽</p></div></div>
                 <button onclick="Game.buyCase(1000000, 'gold')" class="bg-purple-600/20 text-purple-400 px-6 py-2 rounded-xl text-[10px] font-black uppercase">КУПИТЬ</button>
             </div>
-
             <div class="bg-white/5 p-4 rounded-2xl flex justify-between items-center border border-white/5">
                 <div class="flex gap-3 items-center"><div class="text-2xl">👑</div><div><p class="font-bold text-xs uppercase text-red-500">Элита</p><p class="text-[9px] text-gray-500">Цена: 10.000.000 ₽</p></div></div>
                 <button onclick="Game.buyCase(10000000, 'elite')" class="btn-red px-6 py-2 rounded-xl text-[10px] font-black">КУПИТЬ</button>
             </div>
         </section>
 
-        <section id="tab-garage" class="tab-view hidden"><h2 class="oswald text-xl italic mb-6">Гараж</h2><div id="garage-list" class="grid grid-cols-2 gap-4"></div></section>
+        <section id="tab-garage" class="tab-view hidden"><h2 class="oswald text-xl italic mb-6 text-center">Гараж</h2><div id="garage-list" class="grid grid-cols-2 gap-4"></div></section>
         
         <section id="tab-out" class="tab-view hidden space-y-6">
             <div class="bg-white/5 p-6 rounded-3xl border border-white/5 space-y-4 text-center">
@@ -100,6 +96,10 @@
                 <select id="out-srv" class="w-full bg-black/40 p-4 rounded-xl text-xs oswald outline-none"></select>
                 <input id="out-sum" type="number" placeholder="Сумма BC" class="w-full bg-black/40 p-4 rounded-xl text-xs outline-none">
                 <button onclick="Game.withdraw()" class="btn-red w-full py-4 rounded-xl text-[11px]">ПОДАТЬ ЗАЯВКУ</button>
+            </div>
+            <div class="bg-white/5 p-4 rounded-2xl border border-white/5">
+                <p class="oswald text-[10px] text-gray-500 mb-3 italic">История выводов</p>
+                <div id="out-history" class="space-y-2 text-[10px]"></div>
             </div>
         </section>
     </main>
@@ -119,36 +119,24 @@ const SERVERS = ["RED [1]", "GREEN [2]", "BLUE [3]", "YELLOW [4]", "ORANGE [5]",
 
 const POOLS = {
     daily: [{n:"ZAZ 968",p:20000,i:"🏎️",t:"c"}, {n:"5.000 ₽",v:5000,i:"💵",t:"m"}],
-    fast: [
-        {n:"BMW M5 F90",p:9500000,i:"🏎️",t:"c"}, 
-        {n:"Mercedes E63s",p:8000000,i:"🏎️",t:"c"},
-        {n:"100 BC",v:100,i:"💎",t:"b"}, 
-        {n:"50 BC",v:50,i:"💎",t:"b"},
-        {n:"25 BC",v:25,i:"💎",t:"b"}
-    ],
-    ad: [
-        {n:"Ferrari LaFerrari",p:50000000,i:"🏎️",t:"c"}, 
-        {n:"Lamborghini Aventador",p:35000000,i:"🏎️",t:"c"},
-        {n:"250 BC",v:250,i:"💎",t:"b"}, 
-        {n:"150 BC",v:150,i:"💎",t:"b"},
-        {n:"100 BC",v:100,i:"💎",t:"b"}
-    ],
+    fast: [{n:"BMW M5 F90",p:9500000,i:"🏎️",t:"c"},{n:"100 BC",v:100,i:"💎",t:"b"},{n:"25 BC",v:25,i:"💎",t:"b"}],
+    ad: [{n:"Ferrari LaFerrari",p:50000000,i:"🏎️",t:"c"},{n:"250 BC",v:250,i:"💎",t:"b"},{n:"100 BC",v:100,i:"💎",t:"b"}],
     bronze: [{n:"VAZ 2107",p:150000,i:"🏎️",t:"c"}, {n:"15.000 ₽",v:15000,i:"💵",t:"m"}],
     gold: [{n:"BMW M5 E60",p:4500000,i:"🏎️",t:"c"}, {n:"100.000 ₽",v:100000,i:"💵",t:"m"}],
-    elite: [{n:"Rolls-Royce Cullinan",p:60000000,i:"🏎️",t:"c"}, {n:"1.000.000 ₽",v:1000000,i:"💵",t:"m"}]
+    elite: [{n:"G-63 AMG",p:25000000,i:"🏎️",t:"c"}, {n:"1.000.000 ₽",v:1000000,i:"💵",t:"m"}]
 };
 
 const Game = {
-    u: { m:0, bc:0, ads:0, last:0, inv:[] },
+    u: { m:0, bc:0, ads:0, last:0, inv:[], h:[] },
     init() {
-        const s = localStorage.getItem('locus_v_final_s90');
+        const s = localStorage.getItem('locus_v_final_hist');
         if(s) this.u = JSON.parse(s);
         const sel = document.getElementById('out-srv');
         SERVERS.forEach(x => { const o = document.createElement('option'); o.value=x; o.innerText=x; sel.appendChild(o); });
         this.updateUI();
         setInterval(() => this.tick(), 1000);
     },
-    save() { localStorage.setItem('locus_v_final_s90', JSON.stringify(this.u)); },
+    save() { localStorage.setItem('locus_v_final_hist', JSON.stringify(this.u)); },
     updateUI() {
         document.getElementById('bal-rub').innerText = this.u.m.toLocaleString() + ' ₽';
         document.getElementById('bal-bc').innerText = this.u.bc.toLocaleString() + ' BC';
@@ -157,6 +145,11 @@ const Game = {
         g.innerHTML = this.u.inv.length ? '' : '<p class="col-span-2 text-center text-gray-700 py-10 text-[9px]">Гараж пуст</p>';
         this.u.inv.forEach((item, i) => {
             g.innerHTML += `<div class="bg-white/5 p-4 rounded-2xl border border-white/5 text-center"><span class="text-3xl">${item.i}</span><p class="font-bold text-[9px] uppercase mt-2">${item.n}</p><button onclick="Game.sell(${i})" class="w-full py-2 mt-2 bg-white/5 text-red-500 text-[8px] font-black rounded-lg uppercase">Слить: ${(item.p*0.7).toLocaleString()} ₽</button></div>`;
+        });
+        const hist = document.getElementById('out-history');
+        hist.innerHTML = this.u.h.length ? '' : '<p class="text-gray-600">Истории пока нет</p>';
+        this.u.h.slice().reverse().forEach(x => {
+            hist.innerHTML += `<div class="flex justify-between border-b border-white/5 pb-1"><span>${x.n} (${x.s})</span><span class="text-blue-400">${x.a} BC</span></div>`;
         });
     },
     async watchAd(type) {
@@ -179,6 +172,10 @@ const Game = {
         document.querySelectorAll('nav div').forEach(n => n.classList.remove('nav-active'));
         document.getElementById('tab-'+id).classList.remove('hidden');
         document.getElementById('n-'+id).classList.add('nav-active');
+    },
+    exchange() {
+        const val = parseInt(document.getElementById('ex-in').value);
+        if(val >= 1000000 && this.u.m >= val) { this.u.m -= val; this.u.bc += Math.floor(val/1000000); this.updateUI(); this.save(); }
     },
     buyCase(c, t) { if(this.u.m >= c) { this.u.m -= c; this.updateUI(); this.roll(t); } else alert("Мало денег!"); },
     openCase(t) {
@@ -221,8 +218,15 @@ const Game = {
     },
     sell(i) { this.u.m += Math.floor(this.u.inv[i].p * 0.7); this.u.inv.splice(i,1); this.updateUI(); this.save(); },
     withdraw() {
+        const n = document.getElementById('out-nick').value;
+        const s = document.getElementById('out-srv').value;
         const a = parseInt(document.getElementById('out-sum').value);
-        if(a > 0 && this.u.bc >= a) { this.u.bc -= a; this.updateUI(); this.save(); alert("Заявка ушла!"); }
+        if(n.length > 3 && a > 0 && this.u.bc >= a) { 
+            this.u.bc -= a; 
+            this.u.h.push({n, s, a, d: new Date().toLocaleDateString()});
+            this.updateUI(); this.save(); 
+            alert("Заявка ушла!"); 
+        } else { alert("Проверь данные!"); }
     },
     tick() {
         if (!this.u.last) return;
