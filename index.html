@@ -10,53 +10,30 @@
     <script src="https://adsgram.ai/sdk-v1.js"></script>
     
     <style>
-        :root { --br-red: #ff3333; --bg: #0a0a0c; --card: #141417; }
+        :root { --br-red: #ff3333; --bg: #0a0a0c; }
         body { background: var(--bg); color: #fff; font-family: 'Montserrat', sans-serif; overflow: hidden; height: 100vh; user-select: none; }
         .oswald { font-family: 'Oswald', sans-serif; text-transform: uppercase; font-style: italic; }
-
-        .click-container { position: relative; width: 260px; height: 260px; margin: 30px auto; display: flex; align-items: center; justify-content: center; }
+        
+        /* Кнопка кликера */
         .main-btn {
             width: 210px; height: 210px; border-radius: 50%;
             background: radial-gradient(circle, #252529 0%, #000 100%);
-            border: 6px solid #1f1f22; display: flex; flex-direction: column;
-            align-items: center; justify-content: center; cursor: pointer;
-            transition: transform 0.05s ease-out; z-index: 10;
-            box-shadow: 0 0 50px rgba(0,0,0,0.8);
-        }
-        .main-btn::before {
-            content: "BR"; font-family: 'Oswald'; font-size: 70px; color: var(--br-red);
-            text-shadow: 0 0 20px rgba(255,51,51,0.5); font-weight: 900;
+            border: 6px solid #1f1f22; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: transform 0.05s ease-out;
+            box-shadow: 0 0 50px rgba(0,0,0,0.5);
         }
         .main-btn:active { transform: scale(0.92); }
-        
-        .modal-overlay {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.98); z-index: 999;
-            display: none; flex-direction: column; align-items: center; justify-content: center;
-        }
-        .roulette-box {
-            position: relative; width: 100%; height: 140px; background: #000;
-            margin: 40px 0; overflow: hidden; border-top: 1px solid #222; border-bottom: 1px solid #222;
-        }
+
+        /* Рулетка */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.98); z-index: 999; display: none; flex-direction: column; align-items: center; justify-content: center; }
+        .roulette-box { position: relative; width: 100%; height: 140px; background: #000; margin: 40px 0; overflow: hidden; border-top: 1px solid #222; border-bottom: 1px solid #222; }
         .track { display: flex; position: absolute; height: 100%; transition: transform 9s cubic-bezier(0.1, 0, 0.05, 1); }
-        .item {
-            min-width: 150px; height: 100%; display: flex; flex-direction: column;
-            align-items: center; justify-content: center; border-right: 1px solid #111;
-            background: #141416;
-        }
-        .marker {
-            position: absolute; left: 50%; top: 0; bottom: 0; width: 3px;
-            background: var(--br-red); z-index: 100; transform: translateX(-50%);
-            box-shadow: 0 0 15px var(--br-red);
-        }
+        .item { min-width: 150px; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; border-right: 1px solid #111; background: #141416; }
+        .marker { position: absolute; left: 50%; top: 0; bottom: 0; width: 3px; background: var(--br-red); z-index: 100; transform: translateX(-50%); box-shadow: 0 0 15px var(--br-red); }
 
         .btn-red { background: linear-gradient(90deg, #ff3333, #b30000); font-weight: 900; text-transform: uppercase; }
         .nav-active { color: var(--br-red) !important; }
-        .nav-active .dot { background: var(--br-red); box-shadow: 0 0 8px var(--br-red); }
-        
-        /* Стили для полосы прокрутки */
-        ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
+        .disabled-btn { opacity: 0.5; pointer-events: none; }
     </style>
 </head>
 <body>
@@ -76,17 +53,13 @@
 
     <main class="flex-1 overflow-y-auto px-6 pb-28">
         <section id="tab-home" class="tab-view">
-            <div class="click-container">
+            <div class="flex justify-center my-10">
                 <div class="main-btn" onclick="Game.click(event)">
-                    <p class="oswald text-[10px] mt-2 tracking-[0.3em] text-gray-500">ЗАРАБОТАТЬ</p>
+                    <span class="oswald text-6xl text-[#ff3333] font-black italic">BR</span>
                 </div>
             </div>
-            
-            <div class="bg-white/5 p-5 rounded-3xl border border-white/5 space-y-4">
-                <div class="flex justify-between text-[10px] font-bold italic oswald">
-                    <span class="text-blue-400">Обмен валюты</span>
-                    <span class="text-gray-500">1.000.000 ₽ = 1 BC</span>
-                </div>
+            <div class="bg-white/5 p-5 rounded-3xl border border-white/5">
+                <p class="text-[10px] font-bold text-blue-400 mb-2 italic uppercase text-center">Обмен: 1.000.000 ₽ = 1 BC</p>
                 <div class="flex gap-2">
                     <input id="ex-in" type="number" placeholder="Сумма ₽" class="flex-1 bg-black/40 p-3 rounded-xl text-xs outline-none border border-white/5">
                     <button onclick="Game.exchange()" class="bg-blue-600 px-6 rounded-xl text-[10px] font-black uppercase">Обмен</button>
@@ -102,37 +75,31 @@
                     <div class="text-2xl">💎</div>
                     <div>
                         <p class="font-bold text-xs uppercase">Кейс Мажор</p>
-                        <p id="ad-stat" class="text-[9px] text-blue-400 font-bold uppercase italic">ADS: 0 / 5</p>
+                        <p id="ad-stat" class="text-[9px] text-blue-400 font-bold uppercase italic italic">ADS: 0 / 5</p>
                     </div>
                 </div>
-                <button id="ad-btn" onclick="Game.watchAd()" class="bg-blue-600 px-6 py-2 rounded-xl text-[10px] font-black uppercase">Смотреть</button>
+                <button id="ad-btn" onclick="Game.watchAd()" class="bg-blue-600 px-4 py-2 rounded-xl text-[10px] font-black uppercase transition-all">
+                    <span id="ad-btn-text">Смотреть</span>
+                </button>
             </div>
 
             <div class="bg-white/5 p-4 rounded-2xl flex justify-between items-center border border-white/5">
                 <div class="flex gap-3 items-center">
                     <div class="text-2xl">🎁</div>
-                    <div><p class="font-bold text-xs uppercase">Ежедневный</p><p id="d-timer" class="text-[9px] text-green-500 italic uppercase">ГОТОВ</p></div>
+                    <div><p class="font-bold text-xs uppercase">Ежедневный</p><p id="d-timer" class="text-[9px] text-green-500 italic">ГОТОВ</p></div>
                 </div>
                 <button onclick="Game.openCase('daily')" class="btn-red px-6 py-2 rounded-xl text-[10px]">Открыть</button>
-            </div>
-
-            <div class="bg-white/5 p-4 rounded-2xl flex justify-between items-center border-l-4 border-red-600">
-                <div class="flex gap-3 items-center">
-                    <div class="text-2xl">👑</div>
-                    <div><p class="font-bold text-xs uppercase italic">Элитный</p><p class="text-[9px] text-gray-500 uppercase">15.000.000 ₽</p></div>
-                </div>
-                <button onclick="Game.buyCase(15000000, 'elite')" class="btn-red px-6 py-2 rounded-xl text-[10px] font-black">КУПИТЬ</button>
             </div>
         </section>
 
         <section id="tab-garage" class="tab-view hidden">
-            <h2 class="oswald text-xl italic mb-6">Ваш автопарк</h2>
+            <h2 class="oswald text-xl italic mb-6">Гараж</h2>
             <div id="garage-list" class="grid grid-cols-2 gap-4"></div>
         </section>
 
-        <section id="tab-out" class="tab-view hidden space-y-6">
+        <section id="tab-out" class="tab-view hidden space-y-4">
             <div class="bg-white/5 p-6 rounded-3xl border border-white/5 space-y-4">
-                <h3 class="oswald text-center text-red-500 italic">Вывод BC</h3>
+                <h3 class="oswald text-center text-red-500 italic">Заявка на вывод</h3>
                 <input id="out-nick" type="text" placeholder="Nick_Name" class="w-full bg-black/40 p-4 rounded-xl text-xs outline-none">
                 <select id="out-srv" class="w-full bg-black/40 p-4 rounded-xl text-xs oswald outline-none"></select>
                 <input id="out-sum" type="number" placeholder="Сумма BC" class="w-full bg-black/40 p-4 rounded-xl text-xs outline-none">
@@ -148,47 +115,41 @@
             <div id="track" class="track"></div>
         </div>
         <div id="win-ui" class="hidden flex flex-col items-center">
-            <h3 id="win-name" class="oswald text-2xl text-white mb-8 text-center px-4 uppercase italic">---</h3>
+            <h3 id="win-name" class="oswald text-2xl text-white mb-8 text-center px-4">---</h3>
             <button onclick="Game.claim()" class="btn-red px-14 py-4 rounded-full text-[10px] tracking-widest uppercase">Забрать</button>
         </div>
     </div>
 
     <nav class="fixed bottom-0 left-0 right-0 bg-black/90 backdrop-blur-lg border-t border-white/5 flex justify-around py-4 z-50">
         <div onclick="Game.tab('home')" id="n-home" class="flex flex-col items-center gap-1 cursor-pointer nav-active">
-            <span class="text-xl">🏠</span><span class="text-[8px] font-bold uppercase">Главная</span><div class="dot w-1 h-1 rounded-full"></div>
+            <span class="text-xl">🏠</span><span class="text-[8px] font-bold uppercase">Главная</span>
         </div>
         <div onclick="Game.tab('cases')" id="n-cases" class="flex flex-col items-center gap-1 cursor-pointer">
-            <span class="text-xl">📦</span><span class="text-[8px] font-bold uppercase">Кейсы</span><div class="dot w-1 h-1 rounded-full"></div>
+            <span class="text-xl">📦</span><span class="text-[8px] font-bold uppercase">Кейсы</span>
         </div>
         <div onclick="Game.tab('garage')" id="n-garage" class="flex flex-col items-center gap-1 cursor-pointer">
-            <span class="text-xl">🏎️</span><span class="text-[8px] font-bold uppercase">Гараж</span><div class="dot w-1 h-1 rounded-full"></div>
+            <span class="text-xl">🏎️</span><span class="text-[8px] font-bold uppercase">Гараж</span>
         </div>
         <div onclick="Game.tab('out')" id="n-out" class="flex flex-col items-center gap-1 cursor-pointer">
-            <span class="text-xl">💳</span><span class="text-[8px] font-bold uppercase">Вывод</span><div class="dot w-1 h-1 rounded-full"></div>
+            <span class="text-xl">💳</span><span class="text-[8px] font-bold uppercase">Вывод</span>
         </div>
     </nav>
 </div>
 
 <script>
-// ПОЛНЫЙ СПИСОК СЕРВЕРОВ (90)
+// Список из 90 серверов
 const SERVERS = ["RED [1]", "GREEN [2]", "BLUE [3]", "YELLOW [4]", "ORANGE [5]", "PURPLE [6]", "LIME [7]", "PINK [8]", "CHERRY [9]", "BLACK [10]", "INDIGO [11]", "WHITE [12]", "MAGENTA [13]", "CRIMSON [14]", "GOLD [15]", "AZURE [16]", "PLATINUM [17]", "AQUA [18]", "GRAY [19]", "ICE [20]", "CHILLI [21]", "CHOCO [22]", "MOSCOW [23]", "SPB [24]", "UFA [25]", "SOCHI [26]", "KAZAN [27]", "SAMARA [28]", "ROSTOV [29]", "ANAPA [30]", "EKATERINBURG [31]", "KRASNODAR [32]", "ARZAMAS [33]", "NOVOSIBIRSK [34]", "GROZNY [35]", "SARATOV [36]", "OMSK [37]", "IRKUTSK [38]", "VOLGOGRAD [39]", "VORONEZH [40]", "BELGOROD [41]", "MAKHACHKALA [42]", "VLADIKAVKAZ [43]", "VLADIVOSTOK [44]", "KALININGRAD [45]", "CHELYABINSK [46]", "KRASNOYARSK [47]", "CHEBOKSARY [48]", "KHABAROVSK [49]", "PERM [50]", "TULA [51]", "RYAZAN [52]", "MURMANSK [53]", "PENZA [54]", "KURSK [55]", "ARKHANGELSK [56]", "ORENBURG [57]", "KIROV [58]", "KEMEROVO [59]", "TYUMEN [60]", "TOLYATTI [61]", "IVANOVO [62]", "STAVROPOL [63]", "SMOLENSK [64]", "PSKOV [65]", "BRYANSK [66]", "OREL [67]", "YAROSLAVL [68]", "BARNAUL [69]", "LIPETSK [70]", "ULYANOVSK [71]", "YAKUTSK [72]", "TAMBOV [73]", "BRATSK [74]", "ASTRAKHAN [75]", "CHITA [76]", "KOSTROMA [77]", "VLADIMIR [78]", "KALUGA [79]", "N.NOVGOROD [80]", "TAGANROG [81]", "VOLOGDA [82]", "TVER [83]", "TOMSK [84]", "IZHEVSK [85]", "SURGUT [86]", "PODOLSK [87]", "MAGADAN [88]", "CHEREPOVETS [89]", "NORILSK [90]"];
 
 const POOLS = {
     daily: [{n:"VAZ 2107",p:150000,i:"🏎️",t:"c"}, {n:"1.000 ₽",v:1000,i:"💵",t:"m"}],
-    elite: [{n:"Bugatti Chiron",p:120000000,i:"🏎️",t:"c"}, {n:"Mercedes G63",p:25000000,i:"🏎️",t:"c"}],
-    ad: [
-        {n:"500 BC",v:500,i:"💎",t:"b"},
-        {n:"Rolls-Royce Cullinan",p:65000000,i:"🏎️",t:"c"},
-        {n:"1.000.000 ₽",v:1000000,i:"💵",t:"m"},
-        {n:"Ferrari LaFerrari",p:150000000,i:"🏎️",t:"c"}
-    ]
+    ad: [{n:"500 BC",v:500,i:"💎",t:"b"}, {n:"Tesla Model S",p:20000000,i:"🏎️",t:"c"}]
 };
 
 const Game = {
     u: { m:0, bc:0, ads:0, last:0, inv:[] },
     
     init() {
-        const s = localStorage.getItem('locus_br_v4');
+        const s = localStorage.getItem('br_locus_final');
         if(s) this.u = JSON.parse(s);
         const sel = document.getElementById('out-srv');
         SERVERS.forEach(x => { const o = document.createElement('option'); o.value=x; o.innerText=x; sel.appendChild(o); });
@@ -196,44 +157,54 @@ const Game = {
         setInterval(() => this.tick(), 1000);
     },
 
-    save() { localStorage.setItem('locus_br_v4', JSON.stringify(this.u)); },
+    save() { localStorage.setItem('br_locus_final', JSON.stringify(this.u)); },
 
     updateUI() {
         document.getElementById('bal-rub').innerText = this.u.m.toLocaleString() + ' ₽';
         document.getElementById('bal-bc').innerText = this.u.bc.toLocaleString() + ' BC';
         document.getElementById('ad-stat').innerText = `ADS: ${this.u.ads} / 5`;
-        
         const g = document.getElementById('garage-list');
-        g.innerHTML = this.u.inv.length ? '' : '<p class="col-span-2 text-center text-gray-700 py-10 text-[9px] uppercase">Гараж пуст</p>';
-        this.u.inv.forEach((item, i) => {
+        g.innerHTML = this.u.inv.length ? '' : '<p class="col-span-2 text-center text-gray-500 py-10">Гараж пуст</p>';
+        this.u.inv.forEach((it, i) => {
             g.innerHTML += `<div class="bg-white/5 p-4 rounded-2xl border border-white/5 text-center">
-                <span class="text-3xl">${item.i}</span>
-                <p class="font-bold text-[9px] uppercase mt-2">${item.n}</p>
-                <button onclick="Game.sell(${i})" class="w-full py-2 mt-2 bg-white/5 text-red-500 text-[8px] font-black rounded-lg uppercase">ПРОДАТЬ</button>
+                <span class="text-3xl">${it.i}</span><p class="font-bold text-[9px] mt-2 uppercase">${it.n}</p>
+                <button onclick="Game.sell(${i})" class="mt-2 text-red-500 text-[8px] font-bold">ПРОДАТЬ</button>
             </div>`;
         });
     },
 
-    // ПРАВИЛЬНЫЙ ИСПРАВЛЕННЫЙ МЕТОД ADSGRAM
+    // МЕТОД ОЖИДАНИЯ SDK
+    async waitForSDK() {
+        if (window.Adsgram) return true;
+        for (let i = 0; i < 30; i++) { // ждем 3 секунды
+            await new Promise(r => setTimeout(r, 100));
+            if (window.Adsgram) return true;
+        }
+        return false;
+    },
+
+    // ОБНОВЛЕННЫЙ МЕТОД РЕКЛАМЫ
     async watchAd() {
-        if (!window.Adsgram) {
-            alert("Реклама не загрузилась. Отключите AdBlock.");
+        const btn = document.getElementById('ad-btn');
+        const btnText = document.getElementById('ad-btn-text');
+
+        btn.classList.add('disabled-btn');
+        btnText.innerText = "Загрузка...";
+
+        const isOK = await this.waitForSDK();
+        
+        if (!isOK) {
+            alert("SDK не загружен. Отключите AdBlock!");
+            btn.classList.remove('disabled-btn');
+            btnText.innerText = "Смотреть";
             return;
         }
 
-        const ad = window.Adsgram.rewarded({
-            blockId: "20963"
-        });
-
-        const btn = document.getElementById('ad-btn');
-        btn.innerText = "ЗАГРУЗКА...";
-        btn.disabled = true;
+        const ad = window.Adsgram.rewarded({ blockId: "20963" });
 
         try {
-            // Ожидаем завершения. Если пользователь закроет — выбросит исключение
             await ad.show();
-
-            // Сюда попадем ТОЛЬКО если реклама досмотрена (аналог done: true)
+            // Если дошли сюда - успех
             this.u.ads++;
             if (this.u.ads >= 5) {
                 this.u.ads = 0;
@@ -241,18 +212,22 @@ const Game = {
             }
             this.updateUI();
             this.save();
-            alert("Просмотр засчитан!");
+            alert("Просмотр засчитан! +1");
         } catch (e) {
-            console.log("AdsGram error/skip:", e);
-            alert("Реклама не была досмотрена до конца.");
+            console.log("AdsGram info:", e);
+            if (e && e.error === 'closed') {
+                alert("Нужно досмотреть рекламу до конца!");
+            } else {
+                alert("Ошибка рекламы или нет доступных роликов.");
+            }
         } finally {
-            btn.innerText = "СМОТРЕТЬ";
-            btn.disabled = false;
+            btn.classList.remove('disabled-btn');
+            btnText.innerText = "Смотреть";
         }
     },
 
-    click(e) { this.u.m += 500 + (this.u.inv.length * 100); this.updateUI(); this.save(); },
-
+    click(e) { this.u.m += 500; this.updateUI(); this.save(); },
+    
     tab(id) {
         document.querySelectorAll('.tab-view').forEach(t => t.classList.add('hidden'));
         document.querySelectorAll('nav div').forEach(n => n.classList.remove('nav-active'));
@@ -265,23 +240,12 @@ const Game = {
         if(val >= 1000000 && this.u.m >= val) {
             this.u.m -= val; this.u.bc += Math.floor(val/1000000);
             this.updateUI(); this.save();
-            alert("Обмен успешно выполнен!");
-        }
-    },
-
-    buyCase(c, t) {
-        if(this.u.m >= c) {
-            this.u.m -= c;
-            this.updateUI();
-            this.roll(t);
-        } else {
-            alert("Недостаточно средств!");
-        }
+        } else { alert("Минимум 1.000.000 ₽"); }
     },
 
     openCase(t) {
         if(t === 'daily') {
-            if(Date.now() - this.u.last < 86400000) return alert("Ждите 24 часа!");
+            if(Date.now() - this.u.last < 86400000) return alert("Ждите 24 часа");
             this.u.last = Date.now();
         }
         this.roll(t);
@@ -293,18 +257,16 @@ const Game = {
         document.getElementById('modal').style.display = 'flex';
         document.getElementById('win-ui').classList.add('hidden');
         tr.style.transition = 'none'; tr.style.transform = 'translateX(0)'; tr.innerHTML = '';
-        
         let cards = [];
         for(let i=0; i<70; i++) {
             let item = pool[Math.floor(Math.random() * pool.length)];
             cards.push(item);
-            tr.innerHTML += `<div class="item"><span class="text-3xl">${item.i}</span><p class="text-[8px] font-bold mt-1 text-center uppercase">${item.n}</p></div>`;
+            tr.innerHTML += `<div class="item"><span class="text-3xl">${item.i}</span><p class="text-[8px] font-bold mt-1 text-center">${item.n}</p></div>`;
         }
         this.current = cards[62];
         setTimeout(() => {
             tr.style.transition = 'transform 9s cubic-bezier(0.1, 0, 0.05, 1)';
-            const final = (62 * 150) - (window.innerWidth / 2) + 75;
-            tr.style.transform = `translateX(-${final}px)`;
+            tr.style.transform = `translateX(-${(62 * 150) - (window.innerWidth / 2) + 75}px)`;
         }, 50);
         setTimeout(() => { 
             document.getElementById('win-ui').classList.remove('hidden'); 
@@ -321,20 +283,13 @@ const Game = {
         this.updateUI(); this.save();
     },
 
-    sell(i) {
-        this.u.m += Math.floor(this.u.inv[i].p * 0.7);
-        this.u.inv.splice(i, 1);
-        this.updateUI(); this.save();
-    },
+    sell(i) { this.u.m += 500000; this.u.inv.splice(i, 1); this.updateUI(); this.save(); },
 
     withdraw() {
-        const a = parseInt(document.getElementById('out-sum').value);
-        const n = document.getElementById('out-nick').value;
-        if(a > 0 && n.length > 3 && this.u.bc >= a) {
-            this.u.bc -= a; this.updateUI(); this.save();
-            alert("Заявка создана! Ожидайте вывода на аккаунт " + n);
-        } else {
-            alert("Проверьте данные или баланс");
+        const s = document.getElementById('out-sum').value;
+        if(s > 0 && this.u.bc >= s) {
+            this.u.bc -= s; this.updateUI(); this.save();
+            alert("Заявка создана!");
         }
     },
 
