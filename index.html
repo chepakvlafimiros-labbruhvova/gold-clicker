@@ -193,7 +193,7 @@ const Game = {
     u: { m:0, bc:0, ads:0, last:0, inv:[], hist:[] },
     
     init() {
-        const s = localStorage.getItem('locus_v_final_fix');
+        const s = localStorage.getItem('locus_v_ultra_final');
         if(s) this.u = JSON.parse(s);
         const sel = document.getElementById('out-srv');
         SERVERS.forEach(x => { const o = document.createElement('option'); o.value=x; o.innerText=x; sel.appendChild(o); });
@@ -201,7 +201,7 @@ const Game = {
         setInterval(() => this.tick(), 1000);
     },
 
-    save() { localStorage.setItem('locus_v_final_fix', JSON.stringify(this.u)); },
+    save() { localStorage.setItem('locus_v_ultra_final', JSON.stringify(this.u)); },
 
     updateUI() {
         document.getElementById('bal-rub').innerText = this.u.m.toLocaleString() + ' ₽';
@@ -235,32 +235,41 @@ const Game = {
         }
     },
 
-    // ИСПРАВЛЕННАЯ ФУНКЦИЯ РЕКЛАМЫ
+    // РЕАЛЬНЫЙ ВЫЗОВ ADSGRAM
     async watchAd() {
         if (!window.Adsgram) {
-            alert("AdsGram SDK не загружен. Проверьте интернет или отключите AdBlock.");
+            alert("Ошибка: SDK рекламы не найден. Отключите AdBlock.");
             return;
         }
 
-        const AdController = window.Adsgram.init({ blockId: "20963" });
-        
+        // Создаем контроллер рекламы
+        const controller = window.Adsgram.init({ blockId: "20963" });
+
         try {
-            const result = await AdController.show();
+            // Вызываем показ рекламы и ждем результат
+            const result = await controller.show();
+
+            // Проверка: завершен ли просмотр (done: true)
             if (result && result.done) {
                 this.u.ads++;
                 if (this.u.ads >= 5) {
                     this.u.ads = 0;
-                    this.roll('ad');
+                    this.roll('ad'); // Открываем кейс при 5/5
                 }
                 this.updateUI();
                 this.save();
                 alert("Реклама просмотрена! +1 к прогрессу.");
             } else {
-                alert("Реклама не была досмотрена.");
+                alert("Для получения награды нужно досмотреть рекламу до конца.");
             }
-        } catch (e) {
-            console.error(e);
-            alert("Ошибка при загрузке рекламы. Попробуйте еще раз.");
+        } catch (error) {
+            console.error("AdsGram Error:", error);
+            // Обработка ошибок (например, нет доступной рекламы)
+            if (error.error === "no_ads") {
+                alert("Сейчас нет доступной рекламы. Попробуйте через минуту.");
+            } else {
+                alert("Произошла ошибка при загрузке рекламы.");
+            }
         }
     },
 
