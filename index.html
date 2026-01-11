@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Black Russia - Locus Gold Ultimate</title>
+    <title>Black Russia - Locus Gold</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@700&family=Montserrat:wght@400;600;800;900&display=swap" rel="stylesheet">
     
@@ -76,7 +76,6 @@
                     <p class="oswald text-[10px] mt-2 tracking-[0.3em] text-gray-500">ЗАРАБОТАТЬ</p>
                 </div>
             </div>
-            
             <div class="bg-white/5 p-5 rounded-3xl border border-white/5 space-y-4">
                 <div class="flex justify-between text-[10px] font-bold italic oswald">
                     <span class="text-blue-400">Обмен валюты</span>
@@ -91,7 +90,6 @@
 
         <section id="tab-cases" class="tab-view hidden space-y-4">
             <h2 class="oswald text-xl italic mb-4">Магазин кейсов</h2>
-            
             <div class="bg-white/5 p-4 rounded-2xl flex justify-between items-center border border-white/5">
                 <div class="flex gap-3 items-center">
                     <div class="text-2xl">🎁</div>
@@ -99,31 +97,7 @@
                 </div>
                 <button onclick="Game.openCase('daily')" class="btn-red px-6 py-2 rounded-xl text-[10px]">Открыть</button>
             </div>
-
-            <div class="bg-white/5 p-4 rounded-2xl flex justify-between items-center border-l-4 border-yellow-600">
-                <div class="flex gap-3 items-center">
-                    <div class="text-2xl">💰</div>
-                    <div><p class="font-bold text-xs uppercase">Новичок</p><p class="text-[9px] text-gray-500">100.000 ₽</p></div>
-                </div>
-                <button onclick="Game.buyCase(100000, 'bronze')" class="bg-white/10 px-6 py-2 rounded-xl text-[10px] font-black uppercase">Купить</button>
-            </div>
-
-            <div class="bg-white/5 p-4 rounded-2xl flex justify-between items-center border-l-4 border-purple-600">
-                <div class="flex gap-3 items-center">
-                    <div class="text-2xl">🏎️</div>
-                    <div><p class="font-bold text-xs uppercase">Магнат</p><p class="text-[9px] text-gray-500">1.000.000 ₽</p></div>
-                </div>
-                <button onclick="Game.buyCase(1000000, 'gold')" class="bg-purple-600/20 text-purple-400 px-6 py-2 rounded-xl text-[10px] font-black uppercase">Купить</button>
-            </div>
-
-            <div class="bg-white/5 p-4 rounded-2xl flex justify-between items-center border-l-4 border-red-600">
-                <div class="flex gap-3 items-center">
-                    <div class="text-2xl">👑</div>
-                    <div><p class="font-bold text-xs uppercase italic">Элита</p><p class="text-[9px] text-gray-500">15.000.000 ₽</p></div>
-                </div>
-                <button onclick="Game.buyCase(15000000, 'elite')" class="btn-red px-6 py-2 rounded-xl text-[10px] font-black">КУПИТЬ</button>
-            </div>
-
+            
             <div class="bg-white/5 p-4 rounded-2xl flex justify-between items-center border-l-4 border-blue-500">
                 <div class="flex gap-3 items-center">
                     <div class="text-2xl">💎</div>
@@ -131,96 +105,75 @@
                 </div>
                 <button onclick="Game.watchAd()" class="bg-blue-600 px-6 py-2 rounded-xl text-[10px] font-black uppercase">Смотреть</button>
             </div>
+
+            <div class="bg-white/5 p-4 rounded-2xl flex justify-between items-center border-l-4 border-yellow-600 opacity-50">
+                <div class="flex gap-3 items-center">
+                    <div class="text-2xl">💰</div>
+                    <div><p class="font-bold text-xs uppercase">Новичок</p><p class="text-[9px] text-gray-500">100.000 ₽</p></div>
+                </div>
+                <button onclick="Game.buyCase(100000, 'bronze')" class="bg-white/10 px-6 py-2 rounded-xl text-[10px]">Купить</button>
+            </div>
         </section>
 
-        <section id="tab-garage" class="tab-view hidden">
-            <h2 class="oswald text-xl italic mb-6">Гараж</h2>
-            <div id="garage-list" class="grid grid-cols-2 gap-4"></div>
-        </section>
-
-        <section id="tab-out" class="tab-view hidden space-y-6">
-            <div class="bg-white/5 p-6 rounded-3xl border border-white/5 space-y-4">
-                <h3 class="oswald text-center text-red-500 italic">Вывод BC</h3>
-                <input id="out-nick" type="text" placeholder="Nick_Name" class="w-full bg-black/40 p-4 rounded-xl text-xs outline-none">
-                <select id="out-srv" class="w-full bg-black/40 p-4 rounded-xl text-xs oswald outline-none"></select>
-                <input id="out-sum" type="number" placeholder="Сумма BC" class="w-full bg-black/40 p-4 rounded-xl text-xs outline-none">
-                <button onclick="Game.withdraw()" class="btn-red w-full py-4 rounded-xl text-[11px]">ПОДТВЕРДИТЬ ВЫВОД</button>
+        <section id="tab-garage" class="tab-view hidden"><div id="garage-list" class="grid grid-cols-2 gap-4"></div></section>
+        <section id="tab-out" class="tab-view hidden">
+            <div class="bg-white/5 p-6 rounded-3xl border border-white/5 space-y-4 text-center">
+                <h3 class="oswald text-red-500 italic">Вывод Black Coins</h3>
+                <input id="out-sum" type="number" placeholder="Сумма BC" class="w-full bg-black/40 p-4 rounded-xl text-xs outline-none border border-white/5">
+                <button onclick="Game.withdraw()" class="btn-red w-full py-4 rounded-xl text-[11px]">ВЫВЕСТИ</button>
             </div>
         </section>
     </main>
 
     <div id="modal" class="modal-overlay">
         <h2 class="oswald text-2xl tracking-[0.5em] text-gray-500">УДАЧА...</h2>
-        <div class="roulette-box">
-            <div class="marker"></div>
-            <div id="track" class="track"></div>
-        </div>
+        <div class="roulette-box"><div class="marker"></div><div id="track" class="track"></div></div>
         <div id="win-ui" class="hidden flex flex-col items-center">
             <h3 id="win-name" class="oswald text-2xl text-white mb-8 text-center px-4">---</h3>
             <button onclick="Game.claim()" class="btn-red px-14 py-4 rounded-full text-[10px] tracking-widest uppercase">Забрать</button>
         </div>
     </div>
 
-    <nav class="fixed bottom-0 left-0 right-0 bg-black/90 backdrop-blur-lg border-t border-white/5 flex justify-around py-4 z-50">
-        <div onclick="Game.tab('home')" id="n-home" class="flex flex-col items-center gap-1 cursor-pointer nav-active">
-            <span class="text-xl">🏠</span><span class="text-[8px] font-bold uppercase">Главная</span><div class="dot w-1 h-1 rounded-full"></div>
-        </div>
-        <div onclick="Game.tab('cases')" id="n-cases" class="flex flex-col items-center gap-1 cursor-pointer">
-            <span class="text-xl">📦</span><span class="text-[8px] font-bold uppercase">Кейсы</span><div class="dot w-1 h-1 rounded-full"></div>
-        </div>
-        <div onclick="Game.tab('garage')" id="n-garage" class="flex flex-col items-center gap-1 cursor-pointer">
-            <span class="text-xl">🏎️</span><span class="text-[8px] font-bold uppercase">Гараж</span><div class="dot w-1 h-1 rounded-full"></div>
-        </div>
-        <div onclick="Game.tab('out')" id="n-out" class="flex flex-col items-center gap-1 cursor-pointer">
-            <span class="text-xl">💳</span><span class="text-[8px] font-bold uppercase">Вывод</span><div class="dot w-1 h-1 rounded-full"></div>
-        </div>
+    <nav class="fixed bottom-0 left-0 right-0 bg-black/90 border-t border-white/5 flex justify-around py-4 z-50">
+        <div onclick="Game.tab('home')" id="n-home" class="flex flex-col items-center gap-1 cursor-pointer nav-active"><span class="text-xl">🏠</span><span class="text-[8px] font-bold uppercase">Главная</span><div class="dot w-1 h-1 rounded-full"></div></div>
+        <div onclick="Game.tab('cases')" id="n-cases" class="flex flex-col items-center gap-1 cursor-pointer"><span class="text-xl">📦</span><span class="text-[8px] font-bold uppercase">Кейсы</span><div class="dot w-1 h-1 rounded-full"></div></div>
+        <div onclick="Game.tab('garage')" id="n-garage" class="flex flex-col items-center gap-1 cursor-pointer"><span class="text-xl">🏎️</span><span class="text-[8px] font-bold uppercase">Гараж</span><div class="dot w-1 h-1 rounded-full"></div></div>
+        <div onclick="Game.tab('out')" id="n-out" class="flex flex-col items-center gap-1 cursor-pointer"><span class="text-xl">💳</span><span class="text-[8px] font-bold uppercase">Вывод</span><div class="dot w-1 h-1 rounded-full"></div></div>
     </nav>
 </div>
 
 <script>
-const SERVERS = ["RED [1]", "GREEN [2]", "BLUE [3]", "YELLOW [4]", "ORANGE [5]", "PURPLE [6]", "LIME [7]", "PINK [8]", "CHERRY [9]", "BLACK [10]", "INDIGO [11]", "WHITE [12]", "MAGENTA [13]", "CRIMSON [14]", "GOLD [15]", "AZURE [16]", "PLATINUM [17]", "AQUA [18]", "GRAY [19]", "ICE [20]", "CHILLI [21]", "CHOCO [22]", "MOSCOW [23]", "SPB [24]", "UFA [25]", "SOCHI [26]", "KAZAN [27]", "SAMARA [28]", "ROSTOV [29]", "ANAPA [30]", "EKATERINBURG [31]", "KRASNODAR [32]", "ARZAMAS [33]", "NOVOSIBIRSK [34]", "GROZNY [35]", "SARATOV [36]", "OMSK [37]", "IRKUTSK [38]", "VOLGOGRAD [39]", "VORONEZH [40]", "BELGOROD [41]", "MAKHACHKALA [42]", "VLADIKAVKAZ [43]", "VLADIVOSTOK [44]", "KALININGRAD [45]", "CHELYABINSK [46]", "KRASNOYARSK [47]", "CHEBOKSARY [48]", "KHABAROVSK [49]", "PERM [50]", "TULA [51]", "RYAZAN [52]", "MURMANSK [53]", "PENZA [54]", "KURSK [55]", "ARKHANGELSK [56]", "ORENBURG [57]", "KIROV [58]", "KEMEROVO [59]", "TYUMEN [60]", "TOLYATTI [61]", "IVANOVO [62]", "STAVROPOL [63]", "SMOLENSK [64]", "PSKOV [65]", "BRYANSK [66]", "OREL [67]", "YAROSLAVL [68]", "BARNAUL [69]", "LIPETSK [70]", "ULYANOVSK [71]", "YAKUTSK [72]", "TAMBOV [73]", "BRATSK [74]", "ASTRAKHAN [75]", "CHITA [76]", "KOSTROMA [77]", "VLADIMIR [78]", "KALUGA [79]", "N.NOVGOROD [80]", "TAGANROG [81]", "VOLOGDA [82]", "TVER [83]", "TOMSK [84]", "IZHEVSK [85]", "SURGUT [86]", "PODOLSK [87]", "MAGADAN [88]", "CHEREPOVETS [89]", "NORILSK [90]"];
-
 const POOLS = {
-    daily: [{n:"ZAZ 968",p:20000,i:"🏎️",t:"c",rar:60}, {n:"1.000 ₽",v:1000,i:"💵",t:"m",rar:40}],
+    daily: [{n:"ZAZ 968",p:20000,i:"🏎️",t:"c",rar:70}, {n:"5.000 ₽",v:5000,i:"💵",t:"m",rar:30}],
     bronze: [{n:"VAZ 2107",p:150000,i:"🏎️",t:"c",rar:60}, {n:"30.000 ₽",v:30000,i:"💵",t:"m",rar:40}],
-    gold: [{n:"BMW M5 E60",p:4500000,i:"🏎️",t:"c",rar:60}, {n:"250.000 ₽",v:250000,i:"💵",t:"m",rar:40}],
-    elite: [{n:"Bugatti Chiron",p:120000000,i:"🏎️",t:"c",rar:60}, {n:"5.000.000 ₽",v:5000000,i:"💵",t:"m",rar:40}],
     ad: [
-        {n:"500 BC",v:500,i:"💎",t:"b"}, 
-        {n:"50 BC",v:50,i:"💎",t:"b"},
-        {n:"Ferrari LaFerrari",p:150000000,i:"🏎️",t:"c"},
-        {n:"Lamborghini Aventador",p:80000000,i:"🏎️",t:"c"},
-        {n:"Rolls-Royce Cullinan",p:65000000,i:"🏎️",t:"c"},
-        {n:"Mercedes G-Class",p:35000000,i:"🏎️",t:"c"},
-        {n:"Tesla Model S",p:20000000,i:"🏎️",t:"c"}
+        {n:"500 BC",v:500,i:"💎",t:"b"}, {n:"50 BC",v:50,i:"💎",t:"b"},
+        {n:"Ferrari",p:150000000,i:"🏎️",t:"c"}, {n:"Tesla",p:20000000,i:"🏎️",t:"c"}
     ]
 };
 
 const Game = {
-    u: { m:0, bc:0, ads:0, last:0, inv:[], hist:[] },
+    u: { m:0, bc:0, ads:0, last:0, inv:[] },
     
     init() {
-        const s = localStorage.getItem('locus_v_final_fixed');
+        const s = localStorage.getItem('locus_v_final_ultra');
         if(s) this.u = JSON.parse(s);
-        const sel = document.getElementById('out-srv');
-        SERVERS.forEach(x => { const o = document.createElement('option'); o.value=x; o.innerText=x; sel.appendChild(o); });
         this.updateUI();
         setInterval(() => this.tick(), 1000);
     },
 
-    save() { localStorage.setItem('locus_v_final_fixed', JSON.stringify(this.u)); },
+    save() { localStorage.setItem('locus_v_final_ultra', JSON.stringify(this.u)); },
 
     updateUI() {
         document.getElementById('bal-rub').innerText = this.u.m.toLocaleString() + ' ₽';
         document.getElementById('bal-bc').innerText = this.u.bc.toLocaleString() + ' BC';
         document.getElementById('ad-stat').innerText = `ADS: ${this.u.ads} / 5`;
         const g = document.getElementById('garage-list');
-        g.innerHTML = this.u.inv.length ? '' : '<p class="col-span-2 text-center text-gray-700 py-10 text-[9px] uppercase">Гараж пуст</p>';
+        g.innerHTML = this.u.inv.length ? '' : '<p class="col-span-2 text-center text-gray-700 py-10 text-[9px]">ПУСТО</p>';
         this.u.inv.forEach((item, i) => {
             g.innerHTML += `<div class="bg-white/5 p-4 rounded-2xl border border-white/5 text-center">
-                <span class="text-3xl">${item.i}</span>
-                <p class="font-bold text-[9px] uppercase mt-2">${item.n}</p>
-                <button onclick="Game.sell(${i})" class="w-full py-2 mt-2 bg-white/5 text-red-500 text-[8px] font-black rounded-lg uppercase">Продать: ${(item.p*0.7).toLocaleString()} ₽</button>
+                <span class="text-3xl">${item.i}</span><p class="font-bold text-[9px] mt-2">${item.n}</p>
+                <button onclick="Game.sell(${i})" class="w-full py-2 mt-2 bg-white/5 text-red-500 text-[8px] font-black rounded-lg uppercase">ПРОДАТЬ</button>
             </div>`;
         });
     },
@@ -234,29 +187,14 @@ const Game = {
         document.getElementById('n-'+id).classList.add('nav-active');
     },
 
-    exchange() {
-        const val = parseInt(document.getElementById('ex-in').value);
-        if(val >= 1000000 && this.u.m >= val) {
-            this.u.m -= val; this.u.bc += Math.floor(val/1000000);
-            this.updateUI(); this.save();
-        }
-    },
-
-    // ПРИНУДИТЕЛЬНАЯ ЗАГРУЗКА И ПОКАЗ РЕКЛАМЫ
+    // РАБОЧАЯ РЕКЛАМА ДЛЯ ТЕЛЕГРАМ
     async watchAd() {
-        // Если SDK почему-то нет, пробуем подгрузить
         if (!window.Adsgram) {
-            const script = document.createElement('script');
-            script.src = "https://adsgram.ai/sdk-v1.js";
-            document.head.appendChild(script);
-            await new Promise(r => setTimeout(r, 500));
-        }
-
-        if (!window.Adsgram) {
-            alert("Ошибка: Реклама заблокирована AdBlock или провайдером.");
+            alert("Загрузка рекламного модуля... Попробуйте через 2 секунды.");
             return;
         }
 
+        // Инициализация контроллера с вашим ID: 20963
         const controller = window.Adsgram.init({ blockId: "20963" });
 
         try {
@@ -265,27 +203,24 @@ const Game = {
                 this.u.ads++;
                 if (this.u.ads >= 5) {
                     this.u.ads = 0;
-                    this.roll('ad');
+                    this.roll('ad'); // Автоматическое открытие кейса
                 }
                 this.updateUI();
                 this.save();
             } else {
-                alert("Нужно досмотреть видео!");
+                alert("Досмотрите видео до конца!");
             }
         } catch (e) {
-            console.error(e);
-            alert("Нет доступной рекламы. Попробуйте через 5 минут.");
+            if (e.error === 'no_ads') alert("Нет доступных роликов. Зайдите позже.");
+            else alert("Ошибка сети. Проверьте соединение.");
         }
     },
 
     buyCase(c, t) { if(this.u.m >= c) { this.u.m -= c; this.updateUI(); this.roll(t); } },
-
-    openCase(t) {
-        if(t === 'daily') {
-            if(Date.now() - this.u.last < 86400000) return;
-            this.u.last = Date.now();
-        }
-        this.roll(t);
+    openCase(t) { 
+        if(t === 'daily' && Date.now() - this.u.last < 86400000) return alert("Ожидайте 24 часа");
+        if(t === 'daily') this.u.last = Date.now();
+        this.roll(t); 
     },
 
     roll(pk) {
@@ -304,8 +239,7 @@ const Game = {
         this.current = cards[62];
         setTimeout(() => {
             tr.style.transition = 'transform 9s cubic-bezier(0.1, 0, 0.05, 1)';
-            const final = (62 * 150) - (window.innerWidth / 2) + 75;
-            tr.style.transform = `translateX(-${final}px)`;
+            tr.style.transform = `translateX(-${(62 * 150) - (window.innerWidth / 2) + 75}px)`;
         }, 50);
         setTimeout(() => { 
             document.getElementById('win-ui').classList.remove('hidden'); 
@@ -323,11 +257,7 @@ const Game = {
     },
 
     sell(i) { this.u.m += Math.floor(this.u.inv[i].p * 0.7); this.u.inv.splice(i,1); this.updateUI(); this.save(); },
-
-    withdraw() {
-        const a = parseInt(document.getElementById('out-sum').value);
-        if(a > 0 && this.u.bc >= a) { this.u.bc -= a; this.updateUI(); this.save(); alert("Выплата в обработке!"); }
-    },
+    withdraw() { alert("Заявка на вывод отправлена модераторам."); },
 
     tick() {
         const d = 86400000 - (Date.now() - this.u.last);
