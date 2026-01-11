@@ -181,31 +181,19 @@
 <script>
 const SERVERS = ["RED [1]", "GREEN [2]", "BLUE [3]", "YELLOW [4]", "ORANGE [5]", "PURPLE [6]", "LIME [7]", "PINK [8]", "CHERRY [9]", "BLACK [10]", "INDIGO [11]", "WHITE [12]", "MAGENTA [13]", "CRIMSON [14]", "GOLD [15]", "AZURE [16]", "PLATINUM [17]", "AQUA [18]", "GRAY [19]", "ICE [20]", "CHILLI [21]", "CHOCO [22]", "MOSCOW [23]", "SPB [24]", "UFA [25]", "SOCHI [26]", "KAZAN [27]", "SAMARA [28]", "ROSTOV [29]", "ANAPA [30]", "EKATERINBURG [31]", "KRASNODAR [32]", "ARZAMAS [33]", "NOVOSIBIRSK [34]", "GROZNY [35]", "SARATOV [36]", "OMSK [37]", "IRKUTSK [38]", "VOLGOGRAD [39]", "VORONEZH [40]", "BELGOROD [41]", "MAKHACHKALA [42]", "VLADIKAVKAZ [43]", "VLADIVOSTOK [44]", "KALININGRAD [45]", "CHELYABINSK [46]", "KRASNOYARSK [47]", "CHEBOKSARY [48]", "KHABAROVSK [49]", "PERM [50]", "TULA [51]", "RYAZAN [52]", "MURMANSK [53]", "PENZA [54]", "KURSK [55]", "ARKHANGELSK [56]", "ORENBURG [57]", "KIROV [58]", "KEMEROVO [59]", "TYUMEN [60]", "TOLYATTI [61]", "IVANOVO [62]", "STAVROPOL [63]", "SMOLENSK [64]", "PSKOV [65]", "BRYANSK [66]", "OREL [67]", "YAROSLAVL [68]", "BARNAUL [69]", "LIPETSK [70]", "ULYANOVSK [71]", "YAKUTSK [72]", "TAMBOV [73]", "BRATSK [74]", "ASTRAKHAN [75]", "CHITA [76]", "KOSTROMA [77]", "VLADIMIR [78]", "KALUGA [79]", "N.NOVGOROD [80]", "TAGANROG [81]", "VOLOGDA [82]", "TVER [83]", "TOMSK [84]", "IZHEVSK [85]", "SURGUT [86]", "PODOLSK [87]", "MAGADAN [88]", "CHEREPOVETS [89]", "NORILSK [90]"];
 
-// ПУЛЫ: Машины (60%) и Деньги (40%)
 const POOLS = {
-    daily: [
-        {n:"ZAZ 968",p:20000,i:"🏎️",t:"c",rar:60}, {n:"1.000 ₽",v:1000,i:"💵",t:"m",rar:40}
-    ],
-    bronze: [
-        {n:"VAZ 2107",p:150000,i:"🏎️",t:"c",rar:60}, {n:"30.000 ₽",v:30000,i:"💵",t:"m",rar:40}
-    ],
-    gold: [
-        {n:"BMW M5 E60",p:4500000,i:"🏎️",t:"c",rar:60}, {n:"250.000 ₽",v:250000,i:"💵",t:"m",rar:40}
-    ],
-    elite: [
-        {n:"Bugatti Chiron",p:120000000,i:"🏎️",t:"c",rar:60}, {n:"5.000.000 ₽",v:5000000,i:"💵",t:"m",rar:40}
-    ],
-    ad: [
-        {n:"100 BC",v:100,i:"💎",t:"b",rar:50}, {n:"Lada Vesta",p:800000,i:"🏎️",t:"c",rar:50}
-    ]
+    daily: [{n:"ZAZ 968",p:20000,i:"🏎️",t:"c",rar:60}, {n:"1.000 ₽",v:1000,i:"💵",t:"m",rar:40}],
+    bronze: [{n:"VAZ 2107",p:150000,i:"🏎️",t:"c",rar:60}, {n:"30.000 ₽",v:30000,i:"💵",t:"m",rar:40}],
+    gold: [{n:"BMW M5 E60",p:4500000,i:"🏎️",t:"c",rar:60}, {n:"250.000 ₽",v:250000,i:"💵",t:"m",rar:40}],
+    elite: [{n:"Bugatti Chiron",p:120000000,i:"🏎️",t:"c",rar:60}, {n:"5.000.000 ₽",v:5000000,i:"💵",t:"m",rar:40}],
+    ad: [{n:"100 BC",v:100,i:"💎",t:"b",rar:50}, {n:"Lada Vesta",p:800000,i:"🏎️",t:"c",rar:50}]
 };
 
 const Game = {
     u: { m:0, bc:0, ads:0, last:0, inv:[], hist:[] },
-    adController: window.Adsgram ? window.Adsgram.init({ blockId: "20963" }) : null,
-
+    
     init() {
-        const s = localStorage.getItem('locus_v_ultra');
+        const s = localStorage.getItem('locus_v_final_fix');
         if(s) this.u = JSON.parse(s);
         const sel = document.getElementById('out-srv');
         SERVERS.forEach(x => { const o = document.createElement('option'); o.value=x; o.innerText=x; sel.appendChild(o); });
@@ -213,13 +201,12 @@ const Game = {
         setInterval(() => this.tick(), 1000);
     },
 
-    save() { localStorage.setItem('locus_v_ultra', JSON.stringify(this.u)); },
+    save() { localStorage.setItem('locus_v_final_fix', JSON.stringify(this.u)); },
 
     updateUI() {
         document.getElementById('bal-rub').innerText = this.u.m.toLocaleString() + ' ₽';
         document.getElementById('bal-bc').innerText = this.u.bc.toLocaleString() + ' BC';
         document.getElementById('ad-stat').innerText = `ADS: ${this.u.ads} / 5`;
-        
         const g = document.getElementById('garage-list');
         g.innerHTML = this.u.inv.length ? '' : '<p class="col-span-2 text-center text-gray-700 py-10 text-[9px] uppercase">Гараж пуст</p>';
         this.u.inv.forEach((item, i) => {
@@ -231,10 +218,7 @@ const Game = {
         });
     },
 
-    click(e) {
-        const p = 150 + (this.u.inv.length * 100);
-        this.u.m += p; this.updateUI(); this.save();
-    },
+    click(e) { this.u.m += 150 + (this.u.inv.length * 100); this.updateUI(); this.save(); },
 
     tab(id) {
         document.querySelectorAll('.tab-view').forEach(t => t.classList.add('hidden'));
@@ -251,23 +235,40 @@ const Game = {
         }
     },
 
+    // ИСПРАВЛЕННАЯ ФУНКЦИЯ РЕКЛАМЫ
     async watchAd() {
-        if(!this.adController) return;
+        if (!window.Adsgram) {
+            alert("AdsGram SDK не загружен. Проверьте интернет или отключите AdBlock.");
+            return;
+        }
+
+        const AdController = window.Adsgram.init({ blockId: "20963" });
+        
         try {
-            const res = await this.adController.show();
-            if(res && res.done) {
+            const result = await AdController.show();
+            if (result && result.done) {
                 this.u.ads++;
-                if(this.u.ads >= 5) { this.u.ads = 0; this.roll('ad'); }
-                this.updateUI(); this.save();
+                if (this.u.ads >= 5) {
+                    this.u.ads = 0;
+                    this.roll('ad');
+                }
+                this.updateUI();
+                this.save();
+                alert("Реклама просмотрена! +1 к прогрессу.");
+            } else {
+                alert("Реклама не была досмотрена.");
             }
-        } catch(e) {}
+        } catch (e) {
+            console.error(e);
+            alert("Ошибка при загрузке рекламы. Попробуйте еще раз.");
+        }
     },
 
     buyCase(c, t) { if(this.u.m >= c) { this.u.m -= c; this.updateUI(); this.roll(t); } },
 
     openCase(t) {
         if(t === 'daily') {
-            if(Date.now() - this.u.last < 86400000) return;
+            if(Date.now() - this.u.last < 86400000) return alert("Доступно раз в 24 часа!");
             this.u.last = Date.now();
         }
         this.roll(t);
