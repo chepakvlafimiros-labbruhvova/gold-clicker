@@ -2,467 +2,340 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Locus Gold - NextGen Edition</title>
-    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Black Russia - Locus Gold Ultimate</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@700&family=Montserrat:wght@400;600;800;900&display=swap" rel="stylesheet">
     
     <script src="https://adsgram.ai/sdk-v1.js"></script>
-
+    
     <style>
-        :root {
-            --accent: #ff3333;
-            --accent-dark: #b30000;
-            --bg: #050505;
-            --card-bg: rgba(20, 20, 23, 0.7);
-            --blue: #3b82f6;
-        }
-
-        body {
-            background-color: var(--bg);
-            color: #fff;
-            font-family: 'Montserrat', sans-serif;
-            overflow: hidden;
-            height: 100vh;
-            user-select: none;
-            -webkit-tap-highlight-color: transparent;
-        }
-
+        :root { --br-red: #ff3333; --bg: #0a0a0c; --card: #141417; }
+        body { background: var(--bg); color: #fff; font-family: 'Montserrat', sans-serif; overflow: hidden; height: 100vh; user-select: none; }
         .oswald { font-family: 'Oswald', sans-serif; text-transform: uppercase; font-style: italic; }
 
-        /* NextGen UI Elements */
-        .glass {
-            background: var(--card-bg);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        .click-container { position: relative; width: 260px; height: 260px; margin: 30px auto; display: flex; align-items: center; justify-content: center; }
+        .main-btn {
+            width: 210px; height: 210px; border-radius: 50%;
+            background: radial-gradient(circle, #252529 0%, #000 100%);
+            border: 6px solid #1f1f22; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; cursor: pointer;
+            transition: transform 0.05s ease-out; z-index: 10;
+            box-shadow: 0 0 50px rgba(0,0,0,0.8);
+        }
+        .main-btn::before {
+            content: "BR"; font-family: 'Oswald'; font-size: 70px; color: var(--br-red);
+            text-shadow: 0 0 20px rgba(255,51,51,0.5); font-weight: 900;
+        }
+        .main-btn:active { transform: scale(0.92); }
+        
+        .modal-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.98); z-index: 999;
+            display: none; flex-direction: column; align-items: center; justify-content: center;
+        }
+        .roulette-box {
+            position: relative; width: 100%; height: 140px; background: #000;
+            margin: 40px 0; overflow: hidden; border-top: 1px solid #222; border-bottom: 1px solid #222;
+        }
+        .track { display: flex; position: absolute; height: 100%; transition: transform 9s cubic-bezier(0.1, 0, 0.05, 1); }
+        .item {
+            min-width: 150px; height: 100%; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; border-right: 1px solid #111;
+            background: #141416;
+        }
+        .marker {
+            position: absolute; left: 50%; top: 0; bottom: 0; width: 3px;
+            background: var(--br-red); z-index: 100; transform: translateX(-50%);
+            box-shadow: 0 0 15px var(--br-red);
         }
 
-        .neo-shadow { box-shadow: 0 0 25px rgba(255, 51, 51, 0.2); }
-        .blue-shadow { box-shadow: 0 0 25px rgba(59, 130, 246, 0.2); }
-
-        /* Animated Background */
-        .bg-glow {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(circle at 50% -20%, rgba(255,51,51,0.15) 0%, transparent 50%);
-            z-index: -1; pointer-events: none;
-        }
-
-        /* Clicker Engine */
-        .click-circle {
-            position: relative; width: 260px; height: 260px; margin: 20px auto;
-            display: flex; align-items: center; justify-content: center;
-        }
-
-        .btn-main {
-            width: 220px; height: 220px; border-radius: 50%;
-            background: radial-gradient(circle, #1a1a1e 0%, #000 100%);
-            border: 4px solid #1f1f22; position: relative;
-            cursor: pointer; transition: transform 0.05s ease;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-        }
-
-        .btn-main:active { transform: scale(0.92); }
-        .btn-main::after {
-            content: "BR"; font-family: 'Oswald'; font-size: 85px; color: var(--accent);
-            font-weight: 900; text-shadow: 0 0 30px rgba(255,51,51,0.4);
-        }
-
-        /* Roulette Animation */
-        .r-track { display: flex; transition: transform 9s cubic-bezier(0.1, 0, 0.05, 1); will-change: transform; }
-        .r-item {
-            min-width: 160px; height: 160px; display: flex; flex-direction: column;
-            align-items: center; justify-content: center; background: rgba(255,255,255,0.02);
-            border-right: 1px solid rgba(255,255,255,0.05);
-        }
-
-        /* Nav */
-        .nav-link { opacity: 0.4; transition: all 0.3s; }
-        .nav-link.active { opacity: 1; color: var(--accent); }
-        .nav-indicator { height: 2px; width: 0; background: var(--accent); transition: width 0.3s; margin-top: 4px; }
-        .active .nav-indicator { width: 12px; }
-
-        /* Scroll customization */
-        .hide-scroll::-webkit-scrollbar { display: none; }
+        .btn-red { background: linear-gradient(90deg, #ff3333, #b30000); font-weight: 900; text-transform: uppercase; }
+        .nav-active { color: var(--br-red) !important; }
+        .nav-active .dot { background: var(--br-red); box-shadow: 0 0 8px var(--br-red); }
     </style>
 </head>
 <body>
 
-<div class="bg-glow"></div>
-
-<div id="main-app" class="max-w-md mx-auto h-screen flex flex-col relative">
+<div class="max-w-md mx-auto h-screen flex flex-col relative">
     
-    <header class="p-6 pt-10 flex justify-between items-start z-50">
-        <div class="space-y-1">
-            <p class="text-[9px] font-bold text-gray-400 uppercase tracking-[0.2em]">Личный баланс</p>
-            <p id="ui-money" class="text-3xl font-black oswald leading-none">0 ₽</p>
+    <header class="p-6 flex justify-between items-start">
+        <div>
+            <p class="text-[9px] font-bold text-gray-500 uppercase italic">Игровой баланс</p>
+            <p id="bal-rub" class="text-2xl font-black italic oswald">0 ₽</p>
         </div>
-        <div class="text-right space-y-1">
-            <p class="text-[9px] font-bold text-blue-400 uppercase tracking-[0.2em]">Black Coins</p>
-            <p id="ui-bc" class="text-3xl font-black text-blue-400 oswald leading-none">0 BC</p>
+        <div class="text-right">
+            <p class="text-[9px] font-bold text-blue-500 uppercase italic">Донат счёт</p>
+            <p id="bal-bc" class="text-2xl font-black italic text-blue-400 oswald">0 BC</p>
         </div>
     </header>
 
-    <main class="flex-1 overflow-y-auto hide-scroll px-6 pb-32 pt-4">
-        
-        <section id="tab-home" class="view space-y-10">
-            <div class="click-circle">
-                <div class="btn-main neo-shadow" onclick="Game.click(event)">
-                    <span class="oswald text-[10px] text-gray-500 tracking-[0.3em] mt-4">Нажми чтобы заработать</span>
+    <main class="flex-1 overflow-y-auto px-6 pb-28">
+        <section id="tab-home" class="tab-view">
+            <div class="click-container">
+                <div class="main-btn" onclick="Game.click(event)">
+                    <p class="oswald text-[10px] mt-2 tracking-[0.3em] text-gray-500">ЗАРАБОТАТЬ</p>
                 </div>
             </div>
-
-            <div class="glass rounded-[2rem] p-6 space-y-5 blue-shadow">
-                <div class="flex justify-between items-center">
-                    <span class="text-[10px] font-bold text-blue-400 uppercase italic">Обмен валюты</span>
-                    <span class="text-[9px] text-gray-500">1.000.000 ₽ = 1 BC</span>
-                </div>
-                <div class="flex gap-3">
-                    <input id="input-ex" type="number" placeholder="Сумма ₽" 
-                           class="flex-1 bg-black/40 rounded-2xl p-4 text-xs font-bold outline-none border border-white/5 focus:border-blue-500/30">
-                    <button onclick="Game.exchange()" class="bg-blue-600 px-8 rounded-2xl text-[10px] font-black uppercase oswald italic">Обмен</button>
-                </div>
-            </div>
-        </section>
-
-        <section id="tab-cases" class="view hidden space-y-4">
-            <h2 class="oswald text-2xl italic mb-6">Магазин кейсов</h2>
             
-            <div class="glass p-5 rounded-3xl flex justify-between items-center border-l-4 border-blue-500 relative overflow-hidden group">
-                <div class="flex gap-4 items-center">
-                    <div class="w-12 h-12 bg-blue-500/10 rounded-2xl flex items-center justify-center text-2xl">💎</div>
-                    <div>
-                        <p class="font-black text-xs uppercase oswald italic">Кейс Мажор</p>
-                        <p id="ad-status" class="text-[9px] text-blue-400 font-bold uppercase">Доступно: 1 реклама</p>
-                    </div>
+            <div class="bg-white/5 p-5 rounded-3xl border border-white/5 space-y-4">
+                <div class="flex justify-between text-[10px] font-bold italic oswald">
+                    <span class="text-blue-400">Обмен валюты</span>
+                    <span class="text-gray-500">1.000.000 ₽ = 1 BC</span>
                 </div>
-                <button id="ad-btn" onclick="Game.Ads.show()" class="bg-blue-600 px-6 py-3 rounded-2xl text-[10px] font-black uppercase oswald italic">Смотреть</button>
-            </div>
-
-            <div class="glass p-5 rounded-3xl flex justify-between items-center border-l-4 border-green-500">
-                <div class="flex gap-4 items-center">
-                    <div class="w-12 h-12 bg-green-500/10 rounded-2xl flex items-center justify-center text-2xl">🎁</div>
-                    <div>
-                        <p class="font-black text-xs uppercase oswald italic">Ежедневный</p>
-                        <p id="timer" class="text-[9px] text-green-500 font-bold uppercase italic">Готов</p>
-                    </div>
+                <div class="flex gap-2">
+                    <input id="ex-in" type="number" placeholder="Сумма ₽" class="flex-1 bg-black/40 p-3 rounded-xl text-xs outline-none border border-white/5">
+                    <button onclick="Game.exchange()" class="bg-blue-600 px-6 rounded-xl text-[10px] font-black uppercase">Обмен</button>
                 </div>
-                <button onclick="Game.openFree()" class="bg-green-600 px-6 py-3 rounded-2xl text-[10px] font-black uppercase oswald italic">Открыть</button>
-            </div>
-
-            <div class="glass p-5 rounded-3xl flex justify-between items-center border-l-4 border-yellow-600">
-                <div class="flex gap-4 items-center">
-                    <div class="w-12 h-12 bg-yellow-600/10 rounded-2xl flex items-center justify-center text-2xl">💰</div>
-                    <div>
-                        <p class="font-black text-xs uppercase oswald italic">Новичок</p>
-                        <p class="text-[9px] text-gray-500 font-bold">100.000 ₽</p>
-                    </div>
-                </div>
-                <button onclick="Game.buyCase(100000, 'low')" class="bg-white/5 px-6 py-3 rounded-2xl text-[10px] font-black uppercase oswald italic border border-white/5">Купить</button>
-            </div>
-
-            <div class="glass p-5 rounded-3xl flex justify-between items-center border-l-4 border-red-600">
-                <div class="flex gap-4 items-center">
-                    <div class="w-12 h-12 bg-red-600/10 rounded-2xl flex items-center justify-center text-2xl">👑</div>
-                    <div>
-                        <p class="font-black text-xs uppercase oswald italic">Элитный</p>
-                        <p class="text-[9px] text-gray-500 font-bold">15.000.000 ₽</p>
-                    </div>
-                </div>
-                <button onclick="Game.buyCase(15000000, 'high')" class="bg-red-600 px-6 py-3 rounded-2xl text-[10px] font-black uppercase oswald italic">Купить</button>
             </div>
         </section>
 
-        <section id="tab-garage" class="view hidden">
-            <h2 class="oswald text-2xl italic mb-6">Ваш гараж</h2>
-            <div id="garage-grid" class="grid grid-cols-2 gap-4"></div>
+        <section id="tab-cases" class="tab-view hidden space-y-4">
+            <h2 class="oswald text-xl italic mb-4">Магазин кейсов</h2>
+            
+            <div class="bg-white/5 p-4 rounded-2xl flex justify-between items-center border border-white/5">
+                <div class="flex gap-3 items-center">
+                    <div class="text-2xl">🎁</div>
+                    <div><p class="font-bold text-xs uppercase">Ежедневный</p><p id="d-timer" class="text-[9px] text-green-500 italic">ГОТОВ</p></div>
+                </div>
+                <button onclick="Game.openCase('daily')" class="btn-red px-6 py-2 rounded-xl text-[10px]">Открыть</button>
+            </div>
+
+            <div class="bg-white/5 p-4 rounded-2xl flex justify-between items-center border-l-4 border-yellow-600">
+                <div class="flex gap-3 items-center">
+                    <div class="text-2xl">💰</div>
+                    <div><p class="font-bold text-xs uppercase">Новичок</p><p class="text-[9px] text-gray-500">100.000 ₽</p></div>
+                </div>
+                <button onclick="Game.buyCase(100000, 'bronze')" class="bg-white/10 px-6 py-2 rounded-xl text-[10px] font-black uppercase">Купить</button>
+            </div>
+
+            <div class="bg-white/5 p-4 rounded-2xl flex justify-between items-center border-l-4 border-purple-600">
+                <div class="flex gap-3 items-center">
+                    <div class="text-2xl">🏎️</div>
+                    <div><p class="font-bold text-xs uppercase">Магнат</p><p class="text-[9px] text-gray-500">1.000.000 ₽</p></div>
+                </div>
+                <button onclick="Game.buyCase(1000000, 'gold')" class="bg-purple-600/20 text-purple-400 px-6 py-2 rounded-xl text-[10px] font-black uppercase">Купить</button>
+            </div>
+
+            <div class="bg-white/5 p-4 rounded-2xl flex justify-between items-center border-l-4 border-red-600">
+                <div class="flex gap-3 items-center">
+                    <div class="text-2xl">👑</div>
+                    <div><p class="font-bold text-xs uppercase italic">Элита</p><p class="text-[9px] text-gray-500">15.000.000 ₽</p></div>
+                </div>
+                <button onclick="Game.buyCase(15000000, 'elite')" class="btn-red px-6 py-2 rounded-xl text-[10px] font-black">КУПИТЬ</button>
+            </div>
+
+            <div class="bg-white/5 p-4 rounded-2xl flex justify-between items-center border-l-4 border-blue-500">
+                <div class="flex gap-3 items-center">
+                    <div class="text-2xl">💎</div>
+                    <div><p class="font-bold text-xs uppercase">Мажор</p><p id="ad-stat" class="text-[9px] text-blue-400 font-bold">ADS: 0 / 5</p></div>
+                </div>
+                <button onclick="Game.watchAd()" class="bg-blue-600 px-6 py-2 rounded-xl text-[10px] font-black uppercase">Смотреть</button>
+            </div>
         </section>
 
-        <section id="tab-out" class="view hidden space-y-6">
-            <div class="glass p-8 rounded-[2.5rem] space-y-6 text-center">
-                <h3 class="oswald text-xl italic text-red-500">Вывод валюты</h3>
-                <input id="out-nick" type="text" placeholder="Nick_Name" class="w-full bg-black/40 rounded-2xl p-4 text-xs font-bold border border-white/5 outline-none">
-                <select id="out-srv" class="w-full bg-black/40 rounded-2xl p-4 text-xs font-bold border border-white/5 outline-none oswald italic">
-                    </select>
-                <input id="out-sum" type="number" placeholder="Сумма BC" class="w-full bg-black/40 rounded-2xl p-4 text-xs font-bold border border-white/5 outline-none">
-                <button onclick="Game.withdraw()" class="w-full bg-red-600 py-5 rounded-2xl text-[11px] font-black uppercase oswald italic tracking-widest neo-shadow">Создать заявку</button>
+        <section id="tab-garage" class="tab-view hidden">
+            <h2 class="oswald text-xl italic mb-6">Гараж</h2>
+            <div id="garage-list" class="grid grid-cols-2 gap-4"></div>
+        </section>
+
+        <section id="tab-out" class="tab-view hidden space-y-6">
+            <div class="bg-white/5 p-6 rounded-3xl border border-white/5 space-y-4">
+                <h3 class="oswald text-center text-red-500 italic">Вывод BC</h3>
+                <input id="out-nick" type="text" placeholder="Nick_Name" class="w-full bg-black/40 p-4 rounded-xl text-xs outline-none">
+                <select id="out-srv" class="w-full bg-black/40 p-4 rounded-xl text-xs oswald outline-none"></select>
+                <input id="out-sum" type="number" placeholder="Сумма BC" class="w-full bg-black/40 p-4 rounded-xl text-xs outline-none">
+                <button onclick="Game.withdraw()" class="btn-red w-full py-4 rounded-xl text-[11px]">ПОДТВЕРДИТЬ ВЫВОД</button>
             </div>
         </section>
     </main>
 
-    <nav class="fixed bottom-0 left-0 right-0 glass border-t border-white/5 flex justify-around items-center py-5 z-50 rounded-t-[2.5rem]">
-        <div onclick="Game.tab('home')" class="nav-link active flex flex-col items-center" id="nav-home">
-            <span class="text-xl">🏠</span><span class="text-[8px] font-black uppercase mt-1">Главная</span><div class="nav-indicator"></div>
+    <div id="modal" class="modal-overlay">
+        <h2 class="oswald text-2xl tracking-[0.5em] text-gray-500">УДАЧА...</h2>
+        <div class="roulette-box">
+            <div class="marker"></div>
+            <div id="track" class="track"></div>
         </div>
-        <div onclick="Game.tab('cases')" class="nav-link flex flex-col items-center" id="nav-cases">
-            <span class="text-xl">📦</span><span class="text-[8px] font-black uppercase mt-1">Кейсы</span><div class="nav-indicator"></div>
-        </div>
-        <div onclick="Game.tab('garage')" class="nav-link flex flex-col items-center" id="nav-garage">
-            <span class="text-xl">🏎️</span><span class="text-[8px] font-black uppercase mt-1">Гараж</span><div class="nav-indicator"></div>
-        </div>
-        <div onclick="Game.tab('out')" class="nav-link flex flex-col items-center" id="nav-out">
-            <span class="text-xl">💳</span><span class="text-[8px] font-black uppercase mt-1">Вывод</span><div class="nav-indicator"></div>
-        </div>
-    </nav>
-
-    <div id="roulette-modal" class="fixed inset-0 bg-black/98 z-[100] hidden flex flex-col items-center justify-center">
-        <h2 class="oswald text-2xl italic text-gray-600 tracking-[0.4em] mb-10">Удача...</h2>
-        <div class="relative w-full h-40 overflow-hidden border-y border-white/5 bg-black/50">
-            <div class="absolute left-1/2 top-0 bottom-0 w-[2px] bg-red-500 z-50 shadow-[0_0_15px_red]"></div>
-            <div id="r-track" class="r-track"></div>
-        </div>
-        <div id="win-ui" class="mt-10 opacity-0 translate-y-10 transition-all duration-700 flex flex-col items-center">
-            <p id="win-name" class="oswald text-3xl text-white text-center px-10 mb-8 leading-tight">ВАШ ПРИЗ</p>
-            <button onclick="Game.claim()" class="bg-white text-black px-16 py-5 rounded-full text-[10px] font-black uppercase tracking-widest">Забрать</button>
+        <div id="win-ui" class="hidden flex flex-col items-center">
+            <h3 id="win-name" class="oswald text-2xl text-white mb-8 text-center px-4">---</h3>
+            <button onclick="Game.claim()" class="btn-red px-14 py-4 rounded-full text-[10px] tracking-widest uppercase">Забрать</button>
         </div>
     </div>
+
+    <nav class="fixed bottom-0 left-0 right-0 bg-black/90 backdrop-blur-lg border-t border-white/5 flex justify-around py-4 z-50">
+        <div onclick="Game.tab('home')" id="n-home" class="flex flex-col items-center gap-1 cursor-pointer nav-active">
+            <span class="text-xl">🏠</span><span class="text-[8px] font-bold uppercase">Главная</span><div class="dot w-1 h-1 rounded-full"></div>
+        </div>
+        <div onclick="Game.tab('cases')" id="n-cases" class="flex flex-col items-center gap-1 cursor-pointer">
+            <span class="text-xl">📦</span><span class="text-[8px] font-bold uppercase">Кейсы</span><div class="dot w-1 h-1 rounded-full"></div>
+        </div>
+        <div onclick="Game.tab('garage')" id="n-garage" class="flex flex-col items-center gap-1 cursor-pointer">
+            <span class="text-xl">🏎️</span><span class="text-[8px] font-bold uppercase">Гараж</span><div class="dot w-1 h-1 rounded-full"></div>
+        </div>
+        <div onclick="Game.tab('out')" id="n-out" class="flex flex-col items-center gap-1 cursor-pointer">
+            <span class="text-xl">💳</span><span class="text-[8px] font-bold uppercase">Вывод</span><div class="dot w-1 h-1 rounded-full"></div>
+        </div>
+    </nav>
 </div>
 
 <script>
-/**
- * LOCUS GOLD - NEXTGEN ENGINE
- * Built for 3000+ line complexity simulation
- */
+const SERVERS = ["RED [1]", "GREEN [2]", "BLUE [3]", "YELLOW [4]", "ORANGE [5]", "PURPLE [6]", "LIME [7]", "PINK [8]", "CHERRY [9]", "BLACK [10]", "INDIGO [11]", "WHITE [12]", "MAGENTA [13]", "CRIMSON [14]", "GOLD [15]", "AZURE [16]", "PLATINUM [17]", "AQUA [18]", "GRAY [19]", "ICE [20]", "CHILLI [21]", "CHOCO [22]", "MOSCOW [23]", "SPB [24]", "UFA [25]", "SOCHI [26]", "KAZAN [27]", "SAMARA [28]", "ROSTOV [29]", "ANAPA [30]", "EKATERINBURG [31]", "KRASNODAR [32]", "ARZAMAS [33]", "NOVOSIBIRSK [34]", "GROZNY [35]", "SARATOV [36]", "OMSK [37]", "IRKUTSK [38]", "VOLGOGRAD [39]", "VORONEZH [40]", "BELGOROD [41]", "MAKHACHKALA [42]", "VLADIKAVKAZ [43]", "VLADIVOSTOK [44]", "KALININGRAD [45]", "CHELYABINSK [46]", "KRASNOYARSK [47]", "CHEBOKSARY [48]", "KHABAROVSK [49]", "PERM [50]", "TULA [51]", "RYAZAN [52]", "MURMANSK [53]", "PENZA [54]", "KURSK [55]", "ARKHANGELSK [56]", "ORENBURG [57]", "KIROV [58]", "KEMEROVO [59]", "TYUMEN [60]", "TOLYATTI [61]", "IVANOVO [62]", "STAVROPOL [63]", "SMOLENSK [64]", "PSKOV [65]", "BRYANSK [66]", "OREL [67]", "YAROSLAVL [68]", "BARNAUL [69]", "LIPETSK [70]", "ULYANOVSK [71]", "YAKUTSK [72]", "TAMBOV [73]", "BRATSK [74]", "ASTRAKHAN [75]", "CHITA [76]", "KOSTROMA [77]", "VLADIMIR [78]", "KALUGA [79]", "N.NOVGOROD [80]", "TAGANROG [81]", "VOLOGDA [82]", "TVER [83]", "TOMSK [84]", "IZHEVSK [85]", "SURGUT [86]", "PODOLSK [87]", "MAGADAN [88]", "CHEREPOVETS [89]", "NORILSK [90]"];
+
+const POOLS = {
+    daily: [{n:"ZAZ 968",p:20000,i:"🏎️",t:"c",rar:60}, {n:"1.000 ₽",v:1000,i:"💵",t:"m",rar:40}],
+    bronze: [{n:"VAZ 2107",p:150000,i:"🏎️",t:"c",rar:60}, {n:"30.000 ₽",v:30000,i:"💵",t:"m",rar:40}],
+    gold: [{n:"BMW M5 E60",p:4500000,i:"🏎️",t:"c",rar:60}, {n:"250.000 ₽",v:250000,i:"💵",t:"m",rar:40}],
+    elite: [{n:"Bugatti Chiron",p:120000000,i:"🏎️",t:"c",rar:60}, {n:"5.000.000 ₽",v:5000000,i:"💵",t:"m",rar:40}],
+    ad: [
+        {n:"500 BC",v:500,i:"💎",t:"b"}, 
+        {n:"50 BC",v:50,i:"💎",t:"b"},
+        {n:"Ferrari LaFerrari",p:150000000,i:"🏎️",t:"c"},
+        {n:"Lamborghini Aventador",p:80000000,i:"🏎️",t:"c"},
+        {n:"Rolls-Royce Cullinan",p:65000000,i:"🏎️",t:"c"},
+        {n:"Mercedes G-Class",p:35000000,i:"🏎️",t:"c"},
+        {n:"Tesla Model S",p:20000000,i:"🏎️",t:"c"}
+    ]
+};
 
 const Game = {
-    // ДАННЫЕ СЕРВЕРОВ
-    servers: [
-        "RED [1]", "GREEN [2]", "BLUE [3]", "YELLOW [4]", "ORANGE [5]", "PURPLE [6]", "LIME [7]", "PINK [8]", "CHERRY [9]", "BLACK [10]", 
-        "WHITE [11]", "GRAY [12]", "MAGENTA [13]", "CRIMSON [14]", "AZURE [15]", "INDIGO [16]", "GOLD [17]", "ICE [18]", "PLATINUM [19]", "CHOCO [20]",
-        "MOSCOW [21]", "SPB [22]", "SAMARA [23]", "UFA [24]", "KAZAN [25]", "SOCHI [26]", "ROSTOV [27]", "ANAPA [28]", "SARATOV [29]", "PENZA [30]",
-        "VORONEZH [31]", "EKATERINBURG [32]", "KRASNODAR [33]", "OMSK [34]", "NOVOSIBIRSK [35]", "CHELYABINSK [36]", "PERM [37]", "TULA [38]", "VOLGOGRAD [39]", "BELGOROD [40]",
-        "OREL [41]", "KALUGA [42]", "BRIANSK [43]", "VLADIMIR [44]", "YAROSLAVL [45]", "IVANOVO [46]", "KOSTROMA [47]", "LIPETSK [48]", "MURMANSK [49]", "ARKHANGELSK [50]",
-        "KALIININGRAD [51]", "PSKOV [52]", "VELIKIY NOVGOROD [53]", "VOLOGDA [54]", "PETROZAVODSK [55]", "SYKTYVKAR [56]", "KIROV [57]", "IZHEVSK [58]", "ORENBURG [59]", "UFA [60]",
-        "MAGNITOGORSK [61]", "TUMEN [62]", "SURGUT [63]", "NIZHNEVARTOVSK [64]", "KEMEROVO [65]", "TOMSK [66]", "BARNAUL [67]", "KRASNOYARSK [68]", "IRKUTSK [69]", "YAKUTSK [70]"
-    ],
-
-    // ПУЛЫ ПРИЗОВ
-    pools: {
-        low: [
-            {n:"VAZ 2114", p:250000, i:"🏎️", t:"c"}, {n:"LADA PRIORA", p:350000, i:"🏎️", t:"c"},
-            {n:"50.000 ₽", v:50000, i:"💵", t:"m"}, {n:"15.000 ₽", v:15000, i:"💵", t:"m"}
-        ],
-        high: [
-            {n:"BMW M5 F90", p:9500000, i:"🏎️", t:"c"}, {n:"MERCEDES CLS", p:8000000, i:"🏎️", t:"c"},
-            {n:"AUDI RS7", p:12000000, i:"🏎️", t:"c"}, {n:"3.000.000 ₽", v:3000000, i:"💵", t:"m"}
-        ],
-        free: [
-            {n:"ZAZ 968", p:15000, i:"🏎️", t:"c"}, {n:"VAZ 2101", p:30000, i:"🏎️", t:"c"},
-            {n:"5.000 ₽", v:5000, i:"💵", t:"m"}, {n:"1.000 ₽", v:1000, i:"💵", t:"m"}
-        ],
-        ad: [
-            {n:"FERRARI LAFERRARI", p:150000000, i:"🏎️", t:"c"}, {n:"TESLA MODEL S", p:15000000, i:"🏎️", t:"c"},
-            {n:"500 BC", v:500, i:"💎", t:"b"}, {n:"100 BC", v:100, i:"💎", t:"b"},
-            {n:"5.000.000 ₽", v:5000000, i:"💵", t:"m"}
-        ]
-    },
-
-    u: { m:0, bc:0, last:0, inv:[] },
-
-    // ИНИЦИАЛИЗАЦИЯ
+    u: { m:0, bc:0, ads:0, last:0, inv:[], hist:[] },
+    
     init() {
-        const saved = localStorage.getItem('locus_v_final_ultra');
-        if(saved) this.u = JSON.parse(saved);
-        
-        const srv = document.getElementById('out-srv');
-        this.servers.forEach(s => {
-            let o = document.createElement('option');
-            o.value = s; o.innerText = s; srv.appendChild(o);
-        });
-
+        const s = localStorage.getItem('locus_v_final_fixed');
+        if(s) this.u = JSON.parse(s);
+        const sel = document.getElementById('out-srv');
+        SERVERS.forEach(x => { const o = document.createElement('option'); o.value=x; o.innerText=x; sel.appendChild(o); });
         this.updateUI();
         setInterval(() => this.tick(), 1000);
-        this.Ads.init(); // Запуск системы рекламы
     },
 
-    // МОДУЛЬ РЕКЛАМЫ С УЛУЧШЕННОЙ ЛОГИКОЙ
-    Ads: {
-        instance: null,
-        loading: false,
+    save() { localStorage.setItem('locus_v_final_fixed', JSON.stringify(this.u)); },
 
-        init() {
-            this.tryBind();
-        },
-
-        tryBind() {
-            if (window.Adsgram) {
-                this.instance = window.Adsgram.init({ blockId: "20963" });
-                console.log("Adsgram Engine: Bound Successfully");
-            } else {
-                setTimeout(() => this.tryBind(), 2000); // Повтор каждые 2 сек
-            }
-        },
-
-        async show() {
-            if (!this.instance) {
-                alert("Рекламная сеть еще инициализируется. Подождите пару секунд...");
-                this.tryBind();
-                return;
-            }
-
-            const btn = document.getElementById('ad-btn');
-            btn.innerText = "ЗАГРУЗКА...";
-            btn.disabled = true;
-
-            try {
-                const res = await this.instance.show();
-                if (res && res.done) {
-                    Game.startRoll('ad');
-                } else {
-                    alert("Досмотрите видео до конца для открытия кейса!");
-                }
-            } catch (e) {
-                console.error("Ads Error:", e);
-                if (e.error === 'no_ads') alert("Рекламы пока нет. Попробуйте через 5-10 минут.");
-                else alert("Ошибка загрузки. Проверьте интернет или AdBlock.");
-            } finally {
-                btn.innerText = "СМОТРЕТЬ";
-                btn.disabled = false;
-            }
-        }
+    updateUI() {
+        document.getElementById('bal-rub').innerText = this.u.m.toLocaleString() + ' ₽';
+        document.getElementById('bal-bc').innerText = this.u.bc.toLocaleString() + ' BC';
+        document.getElementById('ad-stat').innerText = `ADS: ${this.u.ads} / 5`;
+        const g = document.getElementById('garage-list');
+        g.innerHTML = this.u.inv.length ? '' : '<p class="col-span-2 text-center text-gray-700 py-10 text-[9px] uppercase">Гараж пуст</p>';
+        this.u.inv.forEach((item, i) => {
+            g.innerHTML += `<div class="bg-white/5 p-4 rounded-2xl border border-white/5 text-center">
+                <span class="text-3xl">${item.i}</span>
+                <p class="font-bold text-[9px] uppercase mt-2">${item.n}</p>
+                <button onclick="Game.sell(${i})" class="w-full py-2 mt-2 bg-white/5 text-red-500 text-[8px] font-black rounded-lg uppercase">Продать: ${(item.p*0.7).toLocaleString()} ₽</button>
+            </div>`;
+        });
     },
 
-    // ЛОГИКА ИГРЫ
-    click(e) {
-        const reward = 150 + (this.u.inv.length * 100);
-        this.u.m += reward;
-        this.updateUI();
-        this.save();
-        this.showFloat(e.clientX, e.clientY, `+${reward}₽`);
-    },
+    click(e) { this.u.m += 150 + (this.u.inv.length * 100); this.updateUI(); this.save(); },
 
     tab(id) {
-        document.querySelectorAll('.view').forEach(v => v.classList.add('hidden'));
-        document.querySelectorAll('.nav-link').forEach(n => n.classList.remove('active'));
+        document.querySelectorAll('.tab-view').forEach(t => t.classList.add('hidden'));
+        document.querySelectorAll('nav div').forEach(n => n.classList.remove('nav-active'));
         document.getElementById('tab-'+id).classList.remove('hidden');
-        document.getElementById('nav-'+id).classList.add('active');
-        if(id === 'garage') this.renderGarage();
+        document.getElementById('n-'+id).classList.add('nav-active');
     },
 
     exchange() {
-        const val = parseInt(document.getElementById('input-ex').value);
+        const val = parseInt(document.getElementById('ex-in').value);
         if(val >= 1000000 && this.u.m >= val) {
             this.u.m -= val; this.u.bc += Math.floor(val/1000000);
-            document.getElementById('input-ex').value = '';
             this.updateUI(); this.save();
-            alert("Обмен завершен!");
         }
     },
 
-    buyCase(c, t) {
-        if(this.u.m >= c) { this.u.m -= c; this.updateUI(); this.startRoll(t); }
-        else alert("Недостаточно денег!");
+    // ПРИНУДИТЕЛЬНАЯ ЗАГРУЗКА И ПОКАЗ РЕКЛАМЫ
+    async watchAd() {
+        // Если SDK почему-то нет, пробуем подгрузить
+        if (!window.Adsgram) {
+            const script = document.createElement('script');
+            script.src = "https://adsgram.ai/sdk-v1.js";
+            document.head.appendChild(script);
+            await new Promise(r => setTimeout(r, 500));
+        }
+
+        if (!window.Adsgram) {
+            alert("Ошибка: Реклама заблокирована AdBlock или провайдером.");
+            return;
+        }
+
+        const controller = window.Adsgram.init({ blockId: "20963" });
+
+        try {
+            const result = await controller.show();
+            if (result && result.done) {
+                this.u.ads++;
+                if (this.u.ads >= 5) {
+                    this.u.ads = 0;
+                    this.roll('ad');
+                }
+                this.updateUI();
+                this.save();
+            } else {
+                alert("Нужно досмотреть видео!");
+            }
+        } catch (e) {
+            console.error(e);
+            alert("Нет доступной рекламы. Попробуйте через 5 минут.");
+        }
     },
 
-    openFree() {
-        if(Date.now() - this.u.last >= 86400000) {
+    buyCase(c, t) { if(this.u.m >= c) { this.u.m -= c; this.updateUI(); this.roll(t); } },
+
+    openCase(t) {
+        if(t === 'daily') {
+            if(Date.now() - this.u.last < 86400000) return;
             this.u.last = Date.now();
-            this.startRoll('free');
-        } else alert("Кейс доступен раз в 24 часа!");
+        }
+        this.roll(t);
     },
 
-    // РУЛЕТКА
-    startRoll(poolKey) {
-        const pool = this.pools[poolKey];
-        const modal = document.getElementById('roulette-modal');
-        const track = document.getElementById('r-track');
-        const winUI = document.getElementById('win-ui');
-
-        modal.classList.remove('hidden');
-        winUI.classList.add('opacity-0', 'translate-y-10');
-        track.style.transition = 'none';
-        track.style.transform = 'translateX(0)';
-        track.innerHTML = '';
-
-        let tape = [];
-        for(let i=0; i<80; i++) {
-            let item = pool[Math.floor(Math.random()*pool.length)];
-            tape.push(item);
-            track.innerHTML += `
-                <div class="r-item">
-                    <span class="text-4xl mb-2">${item.i}</span>
-                    <p class="oswald text-[9px] font-bold text-center px-4">${item.n}</p>
-                </div>
-            `;
+    roll(pk) {
+        const pool = POOLS[pk];
+        const tr = document.getElementById('track');
+        document.getElementById('modal').style.display = 'flex';
+        document.getElementById('win-ui').classList.add('hidden');
+        tr.style.transition = 'none'; tr.style.transform = 'translateX(0)'; tr.innerHTML = '';
+        
+        let cards = [];
+        for(let i=0; i<70; i++) {
+            let item = (pk === 'ad') ? pool[Math.floor(Math.random() * pool.length)] : (Math.random() * 100 <= pool[0].rar ? pool[0] : pool[1]);
+            cards.push(item);
+            tr.innerHTML += `<div class="item"><span class="text-3xl">${item.i}</span><p class="text-[8px] font-bold mt-1 text-center">${item.n}</p></div>`;
         }
-
-        this.currentWin = tape[72];
-
+        this.current = cards[62];
         setTimeout(() => {
-            track.style.transition = 'transform 9s cubic-bezier(0.1, 0, 0.05, 1)';
-            const finalX = (72 * 160) - (window.innerWidth / 2) + 80;
-            track.style.transform = `translateX(-${finalX}px)`;
+            tr.style.transition = 'transform 9s cubic-bezier(0.1, 0, 0.05, 1)';
+            const final = (62 * 150) - (window.innerWidth / 2) + 75;
+            tr.style.transform = `translateX(-${final}px)`;
         }, 50);
-
-        setTimeout(() => {
-            document.getElementById('win-name').innerText = this.currentWin.n;
-            winUI.classList.remove('opacity-0', 'translate-y-10');
+        setTimeout(() => { 
+            document.getElementById('win-ui').classList.remove('hidden'); 
+            document.getElementById('win-name').innerText = "ВЫИГРЫШ: " + this.current.n;
         }, 9500);
     },
 
     claim() {
-        const p = this.currentWin;
+        const p = this.current;
         if(p.t === 'c') this.u.inv.push(p);
         else if(p.t === 'm') this.u.m += p.v;
         else if(p.t === 'b') this.u.bc += p.v;
-        
-        document.getElementById('roulette-modal').classList.add('hidden');
+        document.getElementById('modal').style.display = 'none';
         this.updateUI(); this.save();
     },
 
-    // ВСПОМОГАТЕЛЬНОЕ
-    renderGarage() {
-        const g = document.getElementById('garage-grid');
-        g.innerHTML = this.u.inv.length ? '' : '<p class="col-span-2 text-center text-gray-700 py-20 oswald">Гараж пуст</p>';
-        this.u.inv.forEach((item, i) => {
-            g.innerHTML += `
-                <div class="glass p-5 rounded-3xl text-center">
-                    <span class="text-4xl mb-3 block">${item.i}</span>
-                    <p class="font-black text-[9px] uppercase oswald italic mb-2">${item.n}</p>
-                    <button onclick="Game.sell(${i})" class="w-full py-2 bg-white/5 text-red-500 text-[8px] font-black rounded-xl border border-white/5 uppercase">Продать: ${(item.p*0.7).toLocaleString()} ₽</button>
-                </div>
-            `;
-        });
-    },
+    sell(i) { this.u.m += Math.floor(this.u.inv[i].p * 0.7); this.u.inv.splice(i,1); this.updateUI(); this.save(); },
 
-    sell(i) {
-        this.u.m += Math.floor(this.u.inv[i].p * 0.7);
-        this.u.inv.splice(i, 1);
-        this.renderGarage(); this.updateUI(); this.save();
-    },
-
-    updateUI() {
-        document.getElementById('ui-money').innerText = this.u.m.toLocaleString() + ' ₽';
-        document.getElementById('ui-bc').innerText = this.u.bc.toLocaleString() + ' BC';
+    withdraw() {
+        const a = parseInt(document.getElementById('out-sum').value);
+        if(a > 0 && this.u.bc >= a) { this.u.bc -= a; this.updateUI(); this.save(); alert("Выплата в обработке!"); }
     },
 
     tick() {
-        const rem = 86400000 - (Date.now() - this.u.last);
-        const el = document.getElementById('timer');
-        if(rem > 0) {
-            const h = Math.floor(rem/3600000), m = Math.floor((rem%3600000)/60000), s = Math.floor((rem%60000)/1000);
+        const d = 86400000 - (Date.now() - this.u.last);
+        const el = document.getElementById('d-timer');
+        if(d > 0) {
+            const h = Math.floor(d/3600000), m = Math.floor((d%3600000)/60000), s = Math.floor((d%60000)/1000);
             el.innerText = `${h}:${m}:${s}`;
-        } else el.innerText = "ГОТОВ";
-    },
-
-    save() { localStorage.setItem('locus_v_final_ultra', JSON.stringify(this.u)); },
-
-    showFloat(x, y, text) {
-        const el = document.createElement('div');
-        el.className = 'fixed oswald font-black text-white pointer-events-none z-[200] italic';
-        el.style.left = x + 'px'; el.style.top = y + 'px'; el.innerText = text;
-        document.body.appendChild(el);
-        el.animate([{ transform: 'translateY(0) scale(1)', opacity: 1 }, { transform: 'translateY(-100px) scale(1.5)', opacity: 0 }], { duration: 800 });
-        setTimeout(() => el.remove(), 800);
-    },
-
-    withdraw() {
-        const s = parseInt(document.getElementById('out-sum').value);
-        if(s > 0 && this.u.bc >= s) {
-            this.u.bc -= s; this.updateUI(); this.save();
-            alert("Заявка на вывод успешно создана!");
-        } else alert("Недостаточно BC!");
+        } else { el.innerText = "ГОТОВ"; }
     }
 };
 
