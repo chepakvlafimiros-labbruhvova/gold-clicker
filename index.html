@@ -2,257 +2,315 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Locus Gold Elite Pro</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <title>Gold Clicker - Официальный сервис</title>
     <script src="https://sad.adsgram.ai/js/sad.min.js"></script>
-
     <style>
-        :root {
-            --bg: #000000;
-            --surface: #111112;
-            --accent: #ff9d00;
-            --error: #ff3b30;
-            --text-dim: #8e8e93;
-            --safe-bottom: env(safe-area-inset-bottom);
-        }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', -apple-system, sans-serif; -webkit-tap-highlight-color: transparent; }
-        body { background: var(--bg); color: #fff; height: 100vh; overflow: hidden; position: fixed; width: 100%; display: flex; flex-direction: column; }
-
-        .screen { position: absolute; inset: 0; display: none; flex-direction: column; padding: 20px 20px calc(80px + var(--safe-bottom)); overflow-y: auto; }
-        .screen.active { display: flex; }
-
-        /* HEADER */
-        .gold-header { text-align: center; margin-top: 10px; }
-        .gold-count { font-size: 56px; font-weight: 900; color: var(--accent); letter-spacing: -2px; }
-        .gold-label { font-size: 14px; color: var(--text-dim); text-transform: uppercase; font-weight: 800; margin-top: -5px; }
-
-        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 25px 0; }
-        .stat-card { background: var(--surface); border-radius: 20px; padding: 15px; text-align: center; border: 1px solid #1c1c1e; }
-        .stat-card span { display: block; color: var(--text-dim); font-size: 10px; font-weight: 800; text-transform: uppercase; margin-bottom: 5px; }
-        .stat-card b { font-size: 18px; color: #fff; }
-
-        /* COIN */
-        .click-area { flex: 1; display: flex; align-items: center; justify-content: center; position: relative; min-height: 240px; }
-        .coin {
-            width: 230px; height: 230px; border-radius: 50%;
-            background: radial-gradient(circle at 35% 35%, #ffc400, #ff8000);
-            border: 12px solid #1a1a1c; box-shadow: 0 0 40px rgba(255, 157, 0, 0.1);
-            display: flex; align-items: center; justify-content: center;
-            transition: transform 0.05s; cursor: pointer; user-select: none;
-        }
-        .coin:active { transform: scale(0.93); }
-        .coin span { font-size: 90px; font-weight: 900; color: rgba(0,0,0,0.1); }
-
-        /* BUTTONS */
-        .action-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px; }
-        .btn-act { background: var(--surface); border: 1px solid #222; border-radius: 22px; padding: 18px 10px; text-align: center; cursor: pointer; }
-        .btn-act b { display: block; font-size: 15px; color: #fff; text-transform: uppercase; }
-        .btn-act small { color: var(--accent); font-size: 10px; font-weight: 800; text-transform: uppercase; }
+        * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; user-select: none; }
+        body { background-color: #000; color: #fff; font-family: 'Segoe UI', Roboto, sans-serif; margin: 0; padding: 0; text-align: center; overflow: hidden; }
+        .hidden { display: none !important; }
+        .gold-text { color: #ffcc00; }
         
-        .btn-upg { grid-column: span 2; border: 1.5px solid var(--accent); background: rgba(255, 157, 0, 0.03); }
+        section { height: 100vh; overflow-y: auto; padding-bottom: 140px; } /* Увеличен отступ для магазина */
 
-        /* NAVIGATION */
-        .nav { position: fixed; bottom: 0; width: 100%; height: calc(70px + var(--safe-bottom)); background: #080808; border-top: 1px solid #161618; display: flex; padding-bottom: var(--safe-bottom); }
-        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-dim); text-decoration: none; }
-        .nav-item.active { color: var(--accent); }
-        .nav-item i { font-size: 22px; margin-bottom: 4px; font-style: normal; }
-        .nav-item span { font-size: 10px; font-weight: 700; text-transform: uppercase; }
+        .header h1 { color: #ffcc00; font-size: 3.2rem; margin: 20px 0; text-shadow: 0 0 15px rgba(255, 204, 0, 0.4); font-weight: 800; }
 
-/* LISTS */
-        .list-item { background: var(--surface); padding: 18px; border-radius: 20px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #1c1c1e; }
-        .list-item b { font-size: 16px; color: var(--accent); }
-        .list-item span { font-size: 12px; font-weight: 600; }
+        .gold-circle { 
+            width: 210px; height: 210px;
+            background: radial-gradient(circle, #f0c541 0%, #b38a11 100%); 
+            border-radius: 50%; margin: 20px auto;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            font-size: 90px; font-weight: 900; color: #443300;
+            cursor: pointer; border: 8px solid #1a1a1a;
+            box-shadow: 0 0 30px rgba(255, 204, 0, 0.2);
+            transition: transform 0.05s; position: relative;
+        }
+        .gold-circle:active { transform: scale(0.92); }
 
-        .f-pop { position: absolute; color: var(--accent); font-weight: 900; pointer-events: none; animation: fPop 0.6s forwards; font-size: 28px; z-index: 1000; }
-        @keyframes fPop { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-100px); } }
+        .lock-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85); border-radius: 50%;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            color: #fff; z-index: 10;
+        }
+
+        .btn-premium-bonus {
+            background: linear-gradient(180deg, #ffe566 0%, #ffcc00 50%, #b8860b 100%);
+            color: #000; border: 2px solid #443300;
+            padding: 16px; width: 85%; border-radius: 15px;
+            font-weight: 900; font-size: 1.1rem;
+            display: block; margin: 15px auto;
+            box-shadow: 0 6px 20px rgba(255, 204, 0, 0.3);
+            cursor: pointer; position: relative; overflow: hidden;
+            text-transform: uppercase;
+        }
+        .btn-premium-bonus::after {
+            content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.4), transparent);
+            transform: rotate(45deg); animation: shine 3s infinite;
+        }
+        @keyframes shine { 0% { left: -100%; } 100% { left: 100%; } }
+        .btn-premium-bonus .sub-text { font-size: 0.7rem; display: block; opacity: 0.8; font-weight: 700; }
+
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; display: flex; background: #111; padding: 15px 0; border-top: 1px solid #222; justify-content: space-around; font-size: 0.8rem; font-weight: bold; z-index: 100; }
+        .nav-item { color: #888; cursor: pointer; }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 1000; display: flex; align-items: center; justify-content: center; }
+        .modal-content { background: #1a1a1a; padding: 20px; border-radius: 20px; width: 90%; border: 1px solid #333; max-height: 85vh; overflow-y: auto; }
+        
+        .card { background: #111; padding: 15px; margin: 15px; border-radius: 15px; border: 1px solid #222; text-align: center; }
+        .progress-bg { background: #333; height: 10px; border-radius: 5px; margin: 10px 0; }
+
+.progress-fill { background: #ffcc00; height: 100%; width: 0%; border-radius: 5px; transition: 0.4s; }
+        .btn-green-premium { background: linear-gradient(180deg, #2ecc71 0%, #27ae60 100%); color: #fff; border: none; padding: 12px; width: 100%; border-radius: 10px; font-weight: bold; margin-top: 5px; cursor: pointer; }
+        .withdraw-card { background: #111; border: 1px solid #252525; padding: 20px; border-radius: 15px; display: flex; justify-content: space-between; align-items: center; margin: 10px 20px; }
+        input { width: 100%; padding: 14px; margin: 15px 0; background: #000; border: 1px solid #333; color: #fff; text-align: center; border-radius: 10px; }
+        
+        /* Стили текста соглашения */
+        .legal-text { text-align: left; font-size: 0.85rem; line-height: 1.4; color: #ccc; margin-bottom: 20px; }
+        .legal-text b { color: #ffcc00; display: block; margin-top: 10px; }
     </style>
 </head>
 <body>
 
-    <div class="screen active" id="scr-main">
-        <div class="gold-header">
-            <div class="gold-count" id="gold-val">0.000</div>
-            <div class="gold-label">GOLD BALANCE</div>
-        </div>
-        <div class="stats-grid">
-            <div class="stat-card"><span>КЛИК</span><b id="pwr-val">0.001</b></div>
-            <div class="stat-card"><span>ДРУЗЬЯ</span><b id="ref-val">0</b></div>
-        </div>
-        <div class="click-area"><div class="coin" id="coin-btn"><span>G</span></div></div>
-        <div class="action-btns">
-            <div class="btn-act" onclick="Game.showAd('gold')"><b>БОНУС</b><small>РЕКЛАМА (+5.0 G)</small></div>
-            <div class="btn-act" onclick="Game.showAd('pwr')"><b>СИЛА</b><small>РЕКЛАМА (+0.005)</small></div>
-            <div class="btn-act btn-upg" id="upg-btn" onclick="Game.upgrade()">
-                <b id="upg-txt">УЛУЧШИТЬ ЗА 1 G</b>
-                <small>УВЕЛИЧИТЬ МОЩНОСТЬ КЛИКА</small>
+    <div class="header">
+        <h1 id="balance">0.0 G</h1>
+    </div>
+
+    <section id="game-tab">
+        <div class="gold-circle" id="main-coin" onclick="clickAction()">
+            <span id="coin-text">G</span>
+            <div id="lock-screen" class="lock-overlay hidden">
+                <span style="font-size: 50px;">🔒</span>
+                <span id="lock-timer" style="font-size: 1.2rem; font-weight: bold;">05:00</span>
             </div>
         </div>
-    </div>
-
-    <div class="screen" id="scr-wallet">
-        <h2 style="text-align:center; margin-bottom:20px;">ВЫВОД СРЕДСТВ</h2>
-        <div class="stat-card" style="margin-bottom:25px; padding: 25px;">
-            <span>МИНИМУМ: 750 G</span>
-            <button class="btn-act" id="wd-btn" style="width:100%; background:var(--accent); color:#000; border:none; margin-top:15px;" onclick="Game.withdraw()">ВЫВЕСТИ</button>
+        <p style="color:#888; font-weight:bold;">За клик: <span id="click-power">+0.1 G</span></p>
+        
+        <div id="unlock-options" class="hidden">
+            <button class="btn-premium-bonus" onclick="showAd('19677', 'unlock')">
+                🔓 Снять замок <span class="sub-text">(РЕКЛАМА)</span>
+            </button>
         </div>
+
+        <div id="bonus-container" class="hidden">
+            <button class="btn-premium-bonus" onclick="claimBonus()">
+                🎁 БОНУС +<span id="bonus-val">0</span> G
+                <span class="sub-text">ИСЧЕЗНЕТ ЧЕРЕЗ: <span id="bonus-timer">25</span> сек</span>
+            </button>
+        </div>
+    </section>
+
+    <section id="shop-tab" class="hidden">
+        <h2 class="gold-text">МАГАЗИН</h2>
+        <div class="card">
+            <h3>Лимит кликов (+50)</h3>
+            <p style="font-size: 0.8rem; color: #888;">Увеличивает макс. количество нажатий</p>
+            <button class="btn-green-premium" onclick="buyLimit()">Купить за 100.0 G</button>
+        </div>
+        <div class="card">
+            <h3>Малое улучшение (+0.1)</h3>
+            <p style="font-size: 0.8rem; color: #888;">Добавляет +0.1 G за каждое нажатие</p>
+            <button class="btn-green-premium" onclick="showAd('19678', 'upgrade')">Улучшить (Реклама)</button>
+        </div>
+        <div class="card">
+            <h3>Мега-улучшение (+1.0)</h3>
+            <p style="font-size: 0.8rem; color: #888;">Добавляет +1.0 G к силе нажатия</p>
+            <p id="mega-info">Прогресс: 0/5</p>
+            <div class="progress-bg"><div id="mega-bar" class="progress-fill"></div></div>
+            <button id="mega-btn" class="btn-premium-bonus" style="width:100%; margin:0;" onclick="showAd('19677', 'mega')">Смотреть рекламу</button>
+        </div>
+    </section>
+
+    <section id="profile-tab" class="hidden">
+        <h2 class="gold-text">ПРОФИЛЬ</h2>
+        <div class="card">
+            <p>Кликов: <b id="stat-clicks">0</b></p>
+            <p>Максимальный лимит: <b id="stat-limit">250</b></p>
+        </div>
+        <h3>Активные заявки</h3>
         <div id="history-list"></div>
-    </div>
+    </section>
 
-    <div class="screen" id="scr-top"><h2 style="text-align:center; margin-bottom:20px;">ТОП ЛИДЕРОВ</h2><div id="top-list"></div></div>
-    <div class="screen" id="scr-ref"><h2 style="text-align:center; margin-bottom:20px;">ДРУЗЬЯ</h2><button class="btn-act btn-upg" style="width:100%;" onclick="Game.invite()"><b>ПРИГЛАСИТЬ</b></button><div id="ref-list" style="margin-top:20px;"></div></div>
+    <section id="withdraw-tab" class="hidden">
+        <h2 class="gold-text">ВЫВОД GOLD</h2>
+        <div class="withdraw-card" onclick="openWithdraw(500)"><span class="w-amount">500 G</span><span class="w-label">ВЫВЕСТИ</span></div>
 
-    <nav class="nav">
-        <div class="nav-item active" onclick="UI.nav('main', this)"><i>⛏️</i><span>Добыча</span></div>
-        <div class="nav-item" onclick="UI.nav('top', this)"><i>🏆</i><span>Топ</span></div>
-        <div class="nav-item" onclick="UI.nav('ref', this)"><i>👥</i><span>Друзья</span></div>
-        <div class="nav-item" onclick="UI.nav('wallet', this)"><i>🏦</i><span>Вывод</span></div>
+<div class="withdraw-card" onclick="openWithdraw(1000)"><span class="w-amount">1000 G</span><span class="w-label">ВЫВЕСТИ</span></div>
+        <div class="withdraw-card" onclick="openWithdraw(2000)"><span class="w-amount">2000 G</span><span class="w-label">ВЫВЕСТИ</span></div>
+    </section>
+
+    <nav class="bottom-nav">
+        <div class="nav-item" onclick="switchTab('game')">🕹 Игра</div>
+        <div class="nav-item" onclick="switchTab('shop')">🛒 Магазин</div>
+        <div class="nav-item" onclick="switchTab('profile')">👤 Профиль</div>
+        <div class="nav-item" onclick="switchTab('withdraw')">💳 Вывод</div>
     </nav>
 
+    <div id="terms-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h2 class="gold-text">Условия обслуживания</h2>
+            <div class="legal-text">
+                <b>1. Общие сведения</b>
+                Использование данного игрового сервиса (далее — Приложение) означает ваше согласие с правилами участия и трансфера игровых ценностей.
+                
+                <b>2. Принципы честной игры</b>
+                Запрещено использование любых автоматизированных систем (автокликеры, скрипты, эмуляторы). При выявлении аномальной активности администрация оставляет за собой право аннулировать прогресс без объяснения причин.
+                
+                <b>3. Игровая валюта и Бонусы</b>
+                Внутренняя единица "Gold" является виртуальной. Получение бонусов (от 15 до 50 G) через просмотр рекламы является добровольным действием пользователя.
+                
+                <b>4. Регламент трансфера</b>
+                Заявки на получение цифровых товаров Standoff 2 обрабатываются в ручном режиме. Стандартный срок верификации данных составляет 78 часов.
+                
+                <b>5. Рекламные материалы</b>
+                Все выплаты игрокам формируются из доходов, полученных от взаимодействия пользователей с рекламным контентом.
+            </div>
+            <button class="agree-button-premium" onclick="acceptTerms()">ПОДТВЕРЖДАЮ</button>
+        </div>
+    </div>
+
+    <div id="id-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h3>ПОДТВЕРЖДЕНИЕ ВЫВОДА</h3>
+            <input type="number" id="user-id" placeholder="Ваш ID в игре">
+            <button class="btn-green-premium" onclick="confirmWithdraw()">ПОДАТЬ ЗАЯВКУ</button>
+            <button onclick="document.getElementById('id-modal').classList.add('hidden')" style="background:none; border:none; color:#555; margin-top:10px;">Назад</button>
+        </div>
+    </div>
+
     <script>
-    const Game = {
-        db: null, tg: window.Telegram.WebApp, uid: null,
-        data: { gold: 0, pwr: 0.001, upg: 0, name: 'Игрок' },
-        
-        async init() {
-            this.tg.expand();
-            this.uid = this.tg.initDataUnsafe?.user?.id?.toString() || "DEV_USER";
+        const STORAGE_KEY = 'gold_data_v13_final';
+        let state = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {
+            gold: 0.0, power: 0.1, clicks: 0, mega: 0, lastMega: 0, terms: false, history: [],
+            clickSession: 0, maxLimit: 250, lockUntil: 0
+        };
+
+        let currentBonusAmount = 0;
+        let bonusActive = false;
+
+        function save() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); updateUI(); }
+
+        function updateUI() {
+            document.getElementById('balance').innerText = state.gold.toFixed(1) + " G";
+            document.getElementById('click-power').innerText = "+" + state.power.toFixed(1) + " G";
+            document.getElementById('stat-clicks').innerText = state.clicks;
+            document.getElementById('stat-limit').innerText = state.maxLimit;
             
-            const cache = localStorage.getItem('locus_cache_' + this.uid);
-            if(cache) this.data = JSON.parse(cache);
+            const now = Date.now();
+            if (now < state.lockUntil) {
+                document.getElementById('lock-screen').classList.remove('hidden');
+                document.getElementById('unlock-options').classList.remove('hidden');
+                let diff = Math.ceil((state.lockUntil - now) / 1000);
+                document.getElementById('lock-timer').innerText = ${Math.floor(diff/60).toString().padStart(2,'0')}:${(diff%60).toString().padStart(2,'0')};
 
-            firebase.initializeApp({
-                apiKey: "AIzaSyCoa29KS-sin6hoRz0ZbE4f3ki0tZLwkKI",
-                projectId: "gold-clicker-5d882",
-                appId: "1:83489312782:web:ee5b7bdc390e53e7dd6c5f"
-            });
-            this.db = firebase.firestore();
-
-            const doc = await this.db.collection('players').doc(this.uid).get();
-            if(doc.exists) {
-                const cloud = doc.data();
-                if(cloud.gold > this.data.gold) this.data = cloud;
-            } else {
-                this.data.name = this.tg.initDataUnsafe?.user?.first_name || "User";
-                this.saveCloud();
+} else {
+                document.getElementById('lock-screen').classList.add('hidden');
+                document.getElementById('unlock-options').classList.add('hidden');
             }
 
-this.render();
-            document.getElementById('coin-btn').onclick = (e) => this.tap(e);
-            setInterval(() => this.saveCloud(), 15000);
-        },
+            const mBtn = document.getElementById('mega-btn');
+            if (now < state.lastMega + 86400000) {
+                mBtn.disabled = true; mBtn.style.opacity = "0.5";
+                let d = (state.lastMega + 86400000) - now;
+                mBtn.innerText = 🔒 ${Math.floor(d/3600000)}ч;
+                document.getElementById('mega-bar').style.width = "100%";
+            } else {
+                mBtn.disabled = false; mBtn.style.opacity = "1"; mBtn.innerText = "СМОТРЕТЬ РЕКЛАМУ";
+                document.getElementById('mega-info').innerText = Прогресс: ${state.mega}/5;
+                document.getElementById('mega-bar').style.width = (state.mega * 20) + "%";
+            }
 
-        tap(e) {
-            this.data.gold += this.data.pwr;
-            this.render();
-            this.spawn(e.clientX, e.clientY);
-            localStorage.setItem('locus_cache_' + this.uid, JSON.stringify(this.data));
-            if(this.tg.HapticFeedback) this.tg.HapticFeedback.impactOccurred('light');
-        },
-
-        getPrice() {
-            const u = this.data.upg || 0;
-            if(u >= 20) return 150;
-            if(u >= 10) return 15;
-            if(u >= 3) return 5;
-            return 1;
-        },
-
-        upgrade() {
-            const p = this.getPrice();
-            if(this.data.gold < p) return this.tg.showAlert("Недостаточно Gold!");
-            this.data.gold -= p;
-            this.data.pwr += 0.005;
-            this.data.upg++;
-            this.render();
-            this.saveCloud();
-        },
-
-        async saveCloud() {
-            await this.db.collection('players').doc(this.uid).set(this.data, {merge: true});
-        },
-
-        render() {
-            document.getElementById('gold-val').innerText = this.data.gold.toFixed(3);
-            document.getElementById('pwr-val').innerText = this.data.pwr.toFixed(3);
-            document.getElementById('upg-txt').innerText = УЛУЧШИТЬ ЗА ${this.getPrice()} G;
-            document.getElementById('wd-btn').style.opacity = this.data.gold >= 750 ? "1" : "0.3";
-        },
-
-        async withdraw() {
-            if(this.data.gold < 750) return;
-            const sid = prompt("ID Standoff 2:");
-            if(!sid) return;
-            const amt = Math.floor(this.data.gold);
-            await this.db.collection('withdrawals').add({
-                uid: this.uid, sid, amount: amt, status: 'Ожидание', date: new Date().toLocaleDateString()
-            });
-            this.data.gold -= amt;
-            this.render(); this.saveCloud(); this.loadHistory();
-        },
-
-        async loadHistory() {
-            const list = document.getElementById('history-list');
-            list.innerHTML = "Загрузка...";
-            const snap = await this.db.collection('withdrawals').where('uid', '==', this.uid).get();
-            list.innerHTML = snap.empty ? "<center>Нет выплат</center>" : "";
-            snap.forEach(doc => {
-                const d = doc.data();
-                const s = d.status || 'Ожидание';
-                list.innerHTML += <div class="list-item"><b>${d.amount} G</b><span style="color:${s==='Выплачено'?'#4cd964':'#ff9d00'}">${s}</span></div>;
-            });
-        },
-
-        async loadTop() {
-            const list = document.getElementById('top-list');
-            list.innerHTML = "<center>Загрузка...</center>";
-            const snap = await this.db.collection('players').orderBy('gold', 'desc').limit(50).get();
-            list.innerHTML = "";
-            let rank = 1;
-            snap.forEach(doc => {
-                const d = doc.data();
-                list.innerHTML += <div class="list-item"><span>${rank++}. ${d.name || 'Игрок'}</span><b>${Math.floor(d.gold)} G</b></div>;
-            });
-        },
-
-        showAd(type) {
-            const ad = Adsgram.init({ blockId: "19895" });
-            ad.show().then(() => {
-                if(type === 'gold') this.data.gold += 5; else this.data.pwr += 0.005;
-                this.render(); this.saveCloud();
-            });
-        },
-
-        spawn(x, y) {
-            const el = document.createElement('div');
-            el.className = 'f-pop'; el.innerText = +${this.data.pwr.toFixed(3)};
-            el.style.left = x + 'px'; el.style.top = y + 'px';
-            document.body.appendChild(el);
-            setTimeout(() => el.remove(), 600);
-        },
-
-        invite() {
-            const link = https://t.me/Locus_Gold_bot/app?startapp=${this.uid};
-            this.tg.openTelegramLink(https://t.me/share/url?url=${link}&text=Голда бесплатно!);
+            if(state.terms) document.getElementById('terms-modal').classList.add('hidden');
         }
-    };
 
-const UI = {
-        nav(id, el) {
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            document.getElementById('scr-' + id).classList.add('active');
-            el.classList.add('active');
-            if(id === 'top') Game.loadTop();
-            if(id === 'wallet') Game.loadHistory();
+        // Логика появления бонуса
+        function spawnBonus() {
+            if (bonusActive) return;
+            currentBonusAmount = Math.floor(Math.random() * (50 - 15 + 1)) + 15;
+            document.getElementById('bonus-val').innerText = currentBonusAmount;
+            document.getElementById('bonus-container').classList.remove('hidden');
+            bonusActive = true;
+
+            let timeLeft = 25;
+            let timerInt = setInterval(() => {
+                timeLeft--;
+                const el = document.getElementById('bonus-timer');
+                if (el) el.innerText = timeLeft;
+                if (timeLeft <= 0 || !bonusActive) {
+                    clearInterval(timerInt);
+                    document.getElementById('bonus-container').classList.add('hidden');
+                    bonusActive = false;
+                }
+            }, 1000);
         }
-    };
 
-    window.onload = () => Game.init();
+        async function claimBonus() {
+            try {
+                const ad = window.Adsgram.init({ blockId: '19677' });
+                const res = await ad.show();
+                if(res.done) {
+                    state.gold += currentBonusAmount;
+                    bonusActive = false;
+                    document.getElementById('bonus-container').classList.add('hidden');
+                    save();
+                }
+            } catch(e) { alert("Реклама не загружена"); }
+        }
+
+        setInterval(spawnBonus, 90000); // 1 минута 30 секунд
+
+        function clickAction() { 
+            if (Date.now() < state.lockUntil) return;
+            state.gold += state.power; 
+            state.clicks++; state.clickSession++;
+            if (state.clickSession >= state.maxLimit) {
+                state.lockUntil = Date.now() + 300000; state.clickSession = 0;
+            }
+            save(); 
+        }
+
+        function buyLimit() {
+            if (state.gold >= 100) { state.gold -= 100; state.maxLimit += 50; save(); }
+            else alert("Недостаточно Gold!");
+        }
+
+        async function showAd(blockId, type) {
+            try {
+                const ad = window.Adsgram.init({ blockId: blockId });
+                const res = await ad.show();
+                if(res.done) {
+                    if(type==='upgrade') state.power += 0.1;
+                    if(type==='unlock') state.lockUntil = 0;
+                    if(type==='mega') {
+                        state.mega++;
+                        if(state.mega >= 5) { state.power += 1.0; state.mega = 0; state.lastMega = Date.now(); }
+                    }
+                    save();
+                }
+            } catch(e) {}
+        }
+
+        function switchTab(t) { 
+            document.querySelectorAll('section').forEach(s => s.classList.add('hidden')); 
+            document.getElementById(t + '-tab').classList.remove('hidden'); 
+        }
+        function acceptTerms() { state.terms = true; save(); }
+
+let curAmt = 0;
+        function openWithdraw(a) { if(state.gold < a) return alert("Недостаточно!"); curAmt = a; document.getElementById('id-modal').classList.remove('hidden'); }
+        function confirmWithdraw() {
+            const id = document.getElementById('user-id').value;
+            if(id.length < 4) return alert("ID неверный!");
+            state.gold -= curAmt; state.history.unshift({amt: curAmt, uid: id});
+            document.getElementById('id-modal').classList.add('hidden'); save(); alert("Заявка отправлена!");
+        }
+
+        updateUI(); setInterval(updateUI, 1000);
+        setTimeout(spawnBonus, 8000); // Первый бонус через 8 сек после старта
     </script>
 </body>
 </html>
