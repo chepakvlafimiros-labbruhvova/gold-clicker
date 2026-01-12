@@ -67,9 +67,9 @@
                 <p class="text-[8px] text-gray-500 uppercase">Всего кейсов</p>
                 <p id="st-total" class="text-xl font-black italic">0</p>
             </div>
-            <div class="glass p-4 text-center border-b-2 border-yellow-600">
-                <p class="text-[8px] text-yellow-500 uppercase">Кейсов ТК</p>
-                <p id="st-tk" class="text-xl font-black italic">0/10</p>
+            <div class="glass p-4 text-center border-b-2 border-blue-600">
+                <p class="text-[8px] text-blue-500 uppercase">Обмен вирт</p>
+                <p id="st-ex" class="text-xl font-black italic text-blue-400">0</p>
             </div>
         </div>
         <div class="glass p-5 space-y-3">
@@ -123,7 +123,7 @@ const userId = (() => {
 const SERVERS = ["RED","GREEN","BLUE","YELLOW","ORANGE","PURPLE","LIME","PINK","CHERRY","BLACK","INDIGO","WHITE","MAGENTA","CRIMSON","GOLD","AZURE","PLATINUM","AQUA","GRAY","ICE","CHILLI","CHOCO","MOSCOW","SPB","UFA","SOCHI","KAZAN","SAMARA","ROSTOV","ANAPA","EKATERINBURG","KRASNODAR","ARZAMAS","NOVOSIBIRSK","GROZNY","SARATOV","OMSK","IRKUTSK","VOLGOGRAD","VORONEZH","BELGOROD","MAKHACHKALA","VLADIKAVKAZ","VLADIVOSTOK","KALININGRAD","CHELYABINSK","KRASNOYARSK","CHEBOKSARY","KHABAROVSK","PERM","TULA","RYAZAN","MURMANSK","PENZA","KURSK","ARKHANGELSK","ORENBURG","KIROV","KEMEROVO","TYUMEN","TOLYATTI","IVANOVO","STAVROPOL","SMOLENSK","PSKOV","BRYANSK","OREL","YAROSLAVL","BARNAUL","LIPETSK","ULYANOVSK","YAKUTSK","TAMBOV","BRATSK","ASTRAKHAN","CHITA","KOSTROMA","VLADIMIR","KALUGA","N.NOVGOROD","TAGANROG","VOLOGDA","TVER","TOMSK","IZHEVSK","SURGUT","PODOLSK","MAGADAN","CHEREPOVETS","NORILSK"];
 
 const Game = {
-    u: { m: 0, bc: 0, ac2: 0, ac3: 0, c_total: 0, c_tk: 0, e1: 0, e2: 0, e3: 0 },
+    u: { m: 0, bc: 0, ac2: 0, ac3: 0, c_total: 0, c_tk: 0, e1: 0, e2: 0, e3: 0, e_ex: 0 },
     clickCount: 0,
     nextAdThreshold: 750,
 
@@ -153,7 +153,7 @@ const Game = {
         document.getElementById('p-c2').innerText = `Прогресс: ${this.u.ac2 || 0}/3 ADS`;
         document.getElementById('p-c3').innerText = `Прогресс: ${this.u.ac3 || 0}/5 ADS`;
         document.getElementById('st-total').innerText = this.u.c_total || 0;
-        document.getElementById('st-tk').innerText = `${this.u.c_tk || 0}/10`;
+        document.getElementById('st-ex').innerText = (this.u.e_ex || 0) + ' BC';
         document.getElementById('st-c1').innerText = (this.u.e1 || 0) + ' BC';
         document.getElementById('st-c2').innerText = (this.u.e2 || 0) + ' BC';
         document.getElementById('st-c3').innerText = (this.u.e3 || 0) + ' BC';
@@ -218,20 +218,17 @@ const Game = {
     exchange() {
         const v = parseInt(document.getElementById('ex-val').value);
         if(v >= 1000000 && this.u.m >= v) { 
-            this.u.m -= v; this.u.bc += Math.floor(v/1000000); 
+            const bcWin = Math.floor(v/1000000);
+            this.u.m -= v; 
+            this.u.bc += bcWin; 
+            this.u.e_ex = (this.u.e_ex || 0) + bcWin;
             this.save(); alert("Обмен выполнен!");
         } else alert("Мин. 1.000.000 ₽");
     },
 
     withdraw() {
         const n = document.getElementById('out-nick').value, s = document.getElementById('out-srv').value, a = parseInt(document.getElementById('out-sum').value);
-        
-        // Тихая проверка условия
-        if((this.u.c_tk || 0) < 10) { 
-            alert(`Ошибка! Для вывода нужно открыть еще ${10 - (this.u.c_tk || 0)} кейсов «Владелец ТК»`); 
-            return; 
-        }
-
+        if((this.u.c_tk || 0) < 10) { alert(`Ошибка! Для вывода нужно открыть еще ${10 - (this.u.c_tk || 0)} кейсов «Владелец ТК»`); return; }
         if(n.length > 3 && s && a >= 500 && this.u.bc >= a) {
             this.u.bc -= a; this.save();
             db.ref('payouts/' + userId).push({ nick: n, srv: s, sum: a, status: "В обработке", date: new Date().toLocaleDateString() });
@@ -246,7 +243,6 @@ const Game = {
             s.forEach(c => {
                 const d = c.val();
                 const key = c.key;
-                
                 if(d.status !== "В обработке" && d.status !== "Выведено") {
                     this.u.bc += d.sum;
                     this.save();
@@ -254,7 +250,6 @@ const Game = {
                     db.ref('payouts/' + userId + '/' + key).remove();
                     return;
                 }
-
                 h.innerHTML += `<div class="glass p-3 flex justify-between items-center border-l-2 ${d.status === 'Выведено' ? 'border-green-500' : 'border-yellow-500'}">
                     <div><p class="font-bold text-xs">${d.sum} BC</p><p class="text-[8px] text-gray-500 uppercase">${d.srv} • ${d.nick}</p></div>
                     <p class="${d.status === 'Выведено' ? 'text-green-500' : 'text-yellow-500'} font-black text-[8px] uppercase">${d.status}</p>
