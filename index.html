@@ -34,6 +34,7 @@
             margin: 20px auto; cursor: pointer; position: relative; transition: 0.1s;
         }
         .click-area:active { transform: scale(0.9); border-color: var(--red); }
+        .badge { font-size: 7px; padding: 2px 6px; border-radius: 4px; font-weight: 900; text-transform: uppercase; }
         
         ::-webkit-scrollbar { width: 0; }
     </style>
@@ -42,11 +43,11 @@
 
 <div class="max-w-md mx-auto h-full flex flex-col relative">
     <div class="p-8 flex justify-between items-center z-10">
-        <div class="space-y-1">
-            <p class="text-[9px] text-gray-500 font-black uppercase tracking-widest">Виртуальный счет</p>
+        <div>
+            <p class="text-[9px] text-gray-500 font-black uppercase tracking-widest">Вирты</p>
             <p id="m-rub" class="text-3xl font-black italic tracking-tighter">0 ₽</p>
         </div>
-        <div class="text-right space-y-1">
+        <div class="text-right">
             <p class="text-[9px] text-blue-500 font-black uppercase tracking-widest">Black Coins</p>
             <p id="m-bc" class="text-3xl font-black italic text-blue-400 tracking-tighter">0</p>
         </div>
@@ -57,45 +58,49 @@
             <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
             <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
         </div>
-        <p class="text-[9px] font-black text-gray-500 uppercase tracking-[2px]">
-            Игроков в сети: <span id="online-count" class="text-green-500">0</span>
-        </p>
+        <p class="text-[9px] font-black text-gray-500 uppercase tracking-[2px]">Online: <span id="online-count" class="text-green-500">0</span></p>
     </div>
 
     <div id="tab-home" class="tab-content active text-center">
         <div class="click-area" onclick="Game.click()">
-            <span class="text-7xl font-black text-red-600 italic tracking-tighter select-none" style="text-shadow: 0 0 25px rgba(255,0,0,0.4)">BR</span>
+            <span class="text-7xl font-black text-red-600 italic tracking-tighter" style="text-shadow: 0 0 25px rgba(255,0,0,0.4)">BR</span>
         </div>
-        
-        <div class="glass p-6 mt-6 text-left relative overflow-hidden">
-            <p class="text-[11px] text-blue-400 font-black uppercase italic mb-4">Обменник валют</p>
+        <div class="glass p-6 mt-6">
+            <p class="text-[10px] text-blue-400 font-black uppercase mb-4">Обмен 1.000.000 ₽ на 1 BC</p>
             <div class="flex gap-3">
-                <input id="ex-val" type="number" placeholder="Сумма в ₽">
+                <input id="ex-val" type="number" placeholder="Сумма ₽">
                 <button onclick="Game.exchange()" class="btn-main px-6 py-2 text-[10px]">ОБМЕН</button>
             </div>
-            <p class="text-[9px] text-gray-500 mt-3 font-medium opacity-60 text-center">Курс: 1.000.000 ₽ = 1 BC</p>
         </div>
     </div>
 
     <div id="tab-cases" class="tab-content space-y-4">
         <div class="glass p-5 flex justify-between items-center border-l-[6px] border-gray-600">
-            <div>
+            <div class="space-y-2">
                 <p class="text-xs font-black uppercase text-gray-300">Кейс «Бомж»</p>
-                <p class="text-[9px] font-bold text-gray-500">Приз: 1-5 BC</p>
+                <div class="flex gap-1">
+                    <span class="badge bg-white/10 text-gray-400">1-5 BC</span>
+                </div>
             </div>
             <button onclick="Game.watchAd('c1')" class="btn-main px-5 py-3 text-[9px]">ОТКРЫТЬ</button>
         </div>
         <div class="glass p-5 flex justify-between items-center border-l-[6px] border-blue-600">
-            <div>
+            <div class="space-y-2">
                 <p class="text-xs font-black uppercase text-blue-400">Кейс «Перекуп»</p>
-                <p id="p-c2" class="text-[8px] text-blue-200/40 font-black uppercase">0/3 ADS</p>
+                <div class="flex gap-1">
+                    <span class="badge bg-blue-500/20 text-blue-300">25-50 BC</span>
+                </div>
+                <p id="p-c2" class="text-[8px] text-blue-200/40 font-black uppercase">ADS: 0/3</p>
             </div>
             <button onclick="Game.watchAd('c2')" class="btn-main px-5 py-3 text-[9px] !bg-blue-600">СМОТРЕТЬ</button>
         </div>
         <div class="glass p-5 flex justify-between items-center border-l-[6px] border-yellow-500">
-            <div>
+            <div class="space-y-2">
                 <p class="text-xs font-black uppercase text-yellow-500">Кейс «Владелец ТК»</p>
-                <p id="p-c3" class="text-[8px] text-yellow-200/40 font-black uppercase">0/5 ADS</p>
+                <div class="flex gap-1">
+                    <span class="badge bg-yellow-500/20 text-yellow-300">50-150 BC</span>
+                </div>
+                <p id="p-c3" class="text-[8px] text-yellow-200/40 font-black uppercase">ADS: 0/5</p>
             </div>
             <button onclick="Game.watchAd('c3')" class="btn-main px-5 py-3 text-[9px] !bg-yellow-600">СМОТРЕТЬ</button>
         </div>
@@ -103,32 +108,31 @@
 
     <div id="tab-out" class="tab-content">
         <div class="glass p-6 mb-6">
-            <h3 class="text-xs font-black uppercase text-red-500 italic mb-4">Выплата (МИН. 500 BC)</h3>
+            <h3 class="text-xs font-black uppercase text-red-500 italic mb-4">Вывод (Мин. 500 BC)</h3>
             <div class="space-y-4">
-                <input id="out-nick" type="text" placeholder="Nick_Name">
+                <input id="out-nick" type="text" placeholder="Игровой ник">
                 <select id="out-srv" class="font-bold text-xs"></select>
                 <input id="out-sum" type="number" placeholder="Сумма BC">
-                <button onclick="Game.withdraw()" class="btn-main w-full py-4 text-[11px]">ПОЛУЧИТЬ ДОНАТ</button>
+                <button onclick="Game.withdraw()" class="btn-main w-full py-4 text-[11px]">ПОДАТЬ ЗАЯВКУ</button>
             </div>
         </div>
         <div id="out-history" class="space-y-3 pb-10"></div>
     </div>
 
-    <nav class="fixed bottom-6 left-6 right-6 glass flex justify-around py-4 z-50 shadow-2xl">
+    <nav class="fixed bottom-6 left-6 right-6 glass flex justify-around py-4 z-50">
         <div onclick="Game.tab('home')" id="n-home" class="flex flex-col items-center text-gray-500 nav-active cursor-pointer">
-            <span class="text-xl">⚡</span><span class="text-[9px] font-black uppercase mt-1">Игра</span>
+            <span class="text-xl">⚡</span><span class="text-[9px] font-black mt-1">ИГРА</span>
         </div>
         <div onclick="Game.tab('cases')" id="n-cases" class="flex flex-col items-center text-gray-500 cursor-pointer">
-            <span class="text-xl">💎</span><span class="text-[9px] font-black uppercase mt-1">Кейсы</span>
+            <span class="text-xl">📦</span><span class="text-[9px] font-black mt-1">КЕЙСЫ</span>
         </div>
         <div onclick="Game.tab('out')" id="n-out" class="flex flex-col items-center text-gray-500 cursor-pointer">
-            <span class="text-xl">💸</span><span class="text-[9px] font-black uppercase mt-1">Вывод</span>
+            <span class="text-xl">💸</span><span class="text-[9px] font-black mt-1">ВЫВОД</span>
         </div>
     </nav>
 </div>
 
 <script>
-// ТВОЙ НОВЫЙ КОНФИГ
 const firebaseConfig = {
   apiKey: "AIzaSyCxKZLKhg8DmHaw7EcaEchhEMFwEUxqHU",
   authDomain: "locusbot-7fcfb.firebaseapp.com",
@@ -160,16 +164,12 @@ const Game = {
             this.updateUI();
         });
 
-        // ОНЛАЙН СИСТЕМА
         const pRef = db.ref('presence/' + userId);
         db.ref('.info/connected').on('value', (snap) => {
-            if (snap.val()) {
-                pRef.onDisconnect().remove();
-                pRef.set(true);
-            }
+            if (snap.val()) { pRef.onDisconnect().remove(); pRef.set(true); }
         });
         db.ref('presence').on('value', (snap) => {
-            document.getElementById('online-count').innerText = (snap.numChildren() || 0) + 7; // +7 фейк
+            document.getElementById('online-count').innerText = (snap.numChildren() || 0) + 12; // +12 фейк
         });
 
         const sel = document.getElementById('out-srv');
@@ -180,8 +180,8 @@ const Game = {
     updateUI() {
         document.getElementById('m-rub').innerText = Math.floor(this.u.m).toLocaleString() + ' ₽';
         document.getElementById('m-bc').innerText = this.u.bc.toLocaleString();
-        document.getElementById('p-c2').innerText = `${this.u.ac2 || 0}/3 ADS`;
-        document.getElementById('p-c3').innerText = `${this.u.ac3 || 0}/5 ADS`;
+        document.getElementById('p-c2').innerText = `ADS: ${this.u.ac2 || 0}/3`;
+        document.getElementById('p-c3').innerText = `ADS: ${this.u.ac3 || 0}/5`;
     },
 
     save() { db.ref('users/' + userId).update(this.u); },
@@ -199,18 +199,18 @@ const Game = {
             const ad = window.Adsgram.init({ blockId: "20963" });
             const res = await ad.show();
             if(res.done) {
-                if(type === 'c1') { this.u.bc += Math.floor(Math.random()*5)+1; }
+                let win = 0;
+                if(type === 'c1') { win = Math.floor(Math.random()*5)+1; this.u.bc += win; alert(`ВЫПАЛО: ${win} BC!`); }
                 else if(type === 'c2') {
                     this.u.ac2 = (this.u.ac2 || 0) + 1;
-                    if(this.u.ac2 >= 3) { this.u.ac2 = 0; this.u.bc += Math.floor(Math.random()*26)+25; }
+                    if(this.u.ac2 >= 3) { this.u.ac2 = 0; win = Math.floor(Math.random()*26)+25; this.u.bc += win; alert(`КЕЙС ОТКРЫТ: +${win} BC!`); }
                 } else if(type === 'c3') {
                     this.u.ac3 = (this.u.ac3 || 0) + 1;
-                    if(this.u.ac3 >= 5) { this.u.ac3 = 0; this.u.bc += Math.floor(Math.random()*101)+50; }
+                    if(this.u.ac3 >= 5) { this.u.ac3 = 0; win = Math.floor(Math.random()*101)+50; this.u.bc += win; alert(`СОРВАЛ КУШ: +${win} BC!`); }
                 }
                 this.save(); this.updateUI();
-                alert("Награда получена!");
             }
-        } catch(e) { alert("Реклама еще не готова"); }
+        } catch(e) { alert("Реклама не готова"); }
     },
 
     exchange() {
@@ -218,7 +218,7 @@ const Game = {
         if(v >= 1000000 && this.u.m >= v) { 
             this.u.m -= v; this.u.bc += Math.floor(v/1000000); 
             this.save(); document.getElementById('ex-val').value = '';
-            alert("Обмен успешен!");
+            alert("Обменял!");
         } else alert("Мин. 1.000.000 ₽");
     },
 
@@ -227,9 +227,9 @@ const Game = {
         if(n.length > 3 && a >= 500 && this.u.bc >= a) {
             this.u.bc -= a; this.save();
             db.ref('payouts/' + userId).push({ nick: n, srv: s, sum: a, status: "Выведено", date: new Date().toLocaleDateString() });
-            alert("Успешно выведено!");
+            alert("Выведено! Проверь баланс в игре.");
             document.getElementById('out-sum').value = '';
-        } else alert("Ошибка: Мин. 500 BC");
+        } else alert("Ошибка: Проверь баланс и данные!");
     },
 
     loadHistory() {
