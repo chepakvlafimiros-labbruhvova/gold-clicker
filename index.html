@@ -3,174 +3,91 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Locus Gold Premium</title>
+    <title>Locus Gold - Black Russia</title>
     <script src="https://www.gstatic.com/firebasejs/9.10.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.10.0/firebase-database-compat.js"></script>
     <script src="https://sad.adsgram.ai/js/sad.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
-        :root { --br-red: #ff3333; --br-red-dark: #8b0000; }
-        body { 
-            background: #050505; 
-            color: #ffffff; 
-            font-family: 'Montserrat', sans-serif; 
-            overflow: hidden; 
-            height: 100vh; 
-            user-select: none;
-            background-image: radial-gradient(circle at 50% -20%, #220000 0%, #050505 100%);
-        }
-        
-        .glass { 
-            background: rgba(255, 255, 255, 0.03); 
-            backdrop-filter: blur(10px); 
-            border: 1px solid rgba(255, 255, 255, 0.05); 
-            border-radius: 24px; 
-        }
-
-        .tab-content { display: none; height: calc(100vh - 180px); overflow-y: auto; padding-right: 4px; }
-        .tab-content.active { display: block; animation: fadeIn 0.3s ease-out; }
-        
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        .btn-main {
-            background: linear-gradient(135deg, var(--br-red) 0%, var(--br-red-dark) 100%);
-            box-shadow: 0 4px 15px rgba(255, 51, 51, 0.3);
-            border-radius: 16px;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            transition: all 0.2s;
-        }
-        .btn-main:active { transform: scale(0.96); box-shadow: 0 2px 8px rgba(255, 51, 51, 0.2); }
-
-        .clicker-circle {
-            width: 220px; height: 220px;
-            border-radius: 50%;
-            background: #000;
-            border: 8px solid #111;
-            box-shadow: 0 0 40px rgba(255, 51, 51, 0.1), inset 0 0 20px rgba(255, 255, 255, 0.05);
-            display: flex; align-items: center; justify-content: center;
-            margin: 30px auto;
-            position: relative;
-            cursor: pointer;
-        }
-        .clicker-circle::after {
-            content: ''; position: absolute; inset: -4px; border-radius: 50%;
-            background: linear-gradient(45deg, transparent 40%, var(--br-red) 50%, transparent 60%);
-            opacity: 0.3; animation: rotate 4s linear infinite;
-        }
-        @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #222; border-radius: 10px; }
-
-        input, select { 
-            background: rgba(0,0,0,0.5); 
-            border: 1px solid #222; 
-            color: #fff; 
-            padding: 14px; 
-            border-radius: 16px; 
-            width: 100%; 
-            outline: none; 
-            font-weight: 600;
-        }
-        input:focus { border-color: var(--br-red); }
+        :root { --red: #ff3b3b; --red-dark: #8b0000; --bg: #080808; }
+        body { background: var(--bg); color: #fff; font-family: 'Montserrat', sans-serif; overflow: hidden; height: 100vh; user-select: none; }
+        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.05); border-radius: 20px; }
+        .tab-content { display: none; height: calc(100vh - 160px); overflow-y: auto; padding-bottom: 30px; }
+        .active { display: block; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        .btn-main { background: linear-gradient(180deg, var(--red) 0%, var(--red-dark) 100%); font-weight: 900; text-transform: uppercase; transition: 0.1s; box-shadow: 0 4px 15px rgba(255,59,59,0.2); border-radius: 14px; }
+        .btn-main:active { transform: scale(0.95); }
+        .nav-active { color: var(--red) !important; filter: drop-shadow(0 0 5px var(--red)); }
+        input, select { background: #121212; border: 1px solid #222; color: #fff; padding: 12px; border-radius: 14px; width: 100%; outline: none; }
+        .click-area { width: 200px; height: 200px; border-radius: 50%; background: radial-gradient(circle, #1a1a1a 0%, #000 100%); border: 6px solid #1a1a1a; display: flex; align-items: center; justify-content: center; margin: 20px auto; cursor: pointer; }
+        .click-area:active { transform: scale(0.92); border-color: var(--red); }
+        ::-webkit-scrollbar { width: 3px; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
     </style>
 </head>
 <body>
 
-<div class="max-w-md mx-auto h-full flex flex-col p-6">
-    <header class="flex justify-between items-center mb-8">
-        <div>
-            <p class="text-[10px] text-gray-500 font-extrabold uppercase tracking-[0.2em] mb-1">Баланс ₽</p>
-            <p id="m-rub" class="text-3xl font-black italic tracking-tighter">0 ₽</p>
-        </div>
-        <div class="text-right">
-            <p class="text-[10px] text-blue-500 font-extrabold uppercase tracking-[0.2em] mb-1">Донат BC</p>
-            <p id="m-bc" class="text-3xl font-black italic text-blue-400 tracking-tighter">0</p>
-        </div>
-    </header>
+<div class="max-w-md mx-auto p-5 h-full flex flex-col">
+    <div class="flex justify-between items-start mb-6">
+        <div><p class="text-[10px] text-gray-500 font-bold uppercase italic">Баланс ₽</p><p id="m-rub" class="text-3xl font-black italic tracking-tighter">0</p></div>
+        <div class="text-right"><p class="text-[10px] text-blue-500 font-bold uppercase italic">Донат BC</p><p id="m-bc" class="text-3xl font-black italic text-blue-400 tracking-tighter">0</p></div>
+    </div>
 
-    <main class="flex-1">
-        <div id="tab-home" class="tab-content active text-center">
-            <div class="clicker-circle" onclick="Game.click()">
-                <span class="text-7xl font-black text-red-600 italic relative z-10">BR</span>
-            </div>
-            
-            <div class="glass p-5 mt-10 text-left">
-                <div class="flex justify-between items-end mb-4">
-                    <p class="text-[10px] text-blue-500 font-bold uppercase italic">Обмен валюты</p>
-                    <p class="text-[9px] text-gray-500 font-bold italic">КУРС: 1.000.000 ₽ = 1 BC</p>
-                </div>
-                <div class="flex gap-3">
-                    <input id="ex-val" type="number" placeholder="Сумма ₽">
-                    <button onclick="Game.exchange()" class="btn-main px-6 text-[10px]">Обмен</button>
-                </div>
-            </div>
+    <div id="tab-home" class="tab-content active">
+        <div class="click-area" onclick="Game.click()"><span class="text-6xl font-black text-red-600 italic">BR</span></div>
+        <div class="glass p-5 mt-6">
+            <p class="text-blue-500 text-[10px] font-bold uppercase italic mb-2">Обмен: 1.000.000 ₽ = 1 BC</p>
+            <div class="flex gap-2"><input id="ex-val" type="number" placeholder="Сумма ₽"><button onclick="Game.exchange()" class="btn-main px-6 py-2 text-[10px]">Обмен</button></div>
+        </div>
+    </div>
+
+    <div id="tab-cases" class="tab-content space-y-4">
+        <div class="glass p-4 flex justify-between items-center border-l-4 border-gray-500">
+            <div><p class="text-xs font-black">КЕЙС №1</p><p class="text-[10px] text-gray-500 italic">1-5 BC (1 ADS)</p></div>
+            <button onclick="Game.watchAd('c1')" class="btn-main px-5 py-2 text-[10px]">Открыть</button>
+        </div>
+        <div class="glass p-4 flex justify-between items-center border-l-4 border-blue-500">
+            <div><p class="text-xs font-black">КЕЙС №2</p><p id="p-c2" class="text-[10px] text-blue-400 italic">25-50 BC (Прогресс: 0/3)</p></div>
+            <button onclick="Game.watchAd('c2')" class="btn-main px-5 py-2 text-[10px] !bg-blue-600">Смотреть</button>
+        </div>
+        <div class="glass p-4 flex justify-between items-center border-l-4 border-yellow-500">
+            <div><p class="text-xs font-black text-yellow-500">КЕЙС №3</p><p id="p-c3" class="text-[10px] text-yellow-400 italic">50-150 BC (Прогресс: 0/5)</p></div>
+            <button onclick="Game.watchAd('c3')" class="btn-main px-5 py-2 text-[10px] !bg-yellow-600">Смотреть</button>
         </div>
 
-        <div id="tab-cases" class="tab-content space-y-4">
-            <div class="glass p-6 border-l-4 border-green-500 flex justify-between items-center">
-                <div>
-                    <h3 class="font-black text-sm uppercase">Халява</h3>
-                    <p class="text-[10px] text-gray-400 italic">Награда: 25-100 BC за 1 ADS</p>
-                </div>
-                <button onclick="Game.watchAd('lite')" class="btn-main px-5 py-2 text-[9px] !bg-green-600">Открыть</button>
-            </div>
-
-            <div class="glass p-6 border-l-4 border-blue-600 flex justify-between items-center">
-                <div>
-                    <h3 class="font-black text-sm uppercase">Мажор</h3>
-                    <p id="ad-prog" class="text-[10px] text-gray-400 italic font-bold">Прогресс рекламы: 0/5</p>
-                </div>
-                <button onclick="Game.watchAd('major')" class="btn-main px-5 py-2 text-[9px] !bg-blue-600">Смотреть</button>
-            </div>
-
-            <div class="glass p-6">
-                <h3 class="font-black text-sm uppercase text-red-500 mb-3">Пригласи друга (+50 BC)</h3>
-                <div class="flex gap-2 mb-3">
-                    <input id="ref-link" readonly class="text-[10px]" value="Загрузка...">
-                    <button onclick="Game.copyRef()" class="btn-main px-4 py-2 text-[8px]">Копия</button>
-                </div>
-                <div id="ref-list" class="space-y-2 mt-4 max-h-32 overflow-y-auto"></div>
-            </div>
+        <div class="glass p-5 space-y-3">
+            <p class="text-[10px] font-black text-red-500 uppercase italic">Рефералка (+100 BC)</p>
+            <input id="ref-link" readonly class="text-[10px] text-gray-500 bg-black/40">
+            <button onclick="Game.copyRef()" class="btn-main w-full py-2 text-[10px]">Копировать ссылку</button>
+            <div id="ref-list" class="space-y-1 pt-2 max-h-32 overflow-y-auto"></div>
         </div>
+    </div>
 
-        <div id="tab-out" class="tab-content space-y-6">
-            <div class="glass p-6 space-y-4">
-                <h2 class="text-center font-black italic text-red-500 uppercase tracking-widest">Вывод средств</h2>
-                <input id="out-nick" type="text" placeholder="Игровой ник (Nick_Name)">
-                <select id="out-srv">
-                    </select>
-                <input id="out-sum" type="number" placeholder="Сумма BC (Мин. 50)">
-                <button onclick="Game.withdraw()" class="btn-main w-full py-4 text-xs">Подать заявку</button>
-            </div>
-            
-            <div>
-                <p class="text-[10px] text-gray-500 font-bold uppercase italic mb-3 ml-2">История ваших выплат</p>
-                <div id="out-history" class="space-y-3"></div>
-            </div>
+    <div id="tab-top" class="tab-content">
+        <h2 class="text-center font-black italic text-red-500 uppercase mb-4">Топ рефералов</h2>
+        <div id="top-list" class="space-y-2"></div>
+    </div>
+
+    <div id="tab-out" class="tab-content space-y-4">
+        <div class="glass p-5 space-y-4">
+            <input id="out-nick" type="text" placeholder="Nick_Name">
+            <select id="out-srv"></select>
+            <input id="out-sum" type="number" placeholder="Сумма BC (от 50)">
+            <button onclick="Game.withdraw()" class="btn-main w-full py-4 text-xs">Вывести BC</button>
         </div>
-    </main>
+        <div id="out-history" class="space-y-2"></div>
+    </div>
 
-    <nav class="glass flex justify-around py-4 mt-4">
-        <button onclick="Game.tab('home')" id="n-home" class="flex flex-col items-center gap-1 text-gray-600 nav-active">
-            <span class="text-xl">⚡</span><span class="text-[8px] font-black uppercase">Игра</span>
-        </button>
-        <button onclick="Game.tab('cases')" id="n-cases" class="flex flex-col items-center gap-1 text-gray-600">
-            <span class="text-xl">📦</span><span class="text-[8px] font-black uppercase">Кейсы</span>
-        </button>
-        <button onclick="Game.tab('out')" id="n-out" class="flex flex-col items-center gap-1 text-gray-600">
-            <span class="text-xl">💳</span><span class="text-[8px] font-black uppercase">Вывод</span>
-        </button>
+    <nav class="fixed bottom-0 left-0 right-0 bg-[#0a0a0a] border-t border-white/5 flex justify-around py-4">
+        <div onclick="Game.tab('home')" id="n-home" class="flex flex-col items-center gap-1 text-gray-600 nav-active cursor-pointer"><span>🔥</span><span class="text-[8px] font-black uppercase">Игра</span></div>
+        <div onclick="Game.tab('cases')" id="n-cases" class="flex flex-col items-center gap-1 text-gray-600 cursor-pointer"><span>📦</span><span class="text-[8px] font-black uppercase">Кейсы</span></div>
+        <div onclick="Game.tab('top')" id="n-top" class="flex flex-col items-center gap-1 text-gray-600 cursor-pointer"><span>🏆</span><span class="text-[8px] font-black uppercase">Топ</span></div>
+        <div onclick="Game.tab('out')" id="n-out" class="flex flex-col items-center gap-1 text-gray-600 cursor-pointer"><span>💳</span><span class="text-[8px] font-black uppercase">Вывод</span></div>
     </nav>
 </div>
 
 <script>
-// FIREBASE CONFIG
 const firebaseConfig = {
   apiKey: "AIzaSyA4zMBfNc1wTIN75Qr1KMBTrlgiU5qG-fA",
   authDomain: "locus-gold-game.firebaseapp.com",
@@ -182,52 +99,34 @@ const firebaseConfig = {
 
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
+const urlParams = new URLSearchParams(window.location.search);
+const userId = urlParams.get('id') || "test_user";
 
-// ID Пользователя (Интеграция с Telegram или тестовый ID)
-const userId = new URLSearchParams(window.location.search).get('id') || "user_" + Math.floor(Math.random() * 9999);
-
-// ВСЕ 90 СЕРВЕРОВ
-const SERVERS = [
-    "RED [01]", "GREEN [02]", "BLUE [03]", "YELLOW [04]", "ORANGE [05]", "PURPLE [06]", "LIME [07]", "PINK [08]", "CHERRY [09]", "BLACK [10]", 
-    "INDIGO [11]", "WHITE [12]", "MAGENTA [13]", "CRIMSON [14]", "GOLD [15]", "AZURE [16]", "PLATINUM [17]", "AQUA [18]", "GRAY [19]", "ICE [20]", 
-    "CHILLI [21]", "CHOCO [22]", "MOSCOW [23]", "SPB [24]", "UFA [25]", "SOCHI [26]", "KAZAN [27]", "SAMARA [28]", "ROSTOV [29]", "ANAPA [30]", 
-    "EKATERINBURG [31]", "KRASNODAR [32]", "ARZAMAS [33]", "NOVOSIBIRSK [34]", "GROZNY [35]", "SARATOV [36]", "OMSK [37]", "IRKUTSK [38]", "VOLGOGRAD [39]", "VORONEZH [40]", 
-    "BELGOROD [41]", "MAKHACHKALA [42]", "VLADIKAVKAZ [43]", "VLADIVOSTOK [44]", "KALININGRAD [45]", "CHELYABINSK [46]", "KRASNOYARSK [47]", "CHEBOKSARY [48]", "KHABAROVSK [49]", "PERM [50]", 
-    "TULA [51]", "RYAZAN [52]", "MURMANSK [53]", "PENZA [54]", "KURSK [55]", "ARKHANGELSK [56]", "ORENBURG [57]", "KIROV [58]", "KEMEROVO [59]", "TYUMEN [60]", 
-    "TOLYATTI [61]", "IVANOVO [62]", "STAVROPOL [63]", "SMOLENSK [64]", "PSKOV [65]", "BRYANSK [66]", "OREL [67]", "YAROSLAVL [68]", "BARNAUL [69]", "LIPETSK [70]", 
-    "ULYANOVSK [71]", "YAKUTSK [72]", "TAMBOV [73]", "BRATSK [74]", "ASTRAKHAN [75]", "CHITA [76]", "KOSTROMA [77]", "VLADIMIR [78]", "KALUGA [79]", "N.NOVGOROD [80]", 
-    "TAGANROG [81]", "VOLOGDA [82]", "TVER [83]", "TOMSK [84]", "IZHEVSK [85]", "SURGUT [86]", "PODOLSK [87]", "MAGADAN [88]", "CHEREPOVETS [89]", "NORILSK [90]"
-];
+const SERVERS = ["RED [01]","GREEN [02]","BLUE [03]","YELLOW [04]","ORANGE [05]","PURPLE [06]","LIME [07]","PINK [08]","CHERRY [09]","BLACK [10]","INDIGO [11]","WHITE [12]","MAGENTA [13]","CRIMSON [14]","GOLD [15]","AZURE [16]","PLATINUM [17]","AQUA [18]","GRAY [19]","ICE [20]","CHILLI [21]","CHOCO [22]","MOSCOW [23]","SPB [24]","UFA [25]","SOCHI [26]","KAZAN [27]","SAMARA [28]","ROSTOV [29]","ANAPA [30]","EKATERINBURG [31]","KRASNODAR [32]","ARZAMAS [33]","NOVOSIBIRSK [34]","GROZNY [35]","SARATOV [36]","OMSK [37]","IRKUTSK [38]","VOLGOGRAD [39]","VORONEZH [40]","BELGOROD [41]","MAKHACHKALA [42]","VLADIKAVKAZ [43]","VLADIVOSTOK [44]","KALININGRAD [45]","CHELYABINSK [46]","KRASNOYARSK [47]","CHEBOKSARY [48]","KHABAROVSK [49]","PERM [50]","TULA [51]","RYAZAN [52]","MURMANSK [53]","PENZA [54]","KURSK [55]","ARKHANGELSK [56]","ORENBURG [57]","KIROV [58]","KEMEROVO [59]","TYUMEN [60]","TOLYATTI [61]","IVANOVO [62]","STAVROPOL [63]","SMOLENSK [64]","PSKOV [65]","BRYANSK [66]","OREL [67]","YAROSLAVL [68]","BARNAUL [69]","LIPETSK [70]","ULYANOVSK [71]","YAKUTSK [72]","TAMBOV [73]","BRATSK [74]","ASTRAKHAN [75]","CHITA [76]","KOSTROMA [77]","VLADIMIR [78]","KALUGA [79]","N.NOVGOROD [80]","TAGANROG [81]","VOLOGDA [82]","TVER [83]","TOMSK [84]","IZHEVSK [85]","SURGUT [86]","PODOLSK [87]","MAGADAN [88]","CHEREPOVETS [89]","NORILSK [90]"];
 
 const Game = {
-    u: { m: 0, bc: 0, adM: 0, invitedBy: null },
+    u: { m: 0, bc: 0, ac2: 0, ac3: 0, invitedBy: null, refCount: 0 },
     
     init() {
-        // Загрузка данных
         db.ref('users/' + userId).on('value', (s) => {
             if(s.exists()) this.u = { ...this.u, ...s.val() };
             this.updateUI();
         });
-
-        // Заполнение серверов
         const sel = document.getElementById('out-srv');
         SERVERS.forEach(x => { sel.innerHTML += `<option value="${x}">${x}</option>`; });
-
-        // Реф. ссылка
-        document.getElementById('ref-link').value = `https://t.me/ТВОЙ_БОТ?start=${userId}`;
-        
-        // Проверка реферала
-        const refId = new URLSearchParams(window.location.search).get('start');
-        if(refId && refId !== userId) this.checkReferral(refId);
-
+        document.getElementById('ref-link').value = `https://t.me/Locus_Gold_bot?start=${userId}`;
+        const startParam = urlParams.get('start');
+        if(startParam && startParam !== userId) this.registerRef(startParam);
         this.loadHistory();
         this.loadRefs();
+        this.loadTop();
     },
 
     updateUI() {
-        document.getElementById('m-rub').innerText = Math.floor(this.u.m).toLocaleString() + ' ₽';
+        document.getElementById('m-rub').innerText = Math.floor(this.u.m).toLocaleString();
         document.getElementById('m-bc').innerText = this.u.bc.toLocaleString();
-        document.getElementById('ad-prog').innerText = `Прогресс рекламы: ${this.u.adM || 0}/5`;
+        document.getElementById('p-c2').innerText = `25-50 BC (Прогресс: ${this.u.ac2 || 0}/3)`;
+        document.getElementById('p-c3').innerText = `50-150 BC (Прогресс: ${this.u.ac3 || 0}/5)`;
     },
 
     save() { db.ref('users/' + userId).update(this.u); },
@@ -236,7 +135,7 @@ const Game = {
 
     tab(id) {
         document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-        document.querySelectorAll('nav button').forEach(n => n.classList.remove('nav-active'));
+        document.querySelectorAll('nav div').forEach(n => n.classList.remove('nav-active'));
         document.getElementById('tab-'+id).classList.add('active');
         document.getElementById('n-'+id).classList.add('nav-active');
     },
@@ -246,23 +145,23 @@ const Game = {
             const ad = window.Adsgram.init({ blockId: "20963" });
             const res = await ad.show();
             if(res.done) {
-                if(type === 'lite') {
-                    const win = Math.floor(Math.random() * 75) + 25;
-                    this.u.bc += win; alert(`Выпало: ${win} BC!`);
-                } else {
-                    this.u.adM = (this.u.adM || 0) + 1;
-                    if(this.u.adM >= 5) {
-                        this.u.adM = 0; const win = Math.floor(Math.random() * 150) + 50;
-                        this.u.bc += win; alert(`Мажор Кейс: +${win} BC!`);
-                    }
+                if(type === 'c1') {
+                    const win = Math.floor(Math.random() * 5) + 1;
+                    this.u.bc += win; alert(`Приз: ${win} BC!`);
+                } else if(type === 'c2') {
+                    this.u.ac2 = (this.u.ac2 || 0) + 1;
+                    if(this.u.ac2 >= 3) { this.u.ac2 = 0; const win = Math.floor(Math.random() * 26) + 25; this.u.bc += win; alert(`КЕЙС №2: +${win} BC!`); }
+                } else if(type === 'c3') {
+                    this.u.ac3 = (this.u.ac3 || 0) + 1;
+                    if(this.u.ac3 >= 5) { this.u.ac3 = 0; const win = Math.floor(Math.random() * 101) + 50; this.u.bc += win; alert(`КЕЙС №3: +${win} BC!`); }
                 }
-                if(this.u.invitedBy) this.updateRefProgress();
-                this.save();
+                if(this.u.invitedBy) this.progRef();
+                this.save(); this.updateUI();
             }
         } catch(e) { alert("Реклама не готова"); }
     },
 
-    checkReferral(refId) {
+    registerRef(refId) {
         db.ref('users/' + userId).once('value', (s) => {
             if(!s.exists()) {
                 this.u.invitedBy = refId;
@@ -272,7 +171,7 @@ const Game = {
         });
     },
 
-    updateRefProgress() {
+    progRef() {
         const path = `referrals/${this.u.invitedBy}/${userId}`;
         db.ref(path).once('value', (s) => {
             if(s.exists()) {
@@ -281,7 +180,8 @@ const Game = {
                     d.ads++;
                     if(d.ads >= 3) {
                         d.done = true;
-                        db.ref(`users/${this.u.invitedBy}/bc`).transaction(bc => (bc || 0) + 50);
+                        db.ref(`users/${this.u.invitedBy}/bc`).transaction(c => (c || 0) + 100);
+                        db.ref(`users/${this.u.invitedBy}/refCount`).transaction(c => (c || 0) + 1);
                     }
                     db.ref(path).set(d);
                 }
@@ -291,15 +191,27 @@ const Game = {
 
     loadRefs() {
         db.ref('referrals/' + userId).on('value', (s) => {
-            const div = document.getElementById('ref-list');
-            div.innerHTML = '';
+            const div = document.getElementById('ref-list'); div.innerHTML = '';
             s.forEach(c => {
                 const d = c.val();
-                div.innerHTML += `<div class="glass !bg-black/20 p-3 flex justify-between text-[10px]">
-                    <span class="text-gray-400 italic">ID: ...${c.key.slice(-4)}</span>
-                    <span class="${d.done ? 'text-green-500' : 'text-yellow-500'} font-bold">
-                        ${d.done ? '✅ +50 BC' : '⏳ Реклама: ' + d.ads + '/3'}
-                    </span>
+                div.innerHTML += `<div class="flex justify-between text-[9px] bg-white/5 p-2 rounded-lg">
+                    <span>Друг: ...${c.key.slice(-4)}</span>
+                    <span class="${d.done ? 'text-green-500' : 'text-yellow-500'} font-bold">${d.done ? '✅ +100 BC' : '⏳ Реклама: ' + d.ads + '/3'}</span>
+                </div>`;
+            });
+        });
+    },
+
+    loadTop() {
+        db.ref('users').orderByChild('refCount').limitToLast(10).on('value', (s) => {
+            const div = document.getElementById('top-list'); div.innerHTML = '';
+            let items = [];
+            s.forEach(u => { items.push({ id: u.key, count: u.val().refCount || 0 }); });
+            items.reverse().forEach((it, i) => {
+                div.innerHTML += `<div class="glass p-3 flex justify-between items-center">
+                    <span class="text-xs font-bold text-gray-500">#${i+1}</span>
+                    <span class="text-xs">ID: ...${it.id.slice(-5)}</span>
+                    <span class="text-xs font-black text-red-500">${it.count} реф.</span>
                 </div>`;
             });
         });
@@ -307,41 +219,34 @@ const Game = {
 
     exchange() {
         const v = parseInt(document.getElementById('ex-val').value);
-        if(v >= 1000000 && this.u.m >= v) {
-            this.u.m -= v; this.u.bc += Math.floor(v/1000000); this.save();
-            alert("Обмен успешен!");
-        } else alert("Минимум 1.000.000 ₽");
+        if(v >= 1000000 && this.u.m >= v) { this.u.m -= v; this.u.bc += Math.floor(v/1000000); this.save(); alert("Обмен выполнен!"); } 
+        else alert("Минимум 1.000.000 ₽");
     },
 
     withdraw() {
         const n = document.getElementById('out-nick').value, s = document.getElementById('out-srv').value, a = parseInt(document.getElementById('out-sum').value);
         if(n && a >= 50 && this.u.bc >= a) {
             this.u.bc -= a; this.save();
-            db.ref('payouts/' + userId).push({ nick: n, srv: s, sum: a, status: "В обработке", date: new Date().toLocaleDateString() });
+            db.ref('payouts/' + userId).push({ nick: n, srv: s, sum: a, status: "Ожидание", date: new Date().toLocaleDateString() });
             alert("Заявка создана!");
-        } else alert("Ошибка: Мин. 50 BC");
+        } else alert("Ошибка данных");
     },
 
     loadHistory() {
         db.ref('payouts/' + userId).on('value', (s) => {
-            const h = document.getElementById('out-history');
-            h.innerHTML = '';
+            const h = document.getElementById('out-history'); h.innerHTML = '';
             s.forEach(c => {
                 const d = c.val();
-                h.innerHTML += `<div class="glass p-4 flex justify-between items-center text-[10px]">
-                    <div><p class="font-bold text-sm">${d.sum} BC</p><p class="text-gray-500">${d.srv}</p></div>
+                h.innerHTML += `<div class="glass p-3 flex justify-between text-[10px]">
+                    <div><p class="font-bold">${d.sum} BC</p><p class="text-gray-500">${d.srv}</p></div>
                     <div class="text-right"><p class="text-yellow-500 font-bold">${d.status}</p><p class="text-[8px] text-gray-700">${d.date}</p></div>
                 </div>`;
             });
         });
     },
 
-    copyRef() {
-        const el = document.getElementById('ref-link');
-        el.select(); document.execCommand('copy'); alert("Скопировано!");
-    }
+    copyRef() { const el = document.getElementById('ref-link'); el.select(); document.execCommand('copy'); alert("Ссылка скопирована!"); }
 };
-
 window.onload = () => Game.init();
 </script>
 </body>
