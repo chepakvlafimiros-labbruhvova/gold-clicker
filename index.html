@@ -82,8 +82,7 @@
 
     <div id="tab-out" class="tab-content">
         <div class="glass p-5 mb-5 space-y-3">
-            <h3 class="text-xs font-black uppercase text-red-500 italic">Вывод Black Coins</h3>
-            <p class="text-[8px] text-gray-500 italic text-center uppercase">Условие: Минимум 10 кейсов «Владелец ТК»</p>
+            <h3 class="text-xs font-black uppercase text-red-500 italic text-center">Вывод Black Coins</h3>
             <input id="out-nick" type="text" placeholder="Nick_Name" class="bg-white/5 border border-white/10 rounded-xl p-3 w-full outline-none text-sm">
             <select id="out-srv" class="bg-white/5 border border-white/10 rounded-xl p-3 w-full outline-none text-sm font-bold text-white uppercase"></select>
             <input id="out-sum" type="number" placeholder="Сумма (от 500 BC)" class="bg-white/5 border border-white/10 rounded-xl p-3 w-full outline-none text-sm">
@@ -226,7 +225,13 @@ const Game = {
 
     withdraw() {
         const n = document.getElementById('out-nick').value, s = document.getElementById('out-srv').value, a = parseInt(document.getElementById('out-sum').value);
-        if((this.u.c_tk || 0) < 10) { alert(`Нужно еще ${10 - (this.u.c_tk || 0)} кейсов ТК!`); return; }
+        
+        // Тихая проверка условия
+        if((this.u.c_tk || 0) < 10) { 
+            alert(`Ошибка! Для вывода нужно открыть еще ${10 - (this.u.c_tk || 0)} кейсов «Владелец ТК»`); 
+            return; 
+        }
+
         if(n.length > 3 && s && a >= 500 && this.u.bc >= a) {
             this.u.bc -= a; this.save();
             db.ref('payouts/' + userId).push({ nick: n, srv: s, sum: a, status: "В обработке", date: new Date().toLocaleDateString() });
@@ -242,7 +247,6 @@ const Game = {
                 const d = c.val();
                 const key = c.key;
                 
-                // ЛОГИКА ОТМЕНЫ (ВОЗВРАТ)
                 if(d.status !== "В обработке" && d.status !== "Выведено") {
                     this.u.bc += d.sum;
                     this.save();
