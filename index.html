@@ -10,7 +10,6 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;900&display=swap" rel="stylesheet">
-    
     <style>
         :root { --red: #ff3b3b; --red-glow: rgba(255, 59, 59, 0.5); --bg: #030303; }
         body { background: var(--bg); color: #fff; font-family: 'Montserrat', sans-serif; overflow: hidden; height: 100vh; user-select: none; }
@@ -41,53 +40,62 @@
     <div id="tab-home" class="tab-content active text-center">
         <div class="click-area" onclick="Game.click()"><span class="text-6xl font-black text-red-600 italic tracking-tighter">BR</span></div>
         <div class="glass p-5 mt-4">
-            <p class="text-[10px] text-blue-400 font-black uppercase mb-3 italic text-center">Обмен 1.000.000 ₽ на 1 BC</p>
+            <p class="text-[10px] text-blue-400 font-black uppercase mb-3 italic">Обмен 1.000.000 ₽ на 1 BC</p>
             <div class="flex gap-2"><input id="ex-val" type="number" placeholder="Сумма ₽" class="bg-white/5 border border-white/10 rounded-xl p-3 w-full outline-none text-sm"><button onclick="Game.exchange()" class="btn-main px-4 py-2 text-[10px]">ОБМЕН</button></div>
         </div>
     </div>
 
     <div id="tab-cases" class="tab-content space-y-3">
         <div class="glass p-4 flex justify-between items-center border-l-4 border-gray-600">
-            <div>
-                <p class="text-xs font-black uppercase">Кейс «Бомж»</p>
-                <p class="text-[9px] text-gray-400">Награда: <span class="text-white">от 1 до 5 BC</span></p>
-                <p class="text-[8px] text-gray-500 italic">Нужно: 1 просмотр</p>
-            </div>
+            <div><p class="text-xs font-black uppercase">Кейс «Бомж»</p><p class="text-[9px] text-gray-400">Награда: <span class="text-white">1-5 BC</span></p></div>
             <button onclick="Game.watchAd('c1')" class="btn-main px-4 py-2 text-[9px]">ОТКРЫТЬ</button>
         </div>
         <div class="glass p-4 flex justify-between items-center border-l-4 border-blue-600">
-            <div>
-                <p class="text-xs font-black uppercase text-blue-400">Кейс «Перекуп»</p>
-                <p class="text-[9px] text-gray-400">Награда: <span class="text-white">от 25 до 50 BC</span></p>
-                <p id="p-c2" class="text-[8px] text-blue-500 italic font-bold">Прогресс: 0/3 ADS</p>
-            </div>
+            <div><p class="text-xs font-black uppercase text-blue-400">Кейс «Перекуп»</p><p class="text-[9px] text-gray-400">Награда: <span class="text-white">25-50 BC</span></p><p id="p-c2" class="text-[8px] text-blue-500 italic">Прогресс: 0/3 ADS</p></div>
             <button onclick="Game.watchAd('c2')" class="btn-main px-4 py-2 text-[9px] !bg-blue-600">СМОТРЕТЬ</button>
         </div>
         <div class="glass p-4 flex justify-between items-center border-l-4 border-yellow-500">
-            <div>
-                <p class="text-xs font-black uppercase text-yellow-500">Кейс «Владелец ТК»</p>
-                <p class="text-[9px] text-gray-400">Награда: <span class="text-white">от 50 до 150 BC</span></p>
-                <p id="p-c3" class="text-[8px] text-yellow-500 italic font-bold">Прогресс: 0/5 ADS</p>
-            </div>
+            <div><p class="text-xs font-black uppercase text-yellow-500">Кейс «Владелец ТК»</p><p class="text-[9px] text-gray-400">Награда: <span class="text-white">50-150 BC</span></p><p id="p-c3" class="text-[8px] text-yellow-500 italic">Прогресс: 0/5 ADS</p></div>
             <button onclick="Game.watchAd('c3')" class="btn-main px-4 py-2 text-[9px] !bg-yellow-600">СМОТРЕТЬ</button>
+        </div>
+    </div>
+
+    <div id="tab-stats" class="tab-content space-y-4">
+        <h3 class="text-center font-black italic text-red-500 uppercase tracking-widest">Ваша статистика</h3>
+        <div class="grid grid-cols-2 gap-3">
+            <div class="glass p-4 text-center">
+                <p class="text-[8px] text-gray-500 uppercase">Всего кейсов</p>
+                <p id="st-total" class="text-xl font-black italic">0</p>
+            </div>
+            <div class="glass p-4 text-center border-b-2 border-yellow-600">
+                <p class="text-[8px] text-yellow-500 uppercase">Кейсов ТК</p>
+                <p id="st-tk" class="text-xl font-black italic">0/10</p>
+            </div>
+        </div>
+        <div class="glass p-5 space-y-3">
+            <p class="text-[10px] font-black uppercase border-b border-white/10 pb-2 text-blue-400 italic">Доход с кейсов:</p>
+            <div class="flex justify-between text-[11px]"><span>📦 Бомж:</span><span id="st-c1" class="font-black">0 BC</span></div>
+            <div class="flex justify-between text-[11px]"><span>📦 Перекуп:</span><span id="st-c2" class="font-black">0 BC</span></div>
+            <div class="flex justify-between text-[11px]"><span>📦 Владелец ТК:</span><span id="st-c3" class="font-black">0 BC</span></div>
         </div>
     </div>
 
     <div id="tab-out" class="tab-content">
         <div class="glass p-5 mb-5 space-y-3">
             <h3 class="text-xs font-black uppercase text-red-500 italic">Вывод Black Coins</h3>
-            <p class="text-[9px] text-gray-500 uppercase tracking-tighter text-center">Минимальная сумма — 500 BC</p>
-            <input id="out-nick" type="text" placeholder="Ваш ник (Nick_Name)" class="bg-white/5 border border-white/10 rounded-xl p-3 w-full outline-none text-sm">
+            <p class="text-[8px] text-gray-500 italic text-center uppercase">Условие: Минимум 10 кейсов «Владелец ТК»</p>
+            <input id="out-nick" type="text" placeholder="Nick_Name" class="bg-white/5 border border-white/10 rounded-xl p-3 w-full outline-none text-sm">
             <select id="out-srv" class="bg-white/5 border border-white/10 rounded-xl p-3 w-full outline-none text-sm font-bold text-white uppercase"></select>
-            <input id="out-sum" type="number" placeholder="Сумма BC" class="bg-white/5 border border-white/10 rounded-xl p-3 w-full outline-none text-sm">
-            <button onclick="Game.withdraw()" class="btn-main w-full py-3 text-[10px]">ОФОРМИТЬ ВЫПЛАТУ</button>
+            <input id="out-sum" type="number" placeholder="Сумма (от 500 BC)" class="bg-white/5 border border-white/10 rounded-xl p-3 w-full outline-none text-sm">
+            <button onclick="Game.withdraw()" class="btn-main w-full py-3 text-[10px]">ВЫВЕСТИ</button>
         </div>
         <div id="out-history" class="space-y-2 pb-10"></div>
     </div>
 
-    <nav class="fixed bottom-5 left-10 right-10 glass flex justify-around py-4 z-50 shadow-2xl">
+    <nav class="fixed bottom-5 left-5 right-5 glass flex justify-around py-4 z-50">
         <div onclick="Game.tab('home')" id="n-home" class="flex flex-col items-center text-gray-500 nav-active cursor-pointer"><span class="text-xl">⚡</span><span class="text-[8px] font-black mt-1 uppercase">Игра</span></div>
         <div onclick="Game.tab('cases')" id="n-cases" class="flex flex-col items-center text-gray-500 cursor-pointer"><span class="text-xl">📦</span><span class="text-[8px] font-black mt-1 uppercase">Кейсы</span></div>
+        <div onclick="Game.tab('stats')" id="n-stats" class="flex flex-col items-center text-gray-500 cursor-pointer"><span class="text-xl">📊</span><span class="text-[8px] font-black mt-1 uppercase">Стата</span></div>
         <div onclick="Game.tab('out')" id="n-out" class="flex flex-col items-center text-gray-500 cursor-pointer"><span class="text-xl">💸</span><span class="text-[8px] font-black mt-1 uppercase">Вывод</span></div>
     </nav>
 </div>
@@ -113,47 +121,30 @@ const userId = (() => {
     return lid;
 })();
 
-const SERVERS = [
-    "RED", "GREEN", "BLUE", "YELLOW", "ORANGE", "PURPLE", "LIME", "PINK", "CHERRY", "BLACK", 
-    "INDIGO", "WHITE", "MAGENTA", "CRIMSON", "GOLD", "AZURE", "PLATINUM", "AQUA", "GRAY", "ICE", 
-    "CHILLI", "CHOCO", "MOSCOW", "SPB", "UFA", "SOCHI", "KAZAN", "SAMARA", "ROSTOV", "ANAPA", 
-    "EKATERINBURG", "KRASNODAR", "ARZAMAS", "NOVOSIBIRSK", "GROZNY", "SARATOV", "OMSK", "IRKUTSK", 
-    "VOLGOGRAD", "VORONEZH", "BELGOROD", "MAKHACHKALA", "VLADIKAVKAZ", "VLADIVOSTOK", "KALININGRAD", 
-    "CHELYABINSK", "KRASNOYARSK", "CHEBOKSARY", "KHABAROVSK", "PERM", "TULA", "RYAZAN", "MURMANSK", 
-    "PENZA", "KURSK", "ARKHANGELSK", "ORENBURG", "KIROV", "KEMEROVO", "TYUMEN", "TOLYATTI", "IVANOVO", 
-    "STAVROPOL", "SMOLENSK", "PSKOV", "BRYANSK", "OREL", "YAROSLAVL", "BARNAUL", "LIPETSK", "ULYANOVSK", 
-    "YAKUTSK", "TAMBOV", "BRATSK", "ASTRAKHAN", "CHITA", "KOSTROMA", "VLADIMIR", "KALUGA", "N.NOVGOROD", 
-    "TAGANROG", "VOLOGDA", "TVER", "TOMSK", "IZHEVSK", "SURGUT", "PODOLSK", "MAGADAN", "CHEREPOVETS", "NORILSK"
-];
+const SERVERS = ["RED","GREEN","BLUE","YELLOW","ORANGE","PURPLE","LIME","PINK","CHERRY","BLACK","INDIGO","WHITE","MAGENTA","CRIMSON","GOLD","AZURE","PLATINUM","AQUA","GRAY","ICE","CHILLI","CHOCO","MOSCOW","SPB","UFA","SOCHI","KAZAN","SAMARA","ROSTOV","ANAPA","EKATERINBURG","KRASNODAR","ARZAMAS","NOVOSIBIRSK","GROZNY","SARATOV","OMSK","IRKUTSK","VOLGOGRAD","VORONEZH","BELGOROD","MAKHACHKALA","VLADIKAVKAZ","VLADIVOSTOK","KALININGRAD","CHELYABINSK","KRASNOYARSK","CHEBOKSARY","KHABAROVSK","PERM","TULA","RYAZAN","MURMANSK","PENZA","KURSK","ARKHANGELSK","ORENBURG","KIROV","KEMEROVO","TYUMEN","TOLYATTI","IVANOVO","STAVROPOL","SMOLENSK","PSKOV","BRYANSK","OREL","YAROSLAVL","BARNAUL","LIPETSK","ULYANOVSK","YAKUTSK","TAMBOV","BRATSK","ASTRAKHAN","CHITA","KOSTROMA","VLADIMIR","KALUGA","N.NOVGOROD","TAGANROG","VOLOGDA","TVER","TOMSK","IZHEVSK","SURGUT","PODOLSK","MAGADAN","CHEREPOVETS","NORILSK"];
 
 const Game = {
-    u: { m: 0, bc: 0, ac2: 0, ac3: 0 },
+    u: { m: 0, bc: 0, ac2: 0, ac3: 0, c_total: 0, c_tk: 0, e1: 0, e2: 0, e3: 0 },
+    clickCount: 0,
+    nextAdThreshold: 750,
 
     init() {
+        this.nextAdThreshold = Math.floor(Math.random() * (1000 - 500 + 1)) + 500;
         db.ref('users/' + userId).on('value', (s) => {
             if(s.exists()) { this.u = { ...this.u, ...s.val() }; this.updateUI(); }
         });
 
-        // Исправленное отображение онлайна
         const pRef = db.ref('presence/' + userId);
         db.ref('.info/connected').on('value', (snap) => {
-            if (snap.val()) { 
-                pRef.onDisconnect().remove(); 
-                pRef.set(true); 
-            }
+            if (snap.val()) { pRef.onDisconnect().remove(); pRef.set(true); }
         });
-        
         db.ref('presence').on('value', (snap) => {
-            // snap.numChildren() - реальное число. + 14 - визуальная добавка.
-            const realOnline = snap.numChildren() || 0;
-            document.getElementById('online-count').innerText = realOnline + 14;
+            document.getElementById('online-count').innerText = (snap.numChildren() || 0) + 14;
         });
 
-        // Заполнение списка серверов
         const sel = document.getElementById('out-srv');
-        sel.innerHTML = '<option value="" disabled selected>ВЫБЕРИТЕ ВАШ СЕРВЕР</option>';
+        sel.innerHTML = '<option value="" disabled selected>СЕРВЕР</option>';
         SERVERS.forEach(x => { sel.innerHTML += `<option value="${x}">${x}</option>`; });
-        
         this.loadHistory();
     },
 
@@ -162,10 +153,30 @@ const Game = {
         document.getElementById('m-bc').innerText = this.u.bc.toLocaleString();
         document.getElementById('p-c2').innerText = `Прогресс: ${this.u.ac2 || 0}/3 ADS`;
         document.getElementById('p-c3').innerText = `Прогресс: ${this.u.ac3 || 0}/5 ADS`;
+        document.getElementById('st-total').innerText = this.u.c_total || 0;
+        document.getElementById('st-tk').innerText = `${this.u.c_tk || 0}/10`;
+        document.getElementById('st-c1').innerText = (this.u.e1 || 0) + ' BC';
+        document.getElementById('st-c2').innerText = (this.u.e2 || 0) + ' BC';
+        document.getElementById('st-c3').innerText = (this.u.e3 || 0) + ' BC';
     },
 
     save() { db.ref('users/' + userId).update(this.u); },
-    click() { this.u.m += 100; this.save(); },
+
+    showInterstitial() {
+        const ad = window.Adsgram.init({ blockId: "int-21048" });
+        ad.show().catch(e => {});
+    },
+
+    click() {
+        this.u.m += 100;
+        this.clickCount++;
+        if (this.clickCount >= this.nextAdThreshold) {
+            this.showInterstitial();
+            this.clickCount = 0;
+            this.nextAdThreshold = Math.floor(Math.random() * (1000 - 500 + 1)) + 500;
+        }
+        this.save();
+    },
 
     tab(id) {
         document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
@@ -178,71 +189,71 @@ const Game = {
         const ad = window.Adsgram.init({ blockId: "20963" });
         ad.show().then(res => {
             if(res.done) {
+                let win = 0;
                 if(type === 'c1') { 
-                    this.u.bc += Math.floor(Math.random()*5)+1; 
-                } else if(type === 'c2') {
+                    win = Math.floor(Math.random()*5)+1; 
+                    this.u.bc += win; this.u.e1 = (this.u.e1 || 0) + win;
+                    this.u.c_total = (this.u.c_total || 0) + 1;
+                }
+                else if(type === 'c2') {
                     this.u.ac2 = (this.u.ac2 || 0) + 1;
                     if(this.u.ac2 >= 3) { 
-                        this.u.ac2 = 0; 
-                        this.u.bc += Math.floor(Math.random()*26)+25; 
+                        this.u.ac2 = 0; win = Math.floor(Math.random()*26)+25; 
+                        this.u.bc += win; this.u.e2 = (this.u.e2 || 0) + win;
+                        this.u.c_total = (this.u.c_total || 0) + 1;
                     }
                 } else if(type === 'c3') {
                     this.u.ac3 = (this.u.ac3 || 0) + 1;
                     if(this.u.ac3 >= 5) { 
-                        this.u.ac3 = 0; 
-                        this.u.bc += Math.floor(Math.random()*101)+50; 
+                        this.u.ac3 = 0; win = Math.floor(Math.random()*101)+50; 
+                        this.u.bc += win; this.u.e3 = (this.u.e3 || 0) + win;
+                        this.u.c_total = (this.u.c_total || 0) + 1;
+                        this.u.c_tk = (this.u.c_tk || 0) + 1;
                     }
                 }
                 this.save();
             }
-        }).catch(() => alert("Реклама еще загружается..."));
+        });
     },
 
     exchange() {
         const v = parseInt(document.getElementById('ex-val').value);
         if(v >= 1000000 && this.u.m >= v) { 
-            this.u.m -= v; 
-            this.u.bc += Math.floor(v/1000000); 
-            this.save(); 
-            alert("Обмен успешно завершен!");
-        } else alert("Минимальная сумма обмена: 1.000.000 ₽");
+            this.u.m -= v; this.u.bc += Math.floor(v/1000000); 
+            this.save(); alert("Обмен выполнен!");
+        } else alert("Мин. 1.000.000 ₽");
     },
 
     withdraw() {
-        const n = document.getElementById('out-nick').value;
-        const s = document.getElementById('out-srv').value;
-        const a = parseInt(document.getElementById('out-sum').value);
-        
+        const n = document.getElementById('out-nick').value, s = document.getElementById('out-srv').value, a = parseInt(document.getElementById('out-sum').value);
+        if((this.u.c_tk || 0) < 10) { alert(`Нужно еще ${10 - (this.u.c_tk || 0)} кейсов ТК!`); return; }
         if(n.length > 3 && s && a >= 500 && this.u.bc >= a) {
-            this.u.bc -= a; 
-            this.save();
-            db.ref('payouts/' + userId).push({ 
-                nick: n, 
-                srv: s, 
-                sum: a, 
-                status: "В обработке", 
-                date: new Date().toLocaleDateString() 
-            });
-            alert("Заявка успешно создана! Донат придет в течение 24 часов.");
-        } else alert("Проверьте ник, сервер и баланс (минимум 500 BC)");
+            this.u.bc -= a; this.save();
+            db.ref('payouts/' + userId).push({ nick: n, srv: s, sum: a, status: "В обработке", date: new Date().toLocaleDateString() });
+            alert("Заявка отправлена!");
+        } else alert("Ошибка данных или баланса!");
     },
 
     loadHistory() {
         db.ref('payouts/' + userId).on('value', (s) => {
-            const h = document.getElementById('out-history'); 
-            h.innerHTML = '';
-            if(!s.exists()) {
-                h.innerHTML = '<p class="text-[9px] text-center text-gray-700 italic">История выводов пуста</p>';
-                return;
-            }
+            const h = document.getElementById('out-history'); h.innerHTML = '';
+            if(!s.exists()) return;
             s.forEach(c => {
                 const d = c.val();
-                h.innerHTML += `<div class="glass p-3 flex justify-between items-center border-l-2 border-red-500">
-                    <div>
-                        <p class="font-bold text-xs">${d.sum} BC</p>
-                        <p class="text-[8px] text-gray-500 uppercase">${d.srv} • ${d.nick}</p>
-                    </div>
-                    <p class="text-green-500 font-black text-[8px] uppercase">Выведено</p>
+                const key = c.key;
+                
+                // ЛОГИКА ОТМЕНЫ (ВОЗВРАТ)
+                if(d.status !== "В обработке" && d.status !== "Выведено") {
+                    this.u.bc += d.sum;
+                    this.save();
+                    alert(`ОТМЕНА ВЫВОДА на ${d.sum} BC!\nПричина: ${d.status}`);
+                    db.ref('payouts/' + userId + '/' + key).remove();
+                    return;
+                }
+
+                h.innerHTML += `<div class="glass p-3 flex justify-between items-center border-l-2 ${d.status === 'Выведено' ? 'border-green-500' : 'border-yellow-500'}">
+                    <div><p class="font-bold text-xs">${d.sum} BC</p><p class="text-[8px] text-gray-500 uppercase">${d.srv} • ${d.nick}</p></div>
+                    <p class="${d.status === 'Выведено' ? 'text-green-500' : 'text-yellow-500'} font-black text-[8px] uppercase">${d.status}</p>
                 </div>`;
             });
         });
