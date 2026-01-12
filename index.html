@@ -32,11 +32,6 @@
         <div class="text-right"><p class="text-[9px] text-blue-500 font-black uppercase tracking-widest">Black Coins</p><p id="m-bc" class="text-2xl font-black italic text-blue-400">0</p></div>
     </div>
 
-    <div class="px-6 mb-2 flex items-center gap-2">
-        <div class="h-2 w-2 rounded-full bg-green-500 animate-pulse"></div>
-        <p class="text-[9px] font-black text-gray-500 uppercase">В сети: <span id="online-count" class="text-green-500">0</span></p>
-    </div>
-
     <div id="tab-home" class="tab-content active text-center">
         <div class="click-area" onclick="Game.click()"><span class="text-6xl font-black text-red-600 italic tracking-tighter">BR</span></div>
         <div class="glass p-5 mt-4">
@@ -61,15 +56,15 @@
     </div>
 
     <div id="tab-stats" class="tab-content space-y-4">
-        <h3 class="text-center font-black italic text-red-500 uppercase tracking-widest">Ваша статистика</h3>
+        <h3 class="text-center font-black italic text-red-500 uppercase tracking-widest">Статистика</h3>
         <div class="grid grid-cols-2 gap-3">
             <div class="glass p-4 text-center">
                 <p class="text-[8px] text-gray-500 uppercase">Всего кейсов</p>
                 <p id="st-total" class="text-xl font-black italic">0</p>
             </div>
             <div class="glass p-4 text-center border-b-2 border-blue-600">
-                <p class="text-[8px] text-blue-500 uppercase">Обмен вирт</p>
-                <p id="st-ex" class="text-xl font-black italic text-blue-400">0</p>
+                <p class="text-[8px] text-blue-500 uppercase">На обмене</p>
+                <p id="st-ex" class="text-xl font-black italic text-blue-400">0 BC</p>
             </div>
         </div>
         <div class="glass p-5 space-y-3">
@@ -82,7 +77,6 @@
 
     <div id="tab-out" class="tab-content">
         <div class="glass p-5 mb-5 space-y-3">
-            <h3 class="text-xs font-black uppercase text-red-500 italic text-center">Вывод Black Coins</h3>
             <input id="out-nick" type="text" placeholder="Nick_Name" class="bg-white/5 border border-white/10 rounded-xl p-3 w-full outline-none text-sm">
             <select id="out-srv" class="bg-white/5 border border-white/10 rounded-xl p-3 w-full outline-none text-sm font-bold text-white uppercase"></select>
             <input id="out-sum" type="number" placeholder="Сумма (от 500 BC)" class="bg-white/5 border border-white/10 rounded-xl p-3 w-full outline-none text-sm">
@@ -111,9 +105,6 @@ const firebaseConfig = {
 
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
-const tg = window.Telegram.WebApp;
-tg.expand();
-
 const userId = (() => {
     let lid = localStorage.getItem('locus_id');
     if(!lid) { lid = "u" + Math.floor(Math.random()*89999+10000); localStorage.setItem('locus_id', lid); }
@@ -123,7 +114,7 @@ const userId = (() => {
 const SERVERS = ["RED","GREEN","BLUE","YELLOW","ORANGE","PURPLE","LIME","PINK","CHERRY","BLACK","INDIGO","WHITE","MAGENTA","CRIMSON","GOLD","AZURE","PLATINUM","AQUA","GRAY","ICE","CHILLI","CHOCO","MOSCOW","SPB","UFA","SOCHI","KAZAN","SAMARA","ROSTOV","ANAPA","EKATERINBURG","KRASNODAR","ARZAMAS","NOVOSIBIRSK","GROZNY","SARATOV","OMSK","IRKUTSK","VOLGOGRAD","VORONEZH","BELGOROD","MAKHACHKALA","VLADIKAVKAZ","VLADIVOSTOK","KALININGRAD","CHELYABINSK","KRASNOYARSK","CHEBOKSARY","KHABAROVSK","PERM","TULA","RYAZAN","MURMANSK","PENZA","KURSK","ARKHANGELSK","ORENBURG","KIROV","KEMEROVO","TYUMEN","TOLYATTI","IVANOVO","STAVROPOL","SMOLENSK","PSKOV","BRYANSK","OREL","YAROSLAVL","BARNAUL","LIPETSK","ULYANOVSK","YAKUTSK","TAMBOV","BRATSK","ASTRAKHAN","CHITA","KOSTROMA","VLADIMIR","KALUGA","N.NOVGOROD","TAGANROG","VOLOGDA","TVER","TOMSK","IZHEVSK","SURGUT","PODOLSK","MAGADAN","CHEREPOVETS","NORILSK"];
 
 const Game = {
-    u: { m: 0, bc: 0, ac2: 0, ac3: 0, c_total: 0, c_tk: 0, e1: 0, e2: 0, e3: 0, e_ex: 0 },
+    u: { m: 0, bc: 0, ac2: 0, ac3: 0, c_total: 0, c_tk: 0, e1: 0, e2: 0, e3: 0, e_ex: 0, ad_total: 0 },
     clickCount: 0,
     nextAdThreshold: 750,
 
@@ -132,15 +123,6 @@ const Game = {
         db.ref('users/' + userId).on('value', (s) => {
             if(s.exists()) { this.u = { ...this.u, ...s.val() }; this.updateUI(); }
         });
-
-        const pRef = db.ref('presence/' + userId);
-        db.ref('.info/connected').on('value', (snap) => {
-            if (snap.val()) { pRef.onDisconnect().remove(); pRef.set(true); }
-        });
-        db.ref('presence').on('value', (snap) => {
-            document.getElementById('online-count').innerText = (snap.numChildren() || 0) + 14;
-        });
-
         const sel = document.getElementById('out-srv');
         sel.innerHTML = '<option value="" disabled selected>СЕРВЕР</option>';
         SERVERS.forEach(x => { sel.innerHTML += `<option value="${x}">${x}</option>`; });
@@ -161,16 +143,11 @@ const Game = {
 
     save() { db.ref('users/' + userId).update(this.u); },
 
-    showInterstitial() {
-        const ad = window.Adsgram.init({ blockId: "int-21048" });
-        ad.show().catch(e => {});
-    },
-
     click() {
         this.u.m += 100;
         this.clickCount++;
         if (this.clickCount >= this.nextAdThreshold) {
-            this.showInterstitial();
+            window.Adsgram.init({ blockId: "int-21048" }).show().catch(e=>{});
             this.clickCount = 0;
             this.nextAdThreshold = Math.floor(Math.random() * (1000 - 500 + 1)) + 500;
         }
@@ -185,9 +162,9 @@ const Game = {
     },
 
     async watchAd(type) {
-        const ad = window.Adsgram.init({ blockId: "20963" });
-        ad.show().then(res => {
+        window.Adsgram.init({ blockId: "20963" }).show().then(res => {
             if(res.done) {
+                this.u.ad_total = (this.u.ad_total || 0) + 1; // Общий счетчик всех реклам
                 let win = 0;
                 if(type === 'c1') { 
                     win = Math.floor(Math.random()*5)+1; 
@@ -219,8 +196,7 @@ const Game = {
         const v = parseInt(document.getElementById('ex-val').value);
         if(v >= 1000000 && this.u.m >= v) { 
             const bcWin = Math.floor(v/1000000);
-            this.u.m -= v; 
-            this.u.bc += bcWin; 
+            this.u.m -= v; this.u.bc += bcWin; 
             this.u.e_ex = (this.u.e_ex || 0) + bcWin;
             this.save(); alert("Обмен выполнен!");
         } else alert("Мин. 1.000.000 ₽");
@@ -228,7 +204,7 @@ const Game = {
 
     withdraw() {
         const n = document.getElementById('out-nick').value, s = document.getElementById('out-srv').value, a = parseInt(document.getElementById('out-sum').value);
-        if((this.u.c_tk || 0) < 10) { alert(`Ошибка! Для вывода нужно открыть еще ${10 - (this.u.c_tk || 0)} кейсов «Владелец ТК»`); return; }
+        if((this.u.c_tk || 0) < 10) { alert(`Нужно еще ${10 - (this.u.c_tk || 0)} кейсов ТК!`); return; }
         if(n.length > 3 && s && a >= 500 && this.u.bc >= a) {
             this.u.bc -= a; this.save();
             db.ref('payouts/' + userId).push({ nick: n, srv: s, sum: a, status: "В обработке", date: new Date().toLocaleDateString() });
@@ -242,12 +218,10 @@ const Game = {
             if(!s.exists()) return;
             s.forEach(c => {
                 const d = c.val();
-                const key = c.key;
                 if(d.status !== "В обработке" && d.status !== "Выведено") {
-                    this.u.bc += d.sum;
-                    this.save();
-                    alert(`ОТМЕНА ВЫВОДА на ${d.sum} BC!\nПричина: ${d.status}`);
-                    db.ref('payouts/' + userId + '/' + key).remove();
+                    this.u.bc += d.sum; this.save();
+                    alert(`ОТМЕНА ВЫВОДА: ${d.status}`);
+                    db.ref('payouts/' + userId + '/' + c.key).remove();
                     return;
                 }
                 h.innerHTML += `<div class="glass p-3 flex justify-between items-center border-l-2 ${d.status === 'Выведено' ? 'border-green-500' : 'border-yellow-500'}">
