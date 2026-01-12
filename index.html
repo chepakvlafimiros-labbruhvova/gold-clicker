@@ -20,12 +20,12 @@
         @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         
         .btn-main { background: linear-gradient(180deg, #ff4d4d 0%, #a80000 100%); font-weight: 900; border-radius: 16px; transition: 0.2s; box-shadow: 0 4px 15px var(--red-glow); color: white; text-transform: uppercase; letter-spacing: 1px; }
-        .btn-main:active { transform: scale(0.92); }
+        .btn-main:active { transform: scale(0.95); }
         
         .nav-active { color: var(--red) !important; filter: drop-shadow(0 0 10px var(--red)); }
         
-        input, select { background: #0d0d0d; border: 1px solid #1a1a1a; color: #fff; padding: 14px; border-radius: 16px; width: 100%; outline: none; }
-        input:focus { border-color: var(--red); }
+        input, select { background: #0d0d0d; border: 1px solid #1a1a1a; color: #fff; padding: 14px; border-radius: 16px; width: 100%; outline: none; font-size: 14px; }
+        input:focus { border-color: var(--red); box-shadow: 0 0 10px rgba(255,59,59,0.1); }
 
         .click-area { 
             width: 210px; height: 210px; border-radius: 50%; 
@@ -71,7 +71,6 @@
 
     <div id="tab-cases" class="tab-content space-y-4">
         <h2 class="text-center font-black italic text-white uppercase tracking-[4px] text-sm mb-4">Магазин Кейсов</h2>
-        
         <div class="glass p-5 flex justify-between items-center border-l-4 border-gray-500 case-card">
             <div class="flex-1">
                 <p class="text-xs font-black uppercase tracking-wider text-gray-300">Кейс «Бомж»</p>
@@ -79,7 +78,6 @@
             </div>
             <button onclick="Game.watchAd('c1')" class="btn-main px-6 py-3 text-[10px]">ОТКРЫТЬ</button>
         </div>
-
         <div class="glass p-5 flex justify-between items-center border-l-4 border-blue-500 case-card">
             <div class="flex-1">
                 <p class="text-xs font-black uppercase tracking-wider text-blue-400">Кейс «Перекуп»</p>
@@ -88,7 +86,6 @@
             </div>
             <button onclick="Game.watchAd('c2')" class="btn-main px-6 py-3 text-[10px] !bg-blue-600">СМОТРЕТЬ</button>
         </div>
-
         <div class="glass p-5 flex justify-between items-center border-l-4 border-yellow-500 case-card">
             <div class="flex-1">
                 <p class="text-xs font-black uppercase tracking-wider text-yellow-500">Кейс «Владелец ТК»</p>
@@ -99,17 +96,36 @@
         </div>
     </div>
 
-    <div id="tab-out" class="tab-content space-y-6">
-        <div class="glass p-6 space-y-4 shadow-2xl">
-            <h3 class="text-center text-xs font-black uppercase text-red-500 italic tracking-widest">Вывод средств</h3>
-            <input id="out-nick" type="text" placeholder="Ник (Ivan_Ivanov)">
-            <select id="out-srv" class="text-xs font-bold"></select>
-            <input id="out-sum" type="number" placeholder="Сумма (Мин. 1000 BC)">
-            <button onclick="Game.withdraw()" class="btn-main w-full py-5 text-xs">СОЗДАТЬ ЗАЯВКУ</button>
+    <div id="tab-out" class="tab-content">
+        <div class="glass p-6 mb-6">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xs font-black uppercase text-white italic tracking-widest">Выплата BC</h3>
+                <span class="text-[10px] font-bold px-3 py-1 bg-red-500/10 text-red-500 rounded-full border border-red-500/20">МИН. 500 BC</span>
+            </div>
+            
+            <div class="space-y-4">
+                <div>
+                    <p class="text-[9px] text-gray-500 font-bold uppercase ml-1 mb-1">Игровой ник</p>
+                    <input id="out-nick" type="text" placeholder="Ivan_Ivanov">
+                </div>
+                <div>
+                    <p class="text-[9px] text-gray-500 font-bold uppercase ml-1 mb-1">Ваш сервер</p>
+                    <select id="out-srv" class="font-bold text-xs"></select>
+                </div>
+                <div>
+                    <p class="text-[9px] text-gray-500 font-bold uppercase ml-1 mb-1">Сумма коинов</p>
+                    <input id="out-sum" type="number" placeholder="Напр: 750">
+                </div>
+                <button onclick="Game.withdraw()" class="btn-main w-full py-4 text-xs mt-2">ПОДАТЬ ЗАЯВКУ</button>
+            </div>
         </div>
         
-        <div>
-            <p class="text-[10px] font-black text-gray-500 uppercase italic mb-3">История выплат</p>
+        <div class="px-1">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="h-[1px] flex-1 bg-white/5"></div>
+                <p class="text-[9px] font-black text-gray-600 uppercase italic tracking-widest">Транзакции</p>
+                <div class="h-[1px] flex-1 bg-white/5"></div>
+            </div>
             <div id="out-history" class="space-y-3"></div>
         </div>
     </div>
@@ -128,7 +144,6 @@
 </div>
 
 <script>
-// --- КОНФИГУРАЦИЯ ---
 const firebaseConfig = {
   apiKey: "AIzaSyA4zMBfNc1wTIN75Qr1KMBTrlgiU5qG-fA",
   authDomain: "locus-gold-game.firebaseapp.com",
@@ -164,10 +179,8 @@ const Game = {
             else this.save();
             this.updateUI();
         });
-        
         const sel = document.getElementById('out-srv');
         SERVERS.forEach(x => { sel.innerHTML += `<option value="${x}">${x} SERVER</option>`; });
-        
         this.loadHistory();
     },
 
@@ -229,27 +242,28 @@ const Game = {
 
     withdraw() {
         const n = document.getElementById('out-nick').value, s = document.getElementById('out-srv').value, a = parseInt(document.getElementById('out-sum').value);
-        if(n.length > 3 && a >= 1000 && this.u.bc >= a) {
+        if(n.length > 3 && a >= 500 && this.u.bc >= a) {
             this.u.bc -= a; this.save();
             db.ref('payouts/' + userId).push({ nick: n, srv: s, sum: a, status: "Ожидание", date: new Date().toLocaleDateString() });
             alert("Заявка создана! Ожидайте зачисления.");
             document.getElementById('out-sum').value = '';
-        } else alert("Мин. сумма 1000 BC!");
+        } else alert("Ошибка: Мин. сумма 500 BC и корректный ник!");
     },
 
     loadHistory() {
         db.ref('payouts/' + userId).on('value', (s) => {
             const h = document.getElementById('out-history'); h.innerHTML = '';
+            if(!s.exists()) h.innerHTML = '<p class="text-[9px] text-gray-700 text-center italic">История пуста</p>';
             s.forEach(c => {
                 const d = c.val();
                 h.innerHTML += `
                 <div class="glass p-4 flex justify-between items-center bg-white/5 border-l-2 border-red-500">
                     <div>
                         <p class="font-black text-white text-xs">${d.sum} BC</p>
-                        <p class="text-[9px] text-gray-500 mt-1">${d.srv} • ${d.nick}</p>
+                        <p class="text-[9px] text-gray-500 mt-1 uppercase">${d.srv} • ${d.nick}</p>
                     </div>
                     <div class="text-right">
-                        <p class="text-yellow-500 font-black uppercase text-[8px]">${d.status}</p>
+                        <p class="text-yellow-500 font-black uppercase text-[8px] tracking-tighter">${d.status}</p>
                         <p class="text-[8px] text-gray-700 mt-1">${d.date}</p>
                     </div>
                 </div>`;
