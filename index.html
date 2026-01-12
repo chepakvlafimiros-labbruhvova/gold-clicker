@@ -8,137 +8,148 @@
     <script src="https://www.gstatic.com/firebasejs/9.10.0/firebase-database-compat.js"></script>
     <script src="https://sad.adsgram.ai/js/sad.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;900&display=swap" rel="stylesheet">
     <style>
-        :root { --red: #ff3b3b; --red-glow: rgba(255, 59, 59, 0.4); --bg: #050505; }
+        :root { --red: #ff3b3b; --red-glow: rgba(255, 59, 59, 0.5); --bg: #030303; }
         body { background: var(--bg); color: #fff; font-family: 'Montserrat', sans-serif; overflow: hidden; height: 100vh; user-select: none; }
         
-        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.07); border-radius: 24px; }
-        .tab-content { display: none; height: calc(100vh - 130px); overflow-y: auto; padding: 20px; }
-        .active { display: block; animation: slideUp 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28); }
+        /* Glass UI */
+        .glass { background: linear-gradient(145deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.01) 100%); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.08); border-radius: 28px; }
         
-        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .tab-content { display: none; height: calc(100vh - 140px); overflow-y: auto; padding: 20px; scrollbar-width: none; }
+        .active { display: block; animation: slideUp 0.4s cubic-bezier(0.2, 0.8, 0.2, 1); }
         
-        .btn-main { background: linear-gradient(180deg, #ff4d4d 0%, #a80000 100%); font-weight: 900; border-radius: 16px; transition: 0.2s; box-shadow: 0 4px 15px var(--red-glow); color: white; text-transform: uppercase; letter-spacing: 1px; }
-        .btn-main:active { transform: scale(0.95); }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
         
-        .nav-active { color: var(--red) !important; filter: drop-shadow(0 0 10px var(--red)); }
+        /* Кнопки */
+        .btn-main { background: linear-gradient(180deg, #ff4d4d 0%, #8b0000 100%); font-weight: 900; border-radius: 18px; transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 10px 20px -5px var(--red-glow); color: white; text-transform: uppercase; letter-spacing: 1px; border: 1px solid rgba(255,255,255,0.1); }
+        .btn-main:active { transform: scale(0.92); box-shadow: 0 5px 10px var(--red-glow); }
         
-        input, select { background: #0d0d0d; border: 1px solid #1a1a1a; color: #fff; padding: 14px; border-radius: 16px; width: 100%; outline: none; font-size: 14px; }
-        input:focus { border-color: var(--red); }
+        .nav-active { color: var(--red) !important; filter: drop-shadow(0 0 12px var(--red)); transform: translateY(-3px); }
+        
+        input, select { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 16px; border-radius: 18px; width: 100%; outline: none; font-size: 14px; transition: 0.3s; }
+        input:focus { border-color: var(--red); background: rgba(255,255,255,0.06); }
 
+        /* Кнопка клика */
         .click-area { 
-            width: 210px; height: 210px; border-radius: 50%; 
-            background: radial-gradient(circle, #222 0%, #000 100%); 
-            border: 10px solid #111; display: flex; align-items: center; justify-content: center; 
-            margin: 20px auto; cursor: pointer; position: relative;
+            width: 220px; height: 220px; border-radius: 50%; 
+            background: radial-gradient(circle, #1a1a1a 0%, #000 100%); 
+            border: 12px solid #0a0a0a; display: flex; align-items: center; justify-content: center; 
+            margin: 30px auto; cursor: pointer; position: relative; transition: 0.1s;
+            box-shadow: 0 0 50px rgba(0,0,0,0.8), inset 0 0 30px rgba(255,255,255,0.02);
         }
-        .click-area::after { content: ''; position: absolute; inset: -5px; border-radius: 50%; border: 2px solid var(--red); opacity: 0.2; animation: pulse 2s infinite; }
-        @keyframes pulse { 0% { transform: scale(1); opacity: 0.3; } 100% { transform: scale(1.3); opacity: 0; } }
-        .click-area:active { transform: scale(0.88); border-color: var(--red); }
+        .click-area::before { content: ''; position: absolute; inset: -15px; border-radius: 50%; border: 1px solid var(--red); opacity: 0.1; animation: pulse 3s infinite; }
+        @keyframes pulse { 0% { transform: scale(1); opacity: 0.1; } 50% { opacity: 0.3; } 100% { transform: scale(1.4); opacity: 0; } }
+        .click-area:active { transform: scale(0.9); border-color: var(--red); box-shadow: 0 0 30px var(--red-glow); }
 
-        .case-card { transition: 0.3s; border: 1px solid rgba(255,255,255,0.05); }
-        ::-webkit-scrollbar { width: 0px; }
+        .case-card { transition: 0.3s; position: relative; overflow: hidden; }
+        .case-card::after { content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%; background: linear-gradient(to right, transparent, rgba(255,255,255,0.03), transparent); transition: 0.5s; }
+        .case-card:hover::after { left: 100%; }
+        
+        nav { background: rgba(5,5,5,0.8); backdrop-filter: blur(20px); }
     </style>
 </head>
 <body>
 
 <div class="max-w-md mx-auto h-full flex flex-col relative">
-    <div class="p-6 flex justify-between items-center z-10">
-        <div>
-            <p class="text-[10px] text-gray-500 font-black uppercase tracking-[2px] mb-1">Вирты</p>
-            <p id="m-rub" class="text-3xl font-black italic text-white">0 ₽</p>
+    <div class="p-8 flex justify-between items-center z-10">
+        <div class="space-y-1">
+            <p class="text-[9px] text-gray-500 font-black uppercase tracking-widest">Виртуальный счет</p>
+            <p id="m-rub" class="text-3xl font-black italic tracking-tighter">0 ₽</p>
         </div>
-        <div class="text-right">
-            <p class="text-[10px] text-blue-500 font-black uppercase tracking-[2px] mb-1">Black Coins</p>
-            <p id="m-bc" class="text-3xl font-black italic text-blue-400">0</p>
+        <div class="text-right space-y-1">
+            <p class="text-[9px] text-blue-500 font-black uppercase tracking-widest text-glow">Black Coins</p>
+            <p id="m-bc" class="text-3xl font-black italic text-blue-400 tracking-tighter">0</p>
         </div>
     </div>
 
     <div id="tab-home" class="tab-content active text-center">
-        <div class="mt-4 click-area" onclick="Game.click()">
-            <span class="text-7xl font-black text-red-600 italic tracking-tighter">BR</span>
+        <div class="click-area" onclick="Game.click()">
+            <span class="text-7xl font-black text-red-600 italic tracking-tighter select-none" style="text-shadow: 0 0 25px rgba(255,0,0,0.4)">BR</span>
         </div>
-        <div class="glass p-6 mt-12 text-left relative overflow-hidden">
-            <p class="text-[11px] text-blue-400 font-black uppercase mb-3 italic">Обмен валюты</p>
-            <div class="flex gap-3">
-                <input id="ex-val" type="number" placeholder="Сумма вирт">
-                <button onclick="Game.exchange()" class="btn-main px-8 py-2 text-[11px]">ОБМЕН</button>
+        
+        <div class="glass p-6 mt-10 text-left relative overflow-hidden">
+            <div class="flex items-center gap-2 mb-4">
+                <div class="w-1 h-4 bg-blue-500 rounded-full"></div>
+                <p class="text-[11px] text-blue-400 font-black uppercase italic">Обменник валют</p>
             </div>
-            <p class="text-[9px] text-gray-500 mt-3 font-medium italic">Курс: 1.000.000 ₽ = 1 BC</p>
+            <div class="flex gap-3">
+                <input id="ex-val" type="number" placeholder="Сумма в ₽">
+                <button onclick="Game.exchange()" class="btn-main px-6 py-2 text-[10px]">ОБМЕН</button>
+            </div>
+            <p class="text-[9px] text-gray-500 mt-3 font-medium opacity-60">Курс системы: 1.000.000 ₽ = 1 BC</p>
         </div>
     </div>
 
     <div id="tab-cases" class="tab-content space-y-4">
-        <h2 class="text-center font-black italic text-white uppercase tracking-[4px] text-sm mb-4">Магазин Кейсов</h2>
-        <div class="glass p-5 flex justify-between items-center border-l-4 border-gray-500 case-card">
-            <div class="flex-1">
+        <div class="flex items-center justify-between mb-2">
+            <h2 class="font-black italic text-white uppercase tracking-widest text-xs">Магазин Удачи</h2>
+            <div class="h-[1px] flex-1 bg-white/10 ml-4"></div>
+        </div>
+        
+        <div class="glass p-5 flex justify-between items-center border-l-[6px] border-gray-600 case-card">
+            <div class="space-y-1">
                 <p class="text-xs font-black uppercase tracking-wider text-gray-300">Кейс «Бомж»</p>
-                <span class="text-[8px] bg-white/10 px-2 py-0.5 rounded text-gray-400 font-bold italic">Выигрыш: 1-5 BC</span>
+                <p class="text-[9px] font-bold text-gray-500">Приз: <span class="text-white">1-5 BC</span></p>
             </div>
-            <button onclick="Game.watchAd('c1')" class="btn-main px-6 py-3 text-[10px]">ОТКРЫТЬ</button>
+            <button onclick="Game.watchAd('c1')" class="btn-main px-5 py-3 text-[9px]">ОТКРЫТЬ</button>
         </div>
-        <div class="glass p-5 flex justify-between items-center border-l-4 border-blue-500 case-card">
-            <div class="flex-1">
+
+        <div class="glass p-5 flex justify-between items-center border-l-[6px] border-blue-600 case-card">
+            <div class="space-y-1">
                 <p class="text-xs font-black uppercase tracking-wider text-blue-400">Кейс «Перекуп»</p>
-                <span class="text-[8px] bg-blue-500/20 px-2 py-0.5 rounded text-blue-300 font-bold italic">Выигрыш: 25-50 BC</span>
-                <p id="p-c2" class="text-[9px] text-blue-200/50 font-black mt-2">ADS: 0/3</p>
+                <p class="text-[9px] font-bold text-gray-500">Приз: <span class="text-blue-300">25-50 BC</span></p>
+                <p id="p-c2" class="text-[8px] text-blue-200/40 font-black uppercase tracking-tighter">ПРОГРЕСС: 0/3 ADS</p>
             </div>
-            <button onclick="Game.watchAd('c2')" class="btn-main px-6 py-3 text-[10px] !bg-blue-600">СМОТРЕТЬ</button>
+            <button onclick="Game.watchAd('c2')" class="btn-main px-5 py-3 text-[9px] !bg-blue-600">СМОТРЕТЬ</button>
         </div>
-        <div class="glass p-5 flex justify-between items-center border-l-4 border-yellow-500 case-card">
-            <div class="flex-1">
+
+        <div class="glass p-5 flex justify-between items-center border-l-[6px] border-yellow-500 case-card">
+            <div class="space-y-1">
                 <p class="text-xs font-black uppercase tracking-wider text-yellow-500">Кейс «Владелец ТК»</p>
-                <span class="text-[8px] bg-yellow-500/20 px-2 py-0.5 rounded text-yellow-300 font-bold italic">Выигрыш: 50-150 BC</span>
-                <p id="p-c3" class="text-[9px] text-yellow-200/50 font-black mt-2">ADS: 0/5</p>
+                <p class="text-[9px] font-bold text-gray-500">Приз: <span class="text-yellow-200">50-150 BC</span></p>
+                <p id="p-c3" class="text-[8px] text-yellow-200/40 font-black uppercase tracking-tighter">ПРОГРЕСС: 0/5 ADS</p>
             </div>
-            <button onclick="Game.watchAd('c3')" class="btn-main px-6 py-3 text-[10px] !bg-yellow-600">СМОТРЕТЬ</button>
+            <button onclick="Game.watchAd('c3')" class="btn-main px-5 py-3 text-[9px] !bg-yellow-600">СМОТРЕТЬ</button>
         </div>
     </div>
 
     <div id="tab-out" class="tab-content">
-        <div class="glass p-6 mb-6">
+        <div class="glass p-7 mb-8">
             <div class="flex justify-between items-center mb-6">
-                <h3 class="text-xs font-black uppercase text-white italic tracking-widest">Выплата BC</h3>
-                <span class="text-[10px] font-bold px-3 py-1 bg-red-500/10 text-red-500 rounded-full border border-red-500/20">МИН. 500 BC</span>
+                <h3 class="text-xs font-black uppercase text-red-500 italic tracking-widest">Выплата на сервер</h3>
+                <span class="text-[8px] font-black px-2 py-1 bg-white/5 rounded border border-white/10 text-gray-400">МИН. 500 BC</span>
             </div>
             
-            <div class="space-y-4">
-                <div>
-                    <p class="text-[9px] text-gray-500 font-bold uppercase ml-1 mb-1">Игровой ник</p>
-                    <input id="out-nick" type="text" placeholder="Ivan_Ivanov">
-                </div>
-                <div>
-                    <p class="text-[9px] text-gray-500 font-bold uppercase ml-1 mb-1">Ваш сервер</p>
-                    <select id="out-srv" class="font-bold text-xs"></select>
-                </div>
-                <div>
-                    <p class="text-[9px] text-gray-500 font-bold uppercase ml-1 mb-1">Сумма коинов</p>
-                    <input id="out-sum" type="number" placeholder="Напр: 500">
-                </div>
-                <button onclick="Game.withdraw()" class="btn-main w-full py-4 text-xs mt-2">ПОДАТЬ ЗАЯВКУ</button>
+            <div class="space-y-5">
+                <input id="out-nick" type="text" placeholder="Игровой Nick_Name">
+                <select id="out-srv" class="font-bold text-xs"></select>
+                <input id="out-sum" type="number" placeholder="Сумма BC">
+                <button onclick="Game.withdraw()" class="btn-main w-full py-5 text-[11px] mt-2">ПОЛУЧИТЬ ДОНАТ</button>
             </div>
         </div>
         
-        <div class="px-1">
-            <div id="out-history" class="space-y-3"></div>
+        <div class="px-2">
+            <p class="text-[10px] font-black text-gray-600 uppercase italic tracking-[2px] mb-4">История транзакций</p>
+            <div id="out-history" class="space-y-3 pb-10"></div>
         </div>
     </div>
 
-    <nav class="fixed bottom-6 left-6 right-6 glass flex justify-around py-4 z-50 border border-white/10 shadow-2xl">
-        <div onclick="Game.tab('home')" id="n-home" class="flex flex-col items-center text-gray-500 nav-active cursor-pointer">
+    <nav class="fixed bottom-6 left-6 right-6 glass flex justify-around py-4 z-50 shadow-2xl">
+        <div onclick="Game.tab('home')" id="n-home" class="flex flex-col items-center text-gray-500 nav-active cursor-pointer transition-all">
             <span class="text-xl">⚡</span><span class="text-[9px] font-black uppercase mt-1">Игра</span>
         </div>
-        <div onclick="Game.tab('cases')" id="n-cases" class="flex flex-col items-center text-gray-500 cursor-pointer">
+        <div onclick="Game.tab('cases')" id="n-cases" class="flex flex-col items-center text-gray-500 cursor-pointer transition-all">
             <span class="text-xl">💎</span><span class="text-[9px] font-black uppercase mt-1">Кейсы</span>
         </div>
-        <div onclick="Game.tab('out')" id="n-out" class="flex flex-col items-center text-gray-500 cursor-pointer">
+        <div onclick="Game.tab('out')" id="n-out" class="flex flex-col items-center text-gray-500 cursor-pointer transition-all">
             <span class="text-xl">💸</span><span class="text-[9px] font-black uppercase mt-1">Вывод</span>
         </div>
     </nav>
 </div>
 
 <script>
+// --- КОНФИГ ---
 const firebaseConfig = {
   apiKey: "AIzaSyA4zMBfNc1wTIN75Qr1KMBTrlgiU5qG-fA",
   authDomain: "locus-gold-game.firebaseapp.com",
@@ -182,14 +193,14 @@ const Game = {
     updateUI() {
         document.getElementById('m-rub').innerText = Math.floor(this.u.m).toLocaleString() + ' ₽';
         document.getElementById('m-bc').innerText = this.u.bc.toLocaleString();
-        document.getElementById('p-c2').innerText = `ADS: ${this.u.ac2 || 0}/3`;
-        document.getElementById('p-c3').innerText = `ADS: ${this.u.ac3 || 0}/5`;
+        document.getElementById('p-c2').innerText = `ПРОГРЕСС: ${this.u.ac2 || 0}/3 ADS`;
+        document.getElementById('p-c3').innerText = `ПРОГРЕСС: ${this.u.ac3 || 0}/5 ADS`;
     },
 
     save() { db.ref('users/' + userId).update(this.u); },
     
-    // ИЗМЕНЕНО: Теперь +1.000.000 за клик
-    click() { this.u.m += 1000000; this.save(); },
+    // Возвращено +100 за клик
+    click() { this.u.m += 100; this.save(); },
 
     tab(id) {
         document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
@@ -205,7 +216,7 @@ const Game = {
             if(res.done) {
                 if(type === 'c1') {
                     const win = Math.floor(Math.random() * 5) + 1;
-                    this.u.bc += win; alert(`Вам выпало: ${win} BC!`);
+                    this.u.bc += win; alert(`ВЫИГРЫШ: ${win} BC!`);
                 } else if(type === 'c2') {
                     this.u.ac2 = (this.u.ac2 || 0) + 1;
                     if(this.u.ac2 >= 3) { 
@@ -218,12 +229,12 @@ const Game = {
                     if(this.u.ac3 >= 5) { 
                         this.u.ac3 = 0; 
                         let w = Math.floor(Math.random() * 101) + 50; 
-                        this.u.bc += w; alert(`ВЫИГРЫШ: +${w} BC!`); 
+                        this.u.bc += w; alert(`КУШ СОРВАН: +${w} BC!`); 
                     }
                 }
                 this.save(); this.updateUI();
             }
-        } catch(e) { alert("Реклама не готова"); }
+        } catch(e) { alert("Реклама загружается..."); }
     },
 
     exchange() {
@@ -232,27 +243,39 @@ const Game = {
             this.u.m -= v; 
             this.u.bc += Math.floor(v/1000000); 
             this.save(); 
-            alert("Обмен выполнен!"); 
+            alert("ОБМЕН ЗАВЕРШЕН!"); 
             document.getElementById('ex-val').value = '';
-        } else alert("Мин. обмен 1.000.000 ₽");
+        } else alert("Мин. обмен от 1.000.000 ₽");
     },
 
     withdraw() {
         const n = document.getElementById('out-nick').value, s = document.getElementById('out-srv').value, a = parseInt(document.getElementById('out-sum').value);
         if(n.length > 3 && a >= 500 && this.u.bc >= a) {
             this.u.bc -= a; this.save();
-            db.ref('payouts/' + userId).push({ nick: n, srv: s, sum: a, status: "Ожидание", date: new Date().toLocaleDateString() });
-            alert("Заявка создана!");
+            // Теперь статус пишется "Выведено"
+            db.ref('payouts/' + userId).push({ nick: n, srv: s, sum: a, status: "Выведено", date: new Date().toLocaleDateString() });
+            alert("УСПЕШНО: Донат отправлен на ваш аккаунт!");
             document.getElementById('out-sum').value = '';
-        } else alert("Ошибка: Баланс < 500 BC");
+        } else alert("Ошибка: Проверьте баланс (мин. 500 BC) и ник!");
     },
 
     loadHistory() {
         db.ref('payouts/' + userId).on('value', (s) => {
             const h = document.getElementById('out-history'); h.innerHTML = '';
+            if(!s.exists()) h.innerHTML = '<p class="text-[9px] text-gray-800 text-center uppercase tracking-widest mt-4">История пуста</p>';
             s.forEach(c => {
                 const d = c.val();
-                h.innerHTML += `<div class="glass p-4 flex justify-between items-center border-l-2 border-red-500"><div class="text-left"><p class="font-black text-white text-xs">${d.sum} BC</p><p class="text-[9px] text-gray-500 uppercase">${d.srv} • ${d.nick}</p></div><div class="text-right"><p class="text-yellow-500 font-black uppercase text-[8px]">${d.status}</p></div></div>`;
+                h.innerHTML += `
+                <div class="glass p-5 flex justify-between items-center border-l-2 border-red-500 bg-white/[0.02]">
+                    <div class="space-y-1">
+                        <p class="font-black text-white text-sm">${d.sum} Black Coins</p>
+                        <p class="text-[8px] text-gray-500 font-bold uppercase tracking-tighter">${d.srv} • ${d.nick}</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-green-500 font-black uppercase text-[9px] tracking-tighter">${d.status}</p>
+                        <p class="text-[8px] text-gray-700 font-medium mt-1">${d.date}</p>
+                    </div>
+                </div>`;
             });
         });
     }
