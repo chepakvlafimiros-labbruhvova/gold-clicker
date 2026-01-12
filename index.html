@@ -3,181 +3,316 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Locus Gold - Black Russia</title>
+    <title>Locus Gold</title>
+    <script src="https://www.gstatic.com/firebasejs/9.10.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.10.0/firebase-database-compat.js"></script>
     <script src="https://sad.adsgram.ai/js/sad.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@700&family=Montserrat:wght@400;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
-        :root { --br-red: #ff3333; --bg: #0a0a0c; }
-        body { background: var(--bg); color: #fff; font-family: 'Montserrat', sans-serif; overflow: hidden; height: 100vh; user-select: none; }
-        .oswald { font-family: 'Oswald', sans-serif; text-transform: uppercase; }
-        
-        .br-btn {
-            width: 220px; height: 220px; border-radius: 50%;
-            background: radial-gradient(circle, #1a1a1c 0%, #000 100%);
-            border: 4px solid #1f1f22; display: flex; align-items: center; justify-content: center;
-            cursor: pointer; transition: transform 0.05s, box-shadow 0.2s; margin: 50px auto;
-            box-shadow: 0 0 40px rgba(255,51,51,0.1);
-        }
-        .br-btn:active { transform: scale(0.92); box-shadow: 0 0 60px rgba(255,51,51,0.4); }
-
-        .card { background: #111114; border: 1px solid #1e1e22; border-radius: 20px; padding: 20px; }
-        .nav-active { color: var(--br-red) !important; border-top: 2px solid var(--br-red); }
-        .hidden { display: none !important; }
-        .btn-gradient { background: linear-gradient(90deg, #ff3333, #b30000); font-weight: 900; }
-        .btn-blue { background: linear-gradient(90deg, #3b82f6, #1d4ed8); font-weight: 900; }
-        
-        .tab-view { animation: fadeIn 0.3s ease-in-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        body { background: #0a0a0a; color: #fff; font-family: 'Montserrat', sans-serif; overflow: hidden; height: 100vh; user-select: none; }
+        .tab-content { display: none; height: calc(100vh - 160px); overflow-y: auto; padding-bottom: 20px; }
+        .active { display: block; }
+        .card { background: #151515; border-radius: 20px; padding: 16px; border: 1px solid #222; }
+        .btn-red { background: linear-gradient(180deg, #ff3b3b 0%, #b30000 100%); border-radius: 12px; font-weight: 900; transition: transform 0.1s; }
+        .btn-red:active { transform: scale(0.95); }
+        .btn-blue { background: #2563eb; border-radius: 12px; font-weight: 900; }
+        .nav-active { color: #ff3b3b !important; }
+        input, select { background: #1a1a1a; border: 1px solid #333; color: white; padding: 12px; border-radius: 12px; width: 100%; outline: none; font-size: 14px; }
+        /* Анимация клика */
+        .click-circle { width: 180px; height: 180px; border-radius: 50%; background: radial-gradient(circle, #1a1a1a 0%, #000 100%); border: 4px solid #222; display: flex; align-items: center; justify-content: center; margin: 40px auto; cursor: pointer; box-shadow: 0 0 30px rgba(255,0,0,0.1); }
+        .click-circle:active { transform: scale(0.92); }
     </style>
 </head>
 <body>
 
-<div class="max-w-md mx-auto h-screen flex flex-col p-5">
-    <header class="flex justify-between items-start mb-4">
+<div class="p-5 h-full flex flex-col">
+    <div class="flex justify-between items-start mb-4">
         <div>
-            <p class="text-[9px] font-black text-gray-500 uppercase tracking-widest">Игровой баланс</p>
-            <p id="m-rub" class="text-2xl oswald italic font-black">0 ₽</p>
+            <p class="text-[10px] text-gray-500 font-bold italic uppercase">Игровой баланс</p>
+            <p id="m-rub" class="text-2xl font-black italic">0 ₽</p>
         </div>
         <div class="text-right">
-            <p class="text-[9px] font-black text-blue-500 uppercase italic tracking-widest">Донат счёт</p>
-            <p id="m-bc" class="text-2xl oswald italic text-blue-400 font-black">0 BC</p>
+            <p class="text-[10px] text-blue-500 font-bold italic uppercase">Донат счёт</p>
+            <p id="m-bc" class="text-2xl font-black italic text-blue-400">0 BC</p>
         </div>
-    </header>
+    </div>
 
-    <main class="flex-1 overflow-y-auto pb-24">
+    <div id="tab-home" class="tab-content active text-center">
+        <div class="click-circle" onclick="Game.click()">
+            <span class="text-6xl font-black text-red-600 italic">BR</span>
+        </div>
+        <div class="card mt-10 text-left">
+            <div class="flex justify-between items-center mb-3">
+                <span class="text-blue-500 text-[10px] font-bold italic uppercase">Обмен валюты</span>
+                <span class="text-gray-500 text-[10px]">1.000.000 ₽ = 1 BC</span>
+            </div>
+            <div class="flex gap-2">
+                <input id="ex-val" type="number" placeholder="Сумма ₽">
+                <button onclick="Game.exchange()" class="btn-blue px-6 py-2 text-[10px] uppercase">Обмен</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="tab-cases" class="tab-content space-y-3">
+        <h2 class="text-center font-black italic text-xl py-2 uppercase">Магазин кейсов</h2>
         
-        <section id="tab-home" class="tab-view space-y-8">
-            <div class="br-btn oswald text-7xl text-red-600 italic font-black" onclick="Game.click()">BR</div>
-            
-            <div class="card space-y-4 shadow-xl">
-                <div class="flex justify-between items-center">
-                    <p class="text-xs font-black text-blue-400 italic uppercase">Обмен валюты</p>
-                    <p class="text-[10px] text-gray-500 font-bold">1.000.000 ₽ = 1 BC</p>
-                </div>
-                <div class="flex gap-2">
-                    <input id="ex-val" type="number" placeholder="Сумма ₽" class="flex-1 bg-black p-4 rounded-xl text-sm outline-none border border-white/5">
-                    <button onclick="Game.exchange()" class="btn-blue px-8 rounded-xl text-[11px] uppercase italic font-black">Обмен</button>
-                </div>
+        <div class="card flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <span class="text-2xl">⏳</span>
+                <div><p class="text-sm font-black uppercase">Ежедневный</p><p id="timer" class="text-[10px] text-green-500 font-bold">Готово</p></div>
             </div>
-        </section>
+            <button id="daily-btn" onclick="Game.openDaily()" class="btn-red px-6 py-2 text-[10px] uppercase text-white">Открыть</button>
+        </div>
 
-        <section id="tab-cases" class="tab-view hidden space-y-4">
-            <div class="text-center mb-6">
-                <h2 class="oswald text-2xl italic font-black text-white">КЕЙСЫ ЗА РЕКЛАМУ</h2>
+        <div class="card flex justify-between items-center border-l-4 border-green-500">
+            <div class="flex items-center gap-3">
+                <span class="text-2xl">🎁</span>
+                <div><p class="text-sm font-black uppercase text-green-500">Халява (1 ADS)</p><p class="text-[10px] text-gray-400">Приз: 25-100 BC</p></div>
             </div>
-            
-            <div onclick="Game.watchAd('lite')" class="card flex justify-between items-center border-l-4 border-green-500 cursor-pointer active:scale-95 transition-all">
-                <div>
-                    <p class="text-sm font-black uppercase">КЕЙС "ЛАЙТ"</p>
-                    <p class="text-[10px] text-gray-400 font-bold italic">Награда: 1 - 5 BC | 1 ADS</p>
-                </div>
-                <div class="bg-green-600/20 text-green-500 px-5 py-2 rounded-xl text-[11px] font-black oswald">ОТКРЫТЬ</div>
+            <button onclick="Game.watchAd('lite')" class="bg-green-600 rounded-xl px-6 py-2 text-[10px] uppercase font-black">Открыть</button>
+        </div>
+
+        <div class="card flex justify-between items-center border-l-4 border-blue-500">
+            <div class="flex items-center gap-3">
+                <span class="text-2xl">💎</span>
+                <div><p class="text-sm font-black uppercase text-blue-400">Мажор (5 ADS)</p><p id="ad-prog" class="text-[10px] text-gray-400">Прогресс: 0/5</p></div>
             </div>
+            <button onclick="Game.watchAd('major')" class="btn-blue px-6 py-2 text-[10px] uppercase">Смотреть</button>
+        </div>
 
-            <div onclick="Game.watchAd('medium')" class="card flex justify-between items-center border-l-4 border-blue-500 cursor-pointer active:scale-95 transition-all">
-                <div>
-                    <p class="text-sm font-black uppercase">КЕЙС "МЕДИУМ"</p>
-                    <p id="ad-med" class="text-[10px] text-gray-400 font-bold italic">Награда: 25 - 50 BC | Прогресс: 0/3</p>
-                </div>
-                <div class="bg-blue-600/20 text-blue-500 px-5 py-2 rounded-xl text-[11px] font-black oswald">СМОТРЕТЬ</div>
+        <div class="card space-y-3">
+            <p class="text-[10px] font-black text-red-500 uppercase italic">Пригласи друга (+50 BC)</p>
+            <div class="flex gap-2">
+                <input id="ref-link" readonly class="text-[10px] text-gray-500" value="Загрузка...">
+                <button onclick="Game.copyRef()" class="btn-red px-4 py-2 text-[9px] uppercase">Копировать</button>
             </div>
+            <div id="ref-list" class="space-y-1 pt-2"></div>
+        </div>
+    </div>
 
-            <div onclick="Game.watchAd('ultra')" class="card flex justify-between items-center border-l-4 border-purple-600 cursor-pointer active:scale-95 transition-all">
-                <div>
-                    <p class="text-sm font-black uppercase text-purple-400 italic">КЕЙС "УЛЬТРА"</p>
-                    <p id="ad-ult" class="text-[10px] text-gray-400 font-bold italic">Награда: 50 - 100 BC | Прогресс: 0/5</p>
-                </div>
-                <div class="bg-purple-600/20 text-purple-500 px-5 py-2 rounded-xl text-[11px] font-black oswald">СМОТРЕТЬ</div>
-            </div>
-        </section>
+    <div id="tab-garage" class="tab-content text-center">
+        <h2 class="font-black italic text-xl py-4 uppercase">Гараж</h2>
+        <p class="text-gray-600 mt-20 italic">Гараж пока пуст</p>
+    </div>
 
-        <section id="tab-out" class="tab-view hidden space-y-4">
-            <div class="card space-y-4">
-                <h3 class="oswald text-red-500 italic text-xl text-center font-black tracking-widest">ВЫВОД DONAT</h3>
-                <div class="space-y-3">
-                    <input id="out-nick" type="text" placeholder="Ваш Nick_Name" class="w-full bg-black p-4 rounded-xl text-sm outline-none border border-white/5">
-                    <select id="out-srv" class="w-full bg-black p-4 rounded-xl text-sm oswald outline-none border border-white/5"></select>
-                    <input id="out-sum" type="number" placeholder="Сумма BC" class="w-full bg-black p-4 rounded-xl text-sm outline-none border border-white/5">
-                </div>
-                <button onclick="Game.withdraw()" class="btn-gradient w-full py-5 rounded-2xl text-xs font-black uppercase italic tracking-widest">Вывести</button>
-            </div>
-        </section>
+    <div id="tab-out" class="tab-content">
+        <div class="card space-y-4">
+            <h2 class="text-center font-black italic text-red-500 uppercase">Вывод Black Coins</h2>
+            <input id="out-nick" type="text" placeholder="Ваш Nick_Name">
+            <select id="out-srv"></select>
+            <input id="out-sum" type="number" placeholder="Сумма BC">
+            <button onclick="Game.withdraw()" class="btn-red w-full py-4 uppercase text-sm">Подать заявку</button>
+        </div>
+        <div class="mt-6">
+            <p class="text-gray-500 text-[10px] font-bold uppercase italic mb-2">История выводов</p>
+            <div id="out-history" class="space-y-2"></div>
+        </div>
+    </div>
 
-    </main>
-
-    <nav class="fixed bottom-0 left-0 right-0 bg-black/95 border-t border-white/5 flex justify-around py-5">
-        <div onclick="Game.tab('home')" id="n-home" class="flex flex-col items-center gap-1 nav-active text-gray-600 cursor-pointer"><span class="text-2xl">🏠</span><span class="text-[9px] font-black uppercase tracking-tighter">Главная</span></div>
-        <div onclick="Game.tab('cases')" id="n-cases" class="flex flex-col items-center gap-1 text-gray-600 cursor-pointer"><span class="text-2xl">📦</span><span class="text-[9px] font-black uppercase tracking-tighter">Кейсы</span></div>
-        <div onclick="Game.tab('out')" id="n-out" class="flex flex-col items-center gap-1 text-gray-600 cursor-pointer"><span class="text-2xl">💳</span><span class="text-[9px] font-black uppercase tracking-tighter">Вывод</span></div>
+    <nav class="fixed bottom-0 left-0 right-0 bg-[#0d0d0d] border-t border-[#222] flex justify-around py-4">
+        <div onclick="Game.tab('home')" id="n-home" class="flex flex-col items-center gap-1 text-gray-500 nav-active cursor-pointer">
+            <span class="text-xl">🏠</span><span class="text-[9px] font-black uppercase">Игра</span>
+        </div>
+        <div onclick="Game.tab('cases')" id="n-cases" class="flex flex-col items-center gap-1 text-gray-500 cursor-pointer">
+            <span class="text-xl">📦</span><span class="text-[9px] font-black uppercase">Кейсы</span>
+        </div>
+        <div onclick="Game.tab('garage')" id="n-garage" class="flex flex-col items-center gap-1 text-gray-500 cursor-pointer">
+            <span class="text-xl">🏎️</span><span class="text-[9px] font-black uppercase">Гараж</span>
+        </div>
+        <div onclick="Game.tab('out')" id="n-out" class="flex flex-col items-center gap-1 text-gray-500 cursor-pointer">
+            <span class="text-xl">💳</span><span class="text-[9px] font-black uppercase">Вывод</span>
+        </div>
     </nav>
 </div>
 
 <script>
-const SERVERS = ["RED [1]", "GREEN [2]", "BLUE [3]", "YELLOW [4]", "ORANGE [5]", "PURPLE [6]", "LIME [7]", "PINK [8]", "CHERRY [9]", "BLACK [10]", "INDIGO [11]", "WHITE [12]", "MAGENTA [13]", "CRIMSON [14]", "GOLD [15]", "AZURE [16]", "PLATINUM [17]", "AQUA [18]", "GRAY [19]", "ICE [20]", "CHILLI [21]", "CHOCO [22]", "MOSCOW [23]", "SPB [24]", "UFA [25]", "SOCHI [26]", "KAZAN [27]", "SAMARA [28]", "ROSTOV [29]", "ANAPA [30]", "EKATERINBURG [31]", "KRASNODAR [32]", "ARZAMAS [33]", "NOVOSIBIRSK [34]", "GROZNY [35]", "SARATOV [36]", "OMSK [37]", "IRKUTSK [38]", "VOLGOGRAD [39]", "VORONEZH [40]", "BELGOROD [41]", "MAKHACHKALA [42]", "VLADIKAVKAZ [43]", "VLADIVOSTOK [44]", "KALININGRAD [45]", "CHELYABINSK [46]", "KRASNOYARSK [47]", "CHEBOKSARY [48]", "KHABAROVSK [49]", "PERM [50]", "TULA [51]", "RYAZAN [52]", "MURMANSK [53]", "PENZA [54]", "KURSK [55]", "ARKHANGELSK [56]", "ORENBURG [57]", "KIROV [58]", "KEMEROVO [59]", "TYUMEN [60]", "TOLYATTI [61]", "IVANOVO [62]", "STAVROPOL [63]", "SMOLENSK [64]", "PSKOV [65]", "BRYANSK [66]", "OREL [67]", "YAROSLAVL [68]", "BARNAUL [69]", "LIPETSK [70]", "ULYANOVSK [71]", "YAKUTSK [72]", "TAMBOV [73]", "BRATSK [74]", "ASTRAKHAN [75]", "CHITA [76]", "KOSTROMA [77]", "VLADIMIR [78]", "KALUGA [79]", "N.NOVGOROD [80]", "TAGANROG [81]", "VOLOGDA [82]", "TVER [83]", "TOMSK [84]", "IZHEVSK [85]", "SURGUT [86]", "PODOLSK [87]", "MAGADAN [88]", "CHEREPOVETS [89]", "NORILSK [90]"];
+// ТВОЙ FIREBASE CONFIG
+const firebaseConfig = {
+  apiKey: "AIzaSyA4zMBfNc1wTIN75Qr1KMBTrlgiU5qG-fA",
+  authDomain: "locus-gold-game.firebaseapp.com",
+  projectId: "locus-gold-game",
+  storageBucket: "locus-gold-game.firebasestorage.app",
+  messagingSenderId: "450338666762",
+  appId: "1:450338666762:web:f40ef7268c539ef16662f3"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+// Получаем ID из Telegram или создаем временный
+const userId = new URLSearchParams(window.location.search).get('id') || "user_test_1";
+
+const SERVERS = ["RED [1]", "GREEN [2]", "BLUE [3]", "YELLOW [4]", "ORANGE [5]", "BLACK [10]", "MOSCOW [23]"];
 
 const Game = {
-    u: { m: 0, bc: 0, ad3: 0, ad5: 0 },
+    u: { m: 0, bc: 0, adM: 0, lastDaily: 0, invitedBy: null },
+    
     init() {
-        const s = localStorage.getItem('locus_gold_v90');
-        if(s) this.u = JSON.parse(s);
+        // Загрузка данных пользователя
+        db.ref('users/' + userId).on('value', (s) => {
+            if(s.exists()) this.u = { ...this.u, ...s.val() };
+            this.updateUI();
+        });
+
+        // Загрузка списка серверов
         const sel = document.getElementById('out-srv');
-        SERVERS.forEach(x => { const o = document.createElement('option'); o.value=x; o.innerText=x; sel.appendChild(o); });
-        this.updateUI();
+        SERVERS.forEach(x => { sel.innerHTML += `<option value="${x}">${x}</option>`; });
+
+        // Реферальная ссылка
+        document.getElementById('ref-link').value = `https://t.me/ТВОЙ_БОТ?start=${userId}`;
+        
+        // Проверка реферала при первом входе
+        const refId = new URLSearchParams(window.location.search).get('start');
+        if(refId && refId !== userId) this.checkReferral(refId);
+
+        // Обновление истории и списка друзей
+        this.loadHistory();
+        this.loadRefs();
+        setInterval(() => this.tickDaily(), 1000);
     },
-    save() { localStorage.setItem('locus_gold_v90', JSON.stringify(this.u)); },
+
+    save() { db.ref('users/' + userId).set(this.u); },
+
     updateUI() {
         document.getElementById('m-rub').innerText = Math.floor(this.u.m).toLocaleString() + ' ₽';
         document.getElementById('m-bc').innerText = this.u.bc.toLocaleString() + ' BC';
-        document.getElementById('ad-med').innerHTML = `Награда: 25 - 50 BC | Прогресс: ${this.u.ad3}/3`;
-        document.getElementById('ad-ult').innerHTML = `Награда: 50 - 100 BC | Прогресс: ${this.u.ad5}/5`;
+        document.getElementById('ad-prog').innerText = `Прогресс: ${this.u.adM || 0}/5`;
     },
-    click() { this.u.m += 250; this.updateUI(); this.save(); },
+
+    click() { this.u.m += 250; this.save(); },
+
     tab(id) {
-        document.querySelectorAll('.tab-view').forEach(t => t.classList.add('hidden'));
+        document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
         document.querySelectorAll('nav div').forEach(n => n.classList.remove('nav-active'));
-        document.getElementById('tab-'+id).classList.remove('hidden');
+        document.getElementById('tab-'+id).classList.add('active');
         document.getElementById('n-'+id).classList.add('nav-active');
     },
+
     async watchAd(type) {
         try {
-            const ad = window.Adsgram.init({ blockId: '20963' }); 
+            const ad = window.Adsgram.init({ blockId: "20963" });
             const res = await ad.show();
             if(res.done) {
+                // Награда за рекламу
                 if(type === 'lite') {
-                    const win = Math.floor(Math.random() * 5) + 1; // 1-5
-                    this.u.bc += win; alert(`Вам выпало: ${win} BC!`);
-                } else if(type === 'medium') {
-                    this.u.ad3++;
-                    if(this.u.ad3 >= 3) {
-                        this.u.ad3 = 0; const win = Math.floor(Math.random() * (50 - 25 + 1)) + 25; // 25-50
-                        this.u.bc += win; alert(`Кейс Medium открыт! Выпало: ${win} BC!`);
-                    }
-                } else if(type === 'ultra') {
-                    this.u.ad5++;
-                    if(this.u.ad5 >= 5) {
-                        this.u.ad5 = 0; const win = Math.floor(Math.random() * (100 - 50 + 1)) + 50; // 50-100
-                        this.u.bc += win; alert(`Кейс Ultra открыт! Выпало: ${win} BC!`);
+                    const win = Math.floor(Math.random() * 75) + 25;
+                    this.u.bc += win; alert(`Выпало: ${win} BC!`);
+                } else {
+                    this.u.adM = (this.u.adM || 0) + 1;
+                    if(this.u.adM >= 5) {
+                        this.u.adM = 0; const win = Math.floor(Math.random() * 150) + 50;
+                        this.u.bc += win; alert(`Кейс МАЖОР: +${win} BC!`);
                     }
                 }
-                this.updateUI(); this.save();
+                
+                // Прогресс для пригласившего
+                if(this.u.invitedBy) this.updateRefProgress();
+
+                this.save();
             }
-        } catch(e) { alert("Реклама еще не загрузилась"); }
+        } catch(e) { alert("Реклама не готова"); }
     },
+
+    checkReferral(refId) {
+        db.ref('users/' + userId).once('value', (s) => {
+            if(!s.exists()) {
+                this.u.invitedBy = refId;
+                db.ref('referrals/' + refId + '/' + userId).set({ ads: 0, done: false });
+                this.save();
+            }
+        });
+    },
+
+    updateRefProgress() {
+        const refPath = `referrals/${this.u.invitedBy}/${userId}`;
+        db.ref(refPath).once('value', (s) => {
+            if(s.exists()) {
+                let data = s.val();
+                if(!data.done) {
+                    data.ads++;
+                    if(data.ads >= 3) {
+                        data.done = true;
+                        db.ref(`users/${this.u.invitedBy}/bc`).transaction(bc => (bc || 0) + 50);
+                    }
+                    db.ref(refPath).set(data);
+                }
+            }
+        });
+    },
+
+    loadRefs() {
+        db.ref('referrals/' + userId).on('value', (s) => {
+            const div = document.getElementById('ref-list');
+            div.innerHTML = '';
+            s.forEach(child => {
+                const d = child.val();
+                div.innerHTML += `<div class="flex justify-between text-[9px] bg-black/20 p-2 rounded">
+                    <span class="text-gray-400 italic">ID: ...${child.key.slice(-4)}</span>
+                    <span class="${d.done ? 'text-green-500' : 'text-yellow-500'} font-bold">
+                        ${d.done ? '✅ +50 BC' : '⏳ Реклама: ' + d.ads + '/3'}
+                    </span>
+                </div>`;
+            });
+        });
+    },
+
     exchange() {
         const v = parseInt(document.getElementById('ex-val').value);
         if(v >= 1000000 && this.u.m >= v) {
-            this.u.m -= v; this.u.bc += Math.floor(v/1000000); this.updateUI(); this.save();
-            alert("Успешный обмен!");
-        } else { alert("Минимум 1.000.000 ₽"); }
+            this.u.m -= v; this.u.bc += Math.floor(v/1000000); this.save();
+            alert("Успешно!");
+        } else alert("Нужно минимум 1.000.000 ₽");
     },
+
     withdraw() {
-        const n = document.getElementById('out-nick').value, a = parseInt(document.getElementById('out-sum').value);
-        if(n && a > 0 && this.u.bc >= a) {
-            this.u.bc -= a; this.updateUI(); this.save(); alert("Заявка на вывод создана!");
-        } else { alert("Недостаточно BC или не заполнен ник"); }
+        const n = document.getElementById('out-nick').value, s = document.getElementById('out-srv').value, a = parseInt(document.getElementById('out-sum').value);
+        if(n && a >= 50 && this.u.bc >= a) {
+            this.u.bc -= a; this.save();
+            db.ref('payouts/' + userId).push({ nick: n, srv: s, sum: a, status: "⏳", date: new Date().toLocaleDateString() });
+            alert("Заявка отправлена!");
+        } else alert("Ошибка: минимум 50 BC");
+    },
+
+    loadHistory() {
+        db.ref('payouts/' + userId).on('value', (s) => {
+            const h = document.getElementById('out-history');
+            h.innerHTML = '';
+            s.forEach(child => {
+                const d = child.val();
+                h.innerHTML += `<div class="card flex justify-between items-center py-3 text-[10px]">
+                    <div><p class="font-bold">${d.sum} BC</p><p class="text-gray-500">${d.srv}</p></div>
+                    <div class="text-right"><p class="text-blue-500 font-black">${d.status}</p><p class="text-[8px] text-gray-700">${d.date}</p></div>
+                </div>`;
+            });
+        });
+    },
+
+    tickDaily() {
+        const left = (this.u.lastDaily + 86400000) - Date.now();
+        const b = document.getElementById('daily-btn');
+        if(left > 0) {
+            const h = Math.floor(left/3600000), m = Math.floor((left%3600000)/60000), s = Math.floor((left%60000)/1000);
+            document.getElementById('timer').innerText = `${h}:${m}:${s}`;
+            b.classList.add('opacity-50'); b.disabled = true;
+        } else {
+            document.getElementById('timer').innerText = "Готово";
+            b.classList.remove('opacity-50'); b.disabled = false;
+        }
+    },
+
+    openDaily() {
+        this.u.lastDaily = Date.now();
+        const win = Math.floor(Math.random() * 5000) + 1000;
+        this.u.m += win; alert(`Бонус: +${win} ₽!`); this.save();
+    },
+
+    copyRef() {
+        const el = document.getElementById('ref-link');
+        el.select(); document.execCommand('copy'); alert("Ссылка скопирована!");
     }
 };
+
 window.onload = () => Game.init();
 </script>
 </body>
