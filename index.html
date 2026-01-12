@@ -20,8 +20,8 @@
         @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         .btn-main { background: linear-gradient(180deg, #ff4d4d 0%, #8b0000 100%); font-weight: 900; border-radius: 18px; transition: 0.3s; box-shadow: 0 10px 20px -5px var(--red-glow); color: white; text-transform: uppercase; letter-spacing: 1px; border: 1px solid rgba(255,255,255,0.1); }
         .nav-active { color: var(--red) !important; filter: drop-shadow(0 0 8px var(--red)); }
-        .click-area { width: 200px; height: 200px; border-radius: 50%; background: radial-gradient(circle, #1a1a1a 0%, #000 100%); border: 10px solid #0a0a0a; display: flex; align-items: center; justify-content: center; margin: 10px auto; cursor: pointer; transition: 0.1s; }
-        .click-area:active { transform: scale(0.9); }
+        .click-area { width: 190px; height: 190px; border-radius: 50%; background: radial-gradient(circle, #1a1a1a 0%, #000 100%); border: 10px solid #0a0a0a; display: flex; align-items: center; justify-content: center; margin: 10px auto; cursor: pointer; transition: 0.1s; box-shadow: 0 0 30px rgba(255,0,0,0.1); }
+        .click-area:active { transform: scale(0.9); border-color: var(--red); }
         ::-webkit-scrollbar { width: 0; }
     </style>
 </head>
@@ -29,72 +29,71 @@
 
 <div class="max-w-md mx-auto h-full flex flex-col relative">
     <div class="p-6 flex justify-between items-center z-10">
-        <div><p class="text-[9px] text-gray-500 font-black uppercase">Вирты</p><p id="m-rub" class="text-2xl font-black italic">0 ₽</p></div>
-        <div class="text-right"><p class="text-[9px] text-blue-500 font-black uppercase">Black Coins</p><p id="m-bc" class="text-2xl font-black italic text-blue-400">0</p></div>
+        <div><p class="text-[9px] text-gray-500 font-black uppercase tracking-widest">Вирты</p><p id="m-rub" class="text-2xl font-black italic">0 ₽</p></div>
+        <div class="text-right"><p class="text-[9px] text-blue-500 font-black uppercase tracking-widest">Black Coins</p><p id="m-bc" class="text-2xl font-black italic text-blue-400">0</p></div>
     </div>
 
     <div class="px-6 mb-2 flex items-center gap-2">
         <div class="h-2 w-2 rounded-full bg-green-500 animate-pulse"></div>
-        <p class="text-[9px] font-black text-gray-500 uppercase">Online: <span id="online-count" class="text-green-500">0</span></p>
+        <p class="text-[9px] font-black text-gray-500 uppercase">Players Online: <span id="online-count" class="text-green-500">0</span></p>
     </div>
 
     <div id="tab-home" class="tab-content active text-center">
-        <div class="click-area" onclick="Game.click()"><span class="text-6xl font-black text-red-600 italic">BR</span></div>
+        <div class="click-area" onclick="Game.click()"><span class="text-6xl font-black text-red-600 italic tracking-tighter">BR</span></div>
         <div class="glass p-5 mt-4">
-            <p class="text-[10px] text-blue-400 font-black uppercase mb-3">Обмен 1.000.000 ₽ на 1 BC</p>
+            <p class="text-[10px] text-blue-400 font-black uppercase mb-3 italic">Обмен 1.000.000 ₽ на 1 BC</p>
             <div class="flex gap-2"><input id="ex-val" type="number" placeholder="Сумма ₽" class="bg-white/5 border border-white/10 rounded-xl p-3 w-full outline-none text-sm"><button onclick="Game.exchange()" class="btn-main px-4 py-2 text-[10px]">ОБМЕН</button></div>
         </div>
     </div>
 
     <div id="tab-cases" class="tab-content space-y-3">
         <div class="glass p-4 flex justify-between items-center border-l-4 border-gray-600">
-            <div><p class="text-xs font-black uppercase">Кейс «Бомж»</p><p class="text-[9px] text-gray-500">Дроп: 1-5 BC</p></div>
+            <div><p class="text-xs font-black uppercase">Кейс «Бомж»</p><p class="text-[9px] text-gray-500">1-5 BC (1 ролик)</p></div>
             <button onclick="Game.watchAd('c1')" class="btn-main px-4 py-2 text-[9px]">ОТКРЫТЬ</button>
         </div>
         <div class="glass p-4 flex justify-between items-center border-l-4 border-blue-600">
-            <div><p class="text-xs font-black uppercase text-blue-400">Кейс «Перекуп»</p><p id="p-c2" class="text-[9px] text-gray-500">ADS: 0/3 (25-50 BC)</p></div>
+            <div><p class="text-xs font-black uppercase text-blue-400">Кейс «Перекуп»</p><p id="p-c2" class="text-[9px] text-gray-500">Прогресс: 0/3 ADS</p></div>
             <button onclick="Game.watchAd('c2')" class="btn-main px-4 py-2 text-[9px] !bg-blue-600">СМОТРЕТЬ</button>
         </div>
         <div class="glass p-4 flex justify-between items-center border-l-4 border-yellow-500">
-            <div><p class="text-xs font-black uppercase text-yellow-500">Кейс «Владелец ТК»</p><p id="p-c3" class="text-[9px] text-gray-500">ADS: 0/5 (50-150 BC)</p></div>
+            <div><p class="text-xs font-black uppercase text-yellow-500">Кейс «Владелец ТК»</p><p id="p-c3" class="text-[9px] text-gray-500">Прогресс: 0/5 ADS</p></div>
             <button onclick="Game.watchAd('c3')" class="btn-main px-4 py-2 text-[9px] !bg-yellow-600">СМОТРЕТЬ</button>
         </div>
     </div>
 
     <div id="tab-refs" class="tab-content">
-        <div class="glass p-5 text-center mb-4">
-            <h3 class="text-xs font-black uppercase text-red-500 mb-2">Пригласи друга = +50 BC</h3>
-            <p class="text-[10px] text-gray-400 mb-3">Твоя уникальная ссылка:</p>
-            <div class="bg-black/40 p-3 rounded-lg border border-white/5 mb-3 select-all">
-                <p id="ref-link" class="text-[8px] text-blue-400 break-all italic">Загрузка...</p>
+        <div class="glass p-5 text-center mb-5">
+            <h3 class="text-xs font-black uppercase text-red-500 mb-2">Награда +50 BC</h3>
+            <p class="text-[10px] text-gray-400 mb-4 italic">Бонус когда друг посмотрит 3 рекламы</p>
+            <div class="bg-black/40 p-3 rounded-xl border border-white/10 mb-3 select-all">
+                <p id="ref-link" class="text-[8px] text-blue-400 break-all">Загрузка...</p>
             </div>
             <button onclick="Game.copyRef()" class="btn-main w-full py-3 text-[10px]">Копировать ссылку</button>
         </div>
-        <p class="text-[10px] font-black text-gray-500 uppercase mb-2">Ваши друзья:</p>
-        <div id="refs-list" class="space-y-2 pb-10"></div>
+        <p class="text-[10px] font-black text-gray-500 uppercase mb-3">Ваши друзья:</p>
+        <div id="refs-list" class="space-y-3 pb-10"></div>
     </div>
 
     <div id="tab-out" class="tab-content">
-        <div class="glass p-5 mb-4 space-y-3">
-            <h3 class="text-xs font-black uppercase text-red-500 italic">Вывод от 500 BC</h3>
-            <input id="out-nick" type="text" placeholder="Ваш Ник" class="bg-white/5 border border-white/10 rounded-xl p-3 w-full outline-none text-sm">
-            <select id="out-srv" class="bg-white/5 border border-white/10 rounded-xl p-3 w-full outline-none text-sm font-bold"></select>
-            <input id="out-sum" type="number" placeholder="Сумма BC" class="bg-white/5 border border-white/10 rounded-xl p-3 w-full outline-none text-sm">
-            <button onclick="Game.withdraw()" class="btn-main w-full py-3 text-[10px]">ПОДАТЬ ЗАЯВКУ</button>
+        <div class="glass p-5 mb-5 space-y-3">
+            <h3 class="text-xs font-black uppercase text-red-500 italic">Выплата доната</h3>
+            <input id="out-nick" type="text" placeholder="Nick_Name" class="bg-white/5 border border-white/10 rounded-xl p-3 w-full outline-none text-sm">
+            <select id="out-srv" class="bg-white/5 border border-white/10 rounded-xl p-3 w-full outline-none text-sm font-bold text-white"></select>
+            <input id="out-sum" type="number" placeholder="Сумма BC (от 500)" class="bg-white/5 border border-white/10 rounded-xl p-3 w-full outline-none text-sm">
+            <button onclick="Game.withdraw()" class="btn-main w-full py-3 text-[10px]">ВЫВЕСТИ BC</button>
         </div>
         <div id="out-history" class="space-y-2 pb-10"></div>
     </div>
 
-    <nav class="fixed bottom-4 left-4 right-4 glass flex justify-around py-3 z-50 shadow-2xl">
-        <div onclick="Game.tab('home')" id="n-home" class="flex flex-col items-center text-gray-500 nav-active cursor-pointer"><span class="text-lg">⚡</span><span class="text-[8px] font-black mt-1">ИГРА</span></div>
-        <div onclick="Game.tab('cases')" id="n-cases" class="flex flex-col items-center text-gray-500 cursor-pointer"><span class="text-lg">📦</span><span class="text-[8px] font-black mt-1">КЕЙСЫ</span></div>
-        <div onclick="Game.tab('refs')" id="n-refs" class="flex flex-col items-center text-gray-500 cursor-pointer"><span class="text-lg">👥</span><span class="text-[8px] font-black mt-1">ДРУЗЬЯ</span></div>
-        <div onclick="Game.tab('out')" id="n-out" class="flex flex-col items-center text-gray-500 cursor-pointer"><span class="text-lg">💸</span><span class="text-[8px] font-black mt-1">ВЫВОД</span></div>
+    <nav class="fixed bottom-5 left-5 right-5 glass flex justify-around py-4 z-50 shadow-2xl">
+        <div onclick="Game.tab('home')" id="n-home" class="flex flex-col items-center text-gray-500 nav-active cursor-pointer"><span class="text-xl">⚡</span><span class="text-[8px] font-black mt-1 uppercase">Игра</span></div>
+        <div onclick="Game.tab('cases')" id="n-cases" class="flex flex-col items-center text-gray-500 cursor-pointer"><span class="text-xl">📦</span><span class="text-[8px] font-black mt-1 uppercase">Кейсы</span></div>
+        <div onclick="Game.tab('refs')" id="n-refs" class="flex flex-col items-center text-gray-500 cursor-pointer"><span class="text-xl">👥</span><span class="text-[8px] font-black mt-1 uppercase">Друзья</span></div>
+        <div onclick="Game.tab('out')" id="n-out" class="flex flex-col items-center text-gray-500 cursor-pointer"><span class="text-xl">💸</span><span class="text-[8px] font-black mt-1 uppercase">Вывод</span></div>
     </nav>
 </div>
 
 <script>
-// ТВОЙ КОНФИГ FIREBASE
 const firebaseConfig = {
   apiKey: "AIzaSyCxKZLKhg8DmHaw7EcaEchhEMFwEUxqHU",
   authDomain: "locusbot-7fcfb.firebaseapp.com",
@@ -109,28 +108,37 @@ const db = firebase.database();
 const tg = window.Telegram.WebApp;
 tg.expand();
 
-function getID() {
+const userId = (() => {
     let lid = localStorage.getItem('locus_id');
     if(!lid) { lid = "u" + Math.floor(Math.random()*89999+10000); localStorage.setItem('locus_id', lid); }
     return lid;
-}
-const userId = getID();
+})();
+
+const SERVERS = [
+    "RED", "GREEN", "BLUE", "YELLOW", "ORANGE", "PURPLE", "LIME", "PINK", "CHERRY", "BLACK", 
+    "INDIGO", "WHITE", "MAGENTA", "CRIMSON", "GOLD", "AZURE", "PLATINUM", "AQUA", "GRAY", "ICE", 
+    "CHILLI", "CHOCO", "MOSCOW", "SPB", "UFA", "SOCHI", "KAZAN", "SAMARA", "ROSTOV", "ANAPA", 
+    "EKATERINBURG", "KRASNODAR", "ARZAMAS", "NOVOSIBIRSK", "GROZNY", "SARATOV", "OMSK", "IRKUTSK", 
+    "VOLGOGRAD", "VORONEZH", "BELGOROD", "MAKHACHKALA", "VLADIKAVKAZ", "VLADIVOSTOK", "KALININGRAD", 
+    "CHELYABINSK", "KRASNOYARSK", "CHEBOKSARY", "KHABAROVSK", "PERM", "TULA", "RYAZAN", "MURMANSK", 
+    "PENZA", "KURSK", "ARKHANGELSK", "ORENBURG", "KIROV", "KEMEROVO", "TYUMEN", "TOLYATTI", "IVANOVO", 
+    "STAVROPOL", "SMOLENSK", "PSKOV", "BRYANSK", "OREL", "YAROSLAVL", "BARNAUL", "LIPETSK", "ULYANOVSK", 
+    "YAKUTSK", "TAMBOV", "BRATSK", "ASTRAKHAN", "CHITA", "KOSTROMA", "VLADIMIR", "KALUGA", "N.NOVGOROD", 
+    "TAGANROG", "VOLOGDA", "TVER", "TOMSK", "IZHEVSK", "SURGUT", "PODOLSK", "MAGADAN", "CHEREPOVETS", "NORILSK"
+];
 
 const Game = {
-    u: { m: 0, bc: 0, ac2: 0, ac3: 0, ref: "" },
+    u: { m: 0, bc: 0, ac2: 0, ac3: 0, ref: "", totalAds: 0 },
 
     init() {
-        // Получаем реферала из старт-параметра ссылки
         const startParam = tg.initDataUnsafe.start_param;
-
         db.ref('users/' + userId).once('value').then((s) => {
             if(s.exists()) {
                 this.u = { ...this.u, ...s.val() };
             } else {
-                // Если новый игрок и есть реферер
                 if(startParam && startParam !== userId) {
                     this.u.ref = startParam;
-                    this.rewardReferrer(startParam);
+                    db.ref('referrals/' + startParam + '/' + userId).set({ done: false, ads: 0 });
                 }
                 this.save();
             }
@@ -138,7 +146,6 @@ const Game = {
             this.updateRefLink();
         });
 
-        // Онлайн
         const pRef = db.ref('presence/' + userId);
         db.ref('.info/connected').on('value', (snap) => {
             if (snap.val()) { pRef.onDisconnect().remove(); pRef.set(true); }
@@ -147,9 +154,9 @@ const Game = {
             document.getElementById('online-count').innerText = (snap.numChildren() || 0) + 14;
         });
 
-        // Сервера
         const sel = document.getElementById('out-srv');
-        ["RED","GREEN","BLUE","CHERRY","BLACK","ICE","MOSCOW","SPB"].forEach(x => { sel.innerHTML += `<option value="${x}">${x}</option>`; });
+        sel.innerHTML = '<option value="" disabled selected>ВЫБЕРИТЕ СЕРВЕР</option>';
+        SERVERS.forEach(x => { sel.innerHTML += `<option value="${x}">${x}</option>`; });
         
         this.loadRefs();
         this.loadHistory();
@@ -157,53 +164,15 @@ const Game = {
 
     listenUpdates() {
         db.ref('users/' + userId).on('value', (s) => {
-            if(s.exists()) {
-                this.u = { ...this.u, ...s.val() };
-                this.updateUI();
-            }
-        });
-    },
-
-    rewardReferrer(bossId) {
-        db.ref('users/' + bossId).transaction((user) => {
-            if (user) {
-                user.bc = (user.bc || 0) + 50;
-            }
-            return user;
-        });
-        // Запись в список друзей пригласителя
-        db.ref('referrals/' + bossId).push({ guest: userId, date: new Date().toLocaleDateString() });
-    },
-
-    updateRefLink() {
-        document.getElementById('ref-link').innerText = `https://t.me/Locus_Gold_bot?startapp=${userId}`;
-    },
-
-    copyRef() {
-        const link = document.getElementById('ref-link').innerText;
-        navigator.clipboard.writeText(link);
-        alert("Ссылка скопирована! Отправь другу.");
-    },
-
-    loadRefs() {
-        db.ref('referrals/' + userId).on('value', (s) => {
-            const list = document.getElementById('refs-list'); list.innerHTML = '';
-            if(!s.exists()) { list.innerHTML = '<p class="text-[9px] text-center text-gray-600">Друзей пока нет</p>'; return; }
-            s.forEach(c => {
-                const d = c.val();
-                list.innerHTML += `<div class="glass p-3 flex justify-between items-center border-l-2 border-green-500">
-                    <span class="text-[10px] font-bold">Игрок ${d.guest}</span>
-                    <span class="text-[9px] text-green-400 font-black">+50 BC</span>
-                </div>`;
-            });
+            if(s.exists()) { this.u = { ...this.u, ...s.val() }; this.updateUI(); }
         });
     },
 
     updateUI() {
         document.getElementById('m-rub').innerText = Math.floor(this.u.m).toLocaleString() + ' ₽';
         document.getElementById('m-bc').innerText = this.u.bc.toLocaleString();
-        document.getElementById('p-c2').innerText = `ADS: ${this.u.ac2 || 0}/3 (25-50 BC)`;
-        document.getElementById('p-c3').innerText = `ADS: ${this.u.ac3 || 0}/5 (50-150 BC)`;
+        document.getElementById('p-c2').innerText = `Прогресс: ${this.u.ac2 || 0}/3 ADS`;
+        document.getElementById('p-c3').innerText = `Прогресс: ${this.u.ac3 || 0}/5 ADS`;
     },
 
     save() { db.ref('users/' + userId).update(this.u); },
@@ -216,10 +185,21 @@ const Game = {
         document.getElementById('n-'+id).classList.add('nav-active');
     },
 
+    updateRefLink() {
+        document.getElementById('ref-link').innerText = `https://t.me/Locus_Gold_bot?startapp=${userId}`;
+    },
+
+    copyRef() {
+        const link = document.getElementById('ref-link').innerText;
+        navigator.clipboard.writeText(link);
+        alert("Ссылка скопирована!");
+    },
+
     async watchAd(type) {
         const ad = window.Adsgram.init({ blockId: "20963" });
         ad.show().then(res => {
             if(res.done) {
+                this.u.totalAds = (this.u.totalAds || 0) + 1;
                 if(type === 'c1') { this.u.bc += Math.floor(Math.random()*5)+1; }
                 else if(type === 'c2') {
                     this.u.ac2 = (this.u.ac2 || 0) + 1;
@@ -229,25 +209,64 @@ const Game = {
                     if(this.u.ac3 >= 5) { this.u.ac3 = 0; this.u.bc += Math.floor(Math.random()*101)+50; }
                 }
                 this.save();
+                this.checkRefReward();
             }
         }).catch(() => alert("Реклама не готова"));
+    },
+
+    checkRefReward() {
+        if(this.u.ref) {
+            db.ref('referrals/' + this.u.ref + '/' + userId).once('value').then(snap => {
+                if(snap.exists() && !snap.val().done) {
+                    let curAds = this.u.totalAds || 0;
+                    db.ref('referrals/' + this.u.ref + '/' + userId).update({ ads: curAds });
+                    if(curAds >= 3) {
+                        db.ref('users/' + this.u.ref).transaction(u => {
+                            if(u) u.bc = (u.bc || 0) + 50;
+                            return u;
+                        });
+                        db.ref('referrals/' + this.u.ref + '/' + userId).update({ done: true });
+                    }
+                }
+            });
+        }
+    },
+
+    loadRefs() {
+        db.ref('referrals/' + userId).on('value', (s) => {
+            const list = document.getElementById('refs-list'); list.innerHTML = '';
+            if(!s.exists()) { list.innerHTML = '<p class="text-[9px] text-center text-gray-600">Нет приглашенных</p>'; return; }
+            s.forEach(c => {
+                const d = c.val();
+                const progress = Math.min((d.ads / 3) * 100, 100);
+                list.innerHTML += `<div class="glass p-4 border-l-2 ${d.done ? 'border-green-500' : 'border-blue-500'}">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-[9px] font-bold uppercase tracking-tighter">Player ${c.key}</span>
+                        <span class="text-[9px] font-black ${d.done ? 'text-green-500' : 'text-blue-500'}">${d.done ? 'ВЫПЛАЧЕНО' : d.ads + '/3 ADS'}</span>
+                    </div>
+                    <div class="w-full h-1 bg-white/5 rounded-full overflow-hidden">
+                        <div class="h-full ${d.done ? 'bg-green-500' : 'bg-blue-500'}" style="width: ${progress}%"></div>
+                    </div>
+                </div>`;
+            });
+        });
     },
 
     exchange() {
         const v = parseInt(document.getElementById('ex-val').value);
         if(v >= 1000000 && this.u.m >= v) { 
             this.u.m -= v; this.u.bc += Math.floor(v/1000000); 
-            this.save(); alert("Обмен выполнен!");
-        } else alert("Мин. 1.000.000 ₽");
+            this.save(); alert("Успешный обмен!");
+        } else alert("Нужно минимум 1.000.000 ₽");
     },
 
     withdraw() {
         const n = document.getElementById('out-nick').value, s = document.getElementById('out-srv').value, a = parseInt(document.getElementById('out-sum').value);
-        if(n.length > 3 && a >= 500 && this.u.bc >= a) {
+        if(n.length > 3 && s && a >= 500 && this.u.bc >= a) {
             this.u.bc -= a; this.save();
             db.ref('payouts/' + userId).push({ nick: n, srv: s, sum: a, status: "Выведено", date: new Date().toLocaleDateString() });
-            alert("Заявка принята!");
-        } else alert("Ошибка данных или баланса!");
+            alert("Заявка принята! Ожидайте донат.");
+        } else alert("Ошибка: проверьте баланс (мин 500) и сервер!");
     },
 
     loadHistory() {
@@ -257,7 +276,7 @@ const Game = {
                 const d = c.val();
                 h.innerHTML += `<div class="glass p-3 flex justify-between items-center border-l-2 border-red-500">
                     <div><p class="font-bold text-xs">${d.sum} BC</p><p class="text-[8px] text-gray-500">${d.srv} • ${d.nick}</p></div>
-                    <p class="text-green-500 font-black text-[8px]">ВЫВЕДЕНО</p>
+                    <p class="text-green-500 font-black text-[8px] uppercase">Выведено</p>
                 </div>`;
             });
         });
